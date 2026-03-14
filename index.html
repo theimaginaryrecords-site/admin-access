@@ -3,652 +3,276 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TIR Admin — The Imaginary Records</title>
+<title>TIR Admin Panel — The Imaginary Records</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- Firebase COMPAT SDK — same as artist dashboard -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-  const firebaseConfig = {
+<script>
+  firebase.initializeApp({
     apiKey: "AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
     authDomain: "tir-portal.firebaseapp.com",
     projectId: "tir-portal",
     storageBucket: "tir-portal.firebasestorage.app",
     messagingSenderId: "941411383328",
-    appId: "1:941411383328:web:4b7b0aa63e2c7e44d82a445",
-    measurementId: "G-R6ECJHMK6D"
-  };
-
+    appId: "1:941411383328:web:4b7b0aa63e2c7e44d82a445"
+  });
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
   const ADMIN_EMAIL = 'theimaginaryrecords@gmail.com';
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  window.__ADMIN = { auth, db, signInWithEmailAndPassword, signOut, onAuthStateChanged, collection, getDocs, doc, updateDoc, getDoc, query, orderBy, ADMIN_EMAIL };
 </script>
 
 <style>
-:root {
-  --black: #060606;
-  --deep: #0c0c0c;
-  --card: #111;
-  --border: #1e1e1e;
-  --gold: #c9a84c;
-  --gold-light: #e8c97a;
-  --gold-dim: #6b5520;
-  --white: #f0ede6;
-  --muted: #666;
-  --red: #c0392b;
-  --green: #27ae60;
-  --orange: #e67e22;
-  --blue: #2980b9;
+:root{
+  --blk:#060606;--deep:#0c0c0c;--card:#111;--brd:#1e1e1e;
+  --gold:#c9a84c;--gl:#e8c97a;--gd:#6b5520;
+  --wh:#f0ede6;--mt:#666;--grn:#27ae60;--red:#c0392b;--blu:#2980b9;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  background: var(--black);
-  color: var(--white);
-  font-family: 'Cormorant Garamond', serif;
-  min-height: 100vh;
-}
-
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 9999;
-}
-
-/* AUTH */
-#auth-screen {
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at 50% 20%, rgba(201,168,76,0.06) 0%, transparent 60%);
-}
-
-.auth-box {
-  width: 380px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 48px 36px;
-  position: relative;
-  animation: fadeUp 0.5s ease;
-}
-
-.auth-box::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
-
-.auth-box::after {
-  content: 'ADMIN ACCESS ONLY';
-  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-  background: var(--card);
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 3px;
-  color: var(--gold); padding: 0 12px;
-}
-
-.logo-area { text-align: center; margin-bottom: 36px; }
-
-.logo-area .tir {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 42px; letter-spacing: 6px; color: var(--gold);
-  line-height: 1;
-}
-
-.logo-area .sub {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 3px;
-  color: var(--muted); text-transform: uppercase;
-  margin-top: 4px;
-}
-
-label {
-  display: block;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--muted);
-  margin-bottom: 6px;
-}
-
-input {
-  width: 100%; padding: 11px 14px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  color: var(--white);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 16px; outline: none;
-  transition: border-color 0.2s;
-  margin-bottom: 14px;
-}
-
-input:focus { border-color: var(--gold-dim); }
-
-.btn-gold {
-  width: 100%; padding: 13px;
-  background: var(--gold); border: none;
-  color: #000;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 16px; letter-spacing: 3px;
-  cursor: pointer; transition: background 0.2s;
-  margin-top: 4px;
-}
-
-.btn-gold:hover { background: var(--gold-light); }
-
-.err { 
-  background: rgba(192,57,43,0.12);
-  border: 1px solid rgba(192,57,43,0.3);
-  color: #e74c3c;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px; padding: 10px 14px;
-  margin-bottom: 14px; display: none;
-}
-.err.show { display: block; }
-
-/* DASHBOARD */
-#admin-panel { display: none; }
-
-.layout { display: flex; min-height: 100vh; }
-
-/* SIDEBAR */
-.sidebar {
-  width: 200px; min-width: 200px;
-  background: var(--deep);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
-}
-
-.sb-logo {
-  padding: 20px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.sb-logo .t { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; color: var(--gold); }
-.sb-logo .s { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--muted); }
-
-.nav { flex: 1; padding: 12px 0; }
-
-.nav-section {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px; letter-spacing: 2px;
-  color: var(--gold-dim); text-transform: uppercase;
-  padding: 10px 16px 4px;
-}
-
-.nav-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 9px 16px; color: var(--muted);
-  cursor: pointer; font-size: 13px;
-  transition: all 0.2s;
-  border-left: 2px solid transparent;
-}
-
-.nav-item:hover { color: var(--white); background: rgba(255,255,255,0.02); }
-.nav-item.active { color: var(--gold); background: rgba(201,168,76,0.05); border-left-color: var(--gold); }
-.nav-item .ic { font-size: 14px; width: 16px; text-align: center; }
-
-.sb-bottom {
-  padding: 14px 16px;
-  border-top: 1px solid var(--border);
-}
-
-.admin-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px; letter-spacing: 2px;
-  color: var(--gold); text-transform: uppercase;
-  background: rgba(201,168,76,0.08);
-  border: 1px solid var(--gold-dim);
-  padding: 4px 8px; margin-bottom: 8px;
-  display: inline-block;
-}
-
-.btn-sm {
-  width: 100%; padding: 8px;
-  background: none; border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 2px;
-  text-transform: uppercase; cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-sm:hover { border-color: var(--gold-dim); color: var(--gold); }
-
-/* MAIN */
-.main { flex: 1; overflow-y: auto; }
-
-.topbar {
-  padding: 18px 28px;
-  border-bottom: 1px solid var(--border);
-  background: var(--deep);
-  position: sticky; top: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-}
-
-.page-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px; letter-spacing: 3px;
-}
-
-.page-sub {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; color: var(--muted);
-  letter-spacing: 1px; margin-top: 2px;
-}
-
-.content { padding: 28px; }
-
-/* PAGES */
-.page { display: none; animation: fadeIn 0.3s ease; }
-.page.active { display: block; }
-
-/* STATS */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px; margin-bottom: 24px;
-}
-
-.stat {
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 16px; text-align: center;
-  position: relative; overflow: hidden;
-}
-
-.stat::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-}
-
-.stat-n {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px; color: var(--gold); line-height: 1;
-}
-
-.stat-l {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px; color: var(--muted);
-  letter-spacing: 2px; text-transform: uppercase;
-  margin-top: 3px;
-}
-
-/* CARDS */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 20px; margin-bottom: 20px;
-}
-
-.card-title {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 3px;
-  color: var(--gold); text-transform: uppercase;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* SUBMISSIONS TABLE */
-.table-wrap { overflow-x: auto; }
-
-table { width: 100%; border-collapse: collapse; }
-
-th {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--muted);
-  text-align: left; padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-
-td {
-  padding: 14px 12px;
-  font-size: 13px;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-  vertical-align: middle;
-}
-
-tr:hover td { background: rgba(255,255,255,0.015); }
-tr:last-child td { border-bottom: none; }
-
-/* STATUS BADGES */
-.badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px; letter-spacing: 1px;
-  text-transform: uppercase; padding: 3px 8px;
-  border: 1px solid; white-space: nowrap;
-}
-
-.b-pending { color: #f39c12; border-color: rgba(243,156,18,0.4); background: rgba(243,156,18,0.06); }
-.b-review { color: var(--blue); border-color: rgba(41,128,185,0.4); background: rgba(41,128,185,0.06); }
-.b-approved { color: var(--green); border-color: rgba(39,174,96,0.4); background: rgba(39,174,96,0.06); }
-.b-live { color: var(--gold); border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); }
-.b-rejected { color: var(--red); border-color: rgba(192,57,43,0.4); background: rgba(192,57,43,0.06); }
-
-/* STATUS SELECT */
-.status-select {
-  background: var(--deep);
-  border: 1px solid var(--border);
-  color: var(--white);
-  font-family: 'DM Mono', monospace;
-  font-size: 10px; padding: 4px 8px;
-  cursor: pointer; outline: none;
-}
-
-.status-select:focus { border-color: var(--gold-dim); }
-
-/* ACTION BTNS */
-.act-btn {
-  background: none; border: 1px solid var(--border);
-  color: var(--muted); padding: 4px 10px;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 1px;
-  text-transform: uppercase; cursor: pointer;
-  transition: all 0.2s; white-space: nowrap;
-}
-
-.act-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
-.act-btn.danger:hover { border-color: var(--red); color: var(--red); }
-
-/* MODAL */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.85);
-  z-index: 1000; display: none;
-  align-items: center; justify-content: center;
-}
-
-.modal-overlay.open { display: flex; }
-
-.modal {
-  background: var(--card);
-  border: 1px solid var(--border);
-  width: 600px; max-width: 95vw;
-  max-height: 85vh; overflow-y: auto;
-  position: relative;
-  animation: fadeUp 0.3s ease;
-}
-
-.modal::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
-
-.modal-head {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-
-.modal-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px; letter-spacing: 2px; color: var(--gold);
-}
-
-.modal-close {
-  background: none; border: none;
-  color: var(--muted); font-size: 20px;
-  cursor: pointer; line-height: 1;
-}
-
-.modal-close:hover { color: var(--white); }
-
-.modal-body { padding: 24px; }
-
-.detail-row {
-  display: flex; gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-size: 14px;
-}
-
-.detail-row:last-child { border-bottom: none; }
-
-.detail-key {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--muted);
-  min-width: 120px; padding-top: 2px;
-}
-
-.detail-val { color: var(--white); flex: 1; word-break: break-all; }
-
-.detail-val a { color: var(--gold); text-decoration: none; }
-.detail-val a:hover { text-decoration: underline; }
-
-/* ARTIST TABLE */
-.artist-row {
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
-}
-
-.artist-row:last-child { border-bottom: none; }
-
-.artist-avatar {
-  width: 40px; height: 40px;
-  background: var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0;
-}
-
-.artist-info { flex: 1; }
-.artist-name { font-size: 15px; font-style: italic; }
-.artist-meta {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; color: var(--muted); margin-top: 2px;
-}
-
-/* EMPTY */
-.empty {
-  text-align: center; padding: 48px 20px;
-  color: var(--muted);
-}
-
-.empty-icon { font-size: 32px; opacity: 0.3; margin-bottom: 10px; }
-.empty-text { font-size: 15px; font-style: italic; }
-
-/* FILTER ROW */
-.filter-row {
-  display: flex; gap: 8px; margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  font-size: 9px; letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 6px 14px; cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover, .filter-btn.active {
-  border-color: var(--gold-dim);
-  color: var(--gold);
-  background: rgba(201,168,76,0.05);
-}
-
-/* SEARCH */
-.search-input {
-  background: var(--deep);
-  border: 1px solid var(--border);
-  color: var(--white);
-  padding: 8px 14px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px; outline: none;
-  width: 240px;
-  transition: border-color 0.2s;
-}
-
-.search-input:focus { border-color: var(--gold-dim); }
-
-/* TOAST */
-.toast {
-  position: fixed; bottom: 24px; right: 24px;
-  background: var(--card); border: 1px solid var(--gold-dim);
-  color: var(--gold);
-  font-family: 'DM Mono', monospace;
-  font-size: 11px; letter-spacing: 1px;
-  padding: 12px 20px; z-index: 9998;
-  animation: fadeUp 0.3s ease;
-  display: none;
-}
-
-.toast.show { display: block; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--blk);color:var(--wh);font-family:'Cormorant Garamond',serif;min-height:100vh}
 
 /* LOADING */
-.loading {
-  text-align: center; padding: 40px;
-  font-family: 'DM Mono', monospace;
-  font-size: 10px; color: var(--muted);
-  letter-spacing: 3px;
-}
+#ld{position:fixed;inset:0;background:var(--blk);display:flex;align-items:center;justify-content:center;z-index:9999}
+.ldt{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:4px;color:var(--gold);animation:pulse 1.4s ease infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
 
-/* ANIMATIONS */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* AUTH */
+#auth{min-height:100vh;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 20%,rgba(201,168,76,.07) 0%,transparent 60%)}
+.abox{width:380px;max-width:95vw;background:var(--card);border:1px solid var(--brd);padding:48px 36px;position:relative;animation:up .5s ease}
+.abox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.abox::after{content:'ADMIN ACCESS ONLY';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--card);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);padding:0 12px}
+.logo{text-align:center;margin-bottom:32px}
+.logo .t{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:6px;color:var(--gold);line-height:1}
+.logo .s{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mt);margin-top:4px}
+label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mt);margin-bottom:5px}
+input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--brd);color:var(--wh);padding:11px 13px;font-family:'Cormorant Garamond',serif;font-size:16px;outline:none;transition:border-color .2s;margin-bottom:14px}
+input:focus{border-color:var(--gd)}
+.btn-g{width:100%;padding:13px;background:var(--gold);border:none;color:#000;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;cursor:pointer;transition:background .2s}
+.btn-g:hover{background:var(--gl)}
+.btn-g:disabled{background:var(--gd);cursor:not-allowed}
+.al{padding:10px 14px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:11px;display:none}
+.al.on{display:block}
+.al-e{background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.3);color:#e74c3c}
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* PANEL */
+#panel{display:none}
+.layout{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sb{width:200px;min-width:200px;background:var(--deep);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sbl{padding:20px 16px 16px;border-bottom:1px solid var(--brd)}
+.sbl .t{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--gold)}
+.sbl .s{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mt)}
+nav{flex:1;padding:12px 0}
+.ns{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;padding:10px 16px 4px}
+.ni{display:flex;align-items:center;gap:8px;padding:9px 16px;color:var(--mt);cursor:pointer;font-size:13px;transition:all .2s;border-left:2px solid transparent}
+.ni:hover{color:var(--wh);background:rgba(255,255,255,.02)}
+.ni.on{color:var(--gold);background:rgba(201,168,76,.05);border-left-color:var(--gold)}
+.ni .ic{font-size:13px;width:16px;text-align:center}
+.sbb{padding:14px 16px;border-top:1px solid var(--brd)}
+.adm{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;background:rgba(201,168,76,.08);border:1px solid var(--gd);padding:4px 8px;margin-bottom:8px;display:inline-block}
+.btn-o{width:100%;padding:8px;background:none;border:1px solid var(--brd);color:var(--mt);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-o:hover{border-color:var(--gd);color:var(--gold)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto}
+.topbar{padding:18px 26px;border-bottom:1px solid var(--brd);background:var(--deep);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px}
+.ps{font-family:'DM Mono',monospace;font-size:9px;color:var(--mt);margin-top:2px}
+.btn-sm{padding:8px 16px;background:none;border:1px solid var(--brd);color:var(--mt);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-sm:hover{border-color:var(--gd);color:var(--gold)}
+.content{padding:26px}
+
+/* PAGES */
+.pg{display:none;animation:fi .3s ease}
+.pg.on{display:block}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--brd);padding:16px;text-align:center;position:relative}
+.stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gd),transparent)}
+.sn{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1}
+.sl{font-family:'DM Mono',monospace;font-size:8px;color:var(--mt);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--brd);padding:20px;margin-bottom:20px}
+.ct{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--brd)}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--mt);text-align:left;padding:10px 10px;border-bottom:1px solid var(--brd);white-space:nowrap}
+td{padding:12px 10px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.015)}
+tr:last-child td{border-bottom:none}
+
+/* BADGES */
+.badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border:1px solid;white-space:nowrap}
+.bp{color:#f39c12;border-color:rgba(243,156,18,.4);background:rgba(243,156,18,.06)}
+.br{color:var(--blu);border-color:rgba(41,128,185,.4);background:rgba(41,128,185,.06)}
+.ba{color:var(--grn);border-color:rgba(39,174,96,.4);background:rgba(39,174,96,.06)}
+.bl{color:var(--gold);border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.06)}
+.bx{color:var(--red);border-color:rgba(192,57,43,.4);background:rgba(192,57,43,.06)}
+
+/* STATUS SELECT */
+.ss{background:var(--deep);border:1px solid var(--brd);color:var(--wh);font-family:'DM Mono',monospace;font-size:10px;padding:4px 8px;cursor:pointer;outline:none}
+.ss:focus{border-color:var(--gd)}
+.ss option{background:#1a1a1a}
+
+/* VIEW BTN */
+.vb{background:none;border:1px solid var(--brd);color:var(--mt);padding:4px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
+.vb:hover{border-color:var(--gd);color:var(--gold)}
+
+/* FILTER */
+.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.fb{background:none;border:1px solid var(--brd);color:var(--mt);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;cursor:pointer;transition:all .2s}
+.fb:hover,.fb.on{border-color:var(--gd);color:var(--gold);background:rgba(201,168,76,.05)}
+.si{background:var(--deep);border:1px solid var(--brd);color:var(--wh);padding:7px 12px;font-family:'DM Mono',monospace;font-size:11px;outline:none;width:220px;transition:border-color .2s}
+.si:focus{border-color:var(--gd)}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;display:none;align-items:center;justify-content:center}
+.mo.on{display:flex}
+.mbox{background:var(--card);border:1px solid var(--brd);width:580px;max-width:95vw;max-height:88vh;overflow-y:auto;position:relative;animation:up .3s ease}
+.mbox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.mh{padding:18px 22px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.mt2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold)}
+.mc{background:none;border:none;color:var(--mt);font-size:20px;cursor:pointer;line-height:1}
+.mc:hover{color:var(--wh)}
+.mb{padding:22px}
+.dr{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.dr:last-child{border-bottom:none}
+.dk{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mt);min-width:110px;padding-top:2px}
+.dv{color:var(--wh);flex:1;word-break:break-all}
+.dv a{color:var(--gold);text-decoration:none}
+.dv a:hover{text-decoration:underline}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:var(--mt)}
+.ei{font-size:32px;opacity:.25;margin-bottom:10px}
+.et{font-size:16px;font-style:italic}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--gd);color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;padding:11px 18px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.on{opacity:1}
+
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fi{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
+<div id="ld"><div class="ldt">Loading Admin Panel...</div></div>
+
 <!-- AUTH -->
-<div id="auth-screen">
-  <div class="auth-box">
-    <div class="logo-area">
-      <div class="tir">T·I·R</div>
-      <div class="sub">Label Admin Panel</div>
+<div id="auth">
+  <div class="abox">
+    <div class="logo">
+      <div class="t">T·I·R</div>
+      <div class="s">Label Admin Panel</div>
     </div>
-    <div class="err" id="auth-err"></div>
+    <div class="al al-e" id="ae"></div>
     <div>
       <label>Admin Email</label>
-      <input type="email" id="a-email" value="theimaginaryrecords@gmail.com"/>
+      <input type="email" id="em" value="theimaginaryrecords@gmail.com"/>
       <label>Password</label>
-      <input type="password" id="a-pass" placeholder="••••••••"
-        onkeydown="if(event.key==='Enter')doLogin()"/>
-      <button class="btn-gold" onclick="doLogin()">Access Admin Panel</button>
+      <input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="btn-g" id="blg" onclick="doLogin()">Access Admin Panel</button>
     </div>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="admin-panel">
+<!-- PANEL -->
+<div id="panel">
   <div class="layout">
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sb-logo">
-        <div class="t">T·I·R</div>
-        <div class="s">Admin Panel</div>
-      </div>
-      <nav class="nav">
-        <div class="nav-section">Overview</div>
-        <div class="nav-item active" onclick="goPage('overview',this)"><span class="ic">◈</span> Overview</div>
-        <div class="nav-section">Releases</div>
-        <div class="nav-item" onclick="goPage('submissions',this)"><span class="ic">♪</span> All Submissions</div>
-        <div class="nav-item" onclick="goPage('pending',this)"><span class="ic">◌</span> Pending Review</div>
-        <div class="nav-item" onclick="goPage('live',this)"><span class="ic">◉</span> Live Releases</div>
-        <div class="nav-section">Artists</div>
-        <div class="nav-item" onclick="goPage('artists',this)"><span class="ic">◎</span> All Artists</div>
+    <div class="sb">
+      <div class="sbl"><div class="t">T·I·R</div><div class="s">Admin Panel</div></div>
+      <nav>
+        <div class="ns">Overview</div>
+        <div class="ni on" onclick="goPage('overview',this)"><span class="ic">◈</span> Overview</div>
+        <div class="ns">Releases</div>
+        <div class="ni" onclick="goPage('all',this)"><span class="ic">♪</span> All Submissions</div>
+        <div class="ni" onclick="goPage('pending',this)"><span class="ic">◌</span> Pending</div>
+        <div class="ni" onclick="goPage('live',this)"><span class="ic">◉</span> Live</div>
+        <div class="ns">Artists</div>
+        <div class="ni" onclick="goPage('artists',this)"><span class="ic">◎</span> All Artists</div>
       </nav>
-      <div class="sb-bottom">
-        <div class="admin-badge">✦ Admin</div>
-        <button class="btn-sm" onclick="doSignOut()">Sign Out</button>
+      <div class="sbb">
+        <div class="adm">✦ Admin</div>
+        <button class="btn-o" onclick="doSignOut()">Sign Out</button>
       </div>
     </div>
 
-    <!-- MAIN -->
     <div class="main">
       <div class="topbar">
         <div>
-          <div class="page-title" id="pg-title">Overview</div>
-          <div class="page-sub" id="pg-sub">The Imaginary Records — Label Dashboard</div>
+          <div class="pt" id="pgt">Overview</div>
+          <div class="ps" id="pgs">The Imaginary Records — Admin Dashboard</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="act-btn" onclick="refreshAll()">↻ Refresh</button>
-        </div>
+        <button class="btn-sm" onclick="loadAll()">↻ Refresh Data</button>
       </div>
 
       <div class="content">
 
         <!-- OVERVIEW -->
-        <div class="page active" id="page-overview">
-          <div class="stats" id="stats-row">
-            <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Total Releases</div></div>
-            <div class="stat"><div class="stat-n" id="s-pending">—</div><div class="stat-l">Pending</div></div>
-            <div class="stat"><div class="stat-n" id="s-review">—</div><div class="stat-l">In Review</div></div>
-            <div class="stat"><div class="stat-n" id="s-live">—</div><div class="stat-l">Live</div></div>
-            <div class="stat"><div class="stat-n" id="s-artists">—</div><div class="stat-l">Artists</div></div>
+        <div class="pg on" id="page-overview">
+          <div class="stats">
+            <div class="stat"><div class="sn" id="s0">—</div><div class="sl">Total</div></div>
+            <div class="stat"><div class="sn" id="s1">—</div><div class="sl">Pending</div></div>
+            <div class="stat"><div class="sn" id="s2">—</div><div class="sl">In Review</div></div>
+            <div class="stat"><div class="sn" id="s3">—</div><div class="sl">Live</div></div>
+            <div class="stat"><div class="sn" id="s4">—</div><div class="sl">Artists</div></div>
           </div>
-
           <div class="card">
-            <div class="card-title">Latest Submissions</div>
-            <div id="overview-list"><div class="loading">Loading...</div></div>
+            <div class="ct">Latest Submissions</div>
+            <div id="ov-list"><div class="empty"><div class="ei">◉</div><div class="et">Loading...</div></div></div>
           </div>
         </div>
 
         <!-- ALL SUBMISSIONS -->
-        <div class="page" id="page-submissions">
+        <div class="pg" id="page-all">
           <div class="card">
-            <div class="card-title">All Release Submissions</div>
-            <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-              <input class="search-input" type="text" placeholder="Search by title or artist..." oninput="filterTable(this.value)"/>
-              <div class="filter-row" style="margin:0">
-                <button class="filter-btn active" onclick="filterStatus('all',this)">All</button>
-                <button class="filter-btn" onclick="filterStatus('pending',this)">Pending</button>
-                <button class="filter-btn" onclick="filterStatus('review',this)">Review</button>
-                <button class="filter-btn" onclick="filterStatus('approved',this)">Approved</button>
-                <button class="filter-btn" onclick="filterStatus('live',this)">Live</button>
-                <button class="filter-btn" onclick="filterStatus('rejected',this)">Rejected</button>
-              </div>
+            <div class="ct">All Release Submissions</div>
+            <div class="frow">
+              <input class="si" type="text" placeholder="Search title or artist..." oninput="applyFilter()"/>
+              <button class="fb on" onclick="setStatus('all',this)">All</button>
+              <button class="fb" onclick="setStatus('pending',this)">Pending</button>
+              <button class="fb" onclick="setStatus('review',this)">Review</button>
+              <button class="fb" onclick="setStatus('approved',this)">Approved</button>
+              <button class="fb" onclick="setStatus('live',this)">Live</button>
+              <button class="fb" onclick="setStatus('rejected',this)">Rejected</button>
             </div>
-            <div class="table-wrap">
-              <div id="submissions-table"><div class="loading">Loading...</div></div>
-            </div>
+            <div class="tw" id="all-list"><div class="empty"><div class="et">Loading...</div></div></div>
           </div>
         </div>
 
         <!-- PENDING -->
-        <div class="page" id="page-pending">
+        <div class="pg" id="page-pending">
           <div class="card">
-            <div class="card-title">Pending Review</div>
-            <div id="pending-list"><div class="loading">Loading...</div></div>
+            <div class="ct">Pending Review</div>
+            <div class="tw" id="pend-list"><div class="empty"><div class="et">Loading...</div></div></div>
           </div>
         </div>
 
         <!-- LIVE -->
-        <div class="page" id="page-live">
+        <div class="pg" id="page-live">
           <div class="card">
-            <div class="card-title">Live Releases</div>
-            <div id="live-list"><div class="loading">Loading...</div></div>
+            <div class="ct">Live Releases</div>
+            <div class="tw" id="live-list"><div class="empty"><div class="et">Loading...</div></div></div>
           </div>
         </div>
 
         <!-- ARTISTS -->
-        <div class="page" id="page-artists">
+        <div class="pg" id="page-artists">
           <div class="card">
-            <div class="card-title">Registered Artists</div>
-            <div id="artists-list"><div class="loading">Loading...</div></div>
+            <div class="ct">Registered Artists</div>
+            <div class="tw" id="art-list"><div class="empty"><div class="et">Loading...</div></div></div>
           </div>
         </div>
 
@@ -657,350 +281,287 @@ tr:last-child td { border-bottom: none; }
   </div>
 </div>
 
-<!-- RELEASE DETAIL MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="modal-title">Release Details</div>
-      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+<!-- MODAL -->
+<div class="mo" id="mo" onclick="closeMo(event)">
+  <div class="mbox">
+    <div class="mh">
+      <div class="mt2" id="mo-title">Release Details</div>
+      <button class="mc" onclick="closeMoDirect()">✕</button>
     </div>
-    <div class="modal-body" id="modal-body"></div>
+    <div class="mb" id="mo-body"></div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-const ADMIN_EMAIL = 'theimaginaryrecords@gmail.com';
-let allReleases = [];
-let allArtists = [];
-let currentFilter = 'all';
+let releases = [], artists = [], curFilter = 'all';
 
-// ============ AUTH ============
-async function doLogin() {
-  const { auth, signInWithEmailAndPassword } = window.__ADMIN;
-  const email = document.getElementById('a-email').value.trim();
-  const pass = document.getElementById('a-pass').value;
-  const err = document.getElementById('auth-err');
-
-  if (email !== ADMIN_EMAIL) {
-    err.textContent = 'Access denied. Admin only.';
-    err.classList.add('show'); return;
+// AUTH STATE
+auth.onAuthStateChanged(function(user) {
+  document.getElementById('ld').style.display = 'none';
+  if (user && user.email === ADMIN_EMAIL) {
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+    loadAll();
+  } else if (user && user.email !== ADMIN_EMAIL) {
+    auth.signOut();
+    document.getElementById('auth').style.display = 'flex';
+  } else {
+    document.getElementById('auth').style.display = 'flex';
+    document.getElementById('panel').style.display = 'none';
   }
-
-  try {
-    err.classList.remove('show');
-    await signInWithEmailAndPassword(auth, email, pass);
-  } catch(e) {
-    err.textContent = 'Login failed: ' + e.message.replace('Firebase: ','');
-    err.classList.add('show');
-  }
-}
-
-async function doSignOut() {
-  const { auth, signOut } = window.__ADMIN;
-  await signOut(auth);
-}
-
-// ============ INIT ============
-window.addEventListener('load', () => {
-  const check = setInterval(() => {
-    if (window.__ADMIN) {
-      clearInterval(check);
-      const { auth, onAuthStateChanged } = window.__ADMIN;
-      onAuthStateChanged(auth, user => {
-        if (user && user.email === ADMIN_EMAIL) {
-          document.getElementById('auth-screen').style.display = 'none';
-          document.getElementById('admin-panel').style.display = 'block';
-          loadAll();
-        } else if (user && user.email !== ADMIN_EMAIL) {
-          doSignOut();
-        } else {
-          document.getElementById('auth-screen').style.display = 'flex';
-          document.getElementById('admin-panel').style.display = 'none';
-        }
-      });
-    }
-  }, 100);
 });
 
-// ============ LOAD DATA ============
-async function loadAll() {
-  await Promise.all([loadReleases(), loadArtists()]);
+// LOGIN
+async function doLogin() {
+  const email = document.getElementById('em').value.trim();
+  const pass  = document.getElementById('pw').value;
+  const btn   = document.getElementById('blg');
+  const err   = document.getElementById('ae');
+  err.classList.remove('on');
+
+  if (email !== ADMIN_EMAIL) {
+    err.textContent = 'Access denied — admin only.';
+    err.classList.add('on'); return;
+  }
+  if (!pass) {
+    err.textContent = 'Please enter your password.';
+    err.classList.add('on'); return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    let m = 'Login failed. ';
+    if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential') m+='Wrong password.';
+    else if(e.code==='auth/user-not-found') m+='Account not found.';
+    else m+=e.message;
+    err.textContent = m; err.classList.add('on');
+    btn.disabled = false; btn.textContent = 'Access Admin Panel';
+  }
 }
 
-async function refreshAll() {
-  showToast('Refreshing data...');
-  await loadAll();
-  showToast('Data refreshed ✓');
+function doSignOut() { auth.signOut(); }
+
+// LOAD ALL DATA
+async function loadAll() {
+  toast('Loading data...');
+  await Promise.all([loadReleases(), loadArtists()]);
+  toast('Data loaded ✓');
 }
 
 async function loadReleases() {
-  const { db, collection, getDocs } = window.__ADMIN;
   try {
-    const snap = await getDocs(collection(db, 'releases'));
-    allReleases = [];
-    snap.forEach(d => allReleases.push({ id: d.id, ...d.data() }));
-    allReleases.sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0));
+    const snap = await db.collection('releases').get();
+    releases = [];
+    snap.forEach(d => releases.push({ id: d.id, ...d.data() }));
+    releases.sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0));
     renderAll();
   } catch(e) {
-    console.error('Load releases error:', e);
+    console.error('Releases error:', e);
+    toast('Error loading releases: ' + e.message);
   }
 }
 
 async function loadArtists() {
-  const { db, collection, getDocs } = window.__ADMIN;
   try {
-    const snap = await getDocs(collection(db, 'users'));
-    allArtists = [];
-    snap.forEach(d => allArtists.push({ id: d.id, ...d.data() }));
+    const snap = await db.collection('users').get();
+    artists = [];
+    snap.forEach(d => artists.push({ id: d.id, ...d.data() }));
     renderArtists();
   } catch(e) {
-    console.error('Load artists error:', e);
+    console.error('Artists error:', e);
+    toast('Error loading artists: ' + e.message);
   }
 }
 
-// ============ RENDER ============
+// RENDER ALL
 function renderAll() {
-  // Stats
-  const pending = allReleases.filter(r => r.status === 'pending').length;
-  const review = allReleases.filter(r => r.status === 'review').length;
-  const live = allReleases.filter(r => r.status === 'live').length;
-  document.getElementById('s-total').textContent = allReleases.length;
-  document.getElementById('s-pending').textContent = pending;
-  document.getElementById('s-review').textContent = review;
-  document.getElementById('s-live').textContent = live;
-  document.getElementById('s-artists').textContent = allArtists.length;
+  const pending  = releases.filter(r=>r.status==='pending').length;
+  const review   = releases.filter(r=>r.status==='review').length;
+  const live     = releases.filter(r=>r.status==='live').length;
+  document.getElementById('s0').textContent = releases.length;
+  document.getElementById('s1').textContent = pending;
+  document.getElementById('s2').textContent = review;
+  document.getElementById('s3').textContent = live;
+  document.getElementById('s4').textContent = artists.length;
 
-  // Overview list (latest 8)
-  renderReleaseTable('overview-list', allReleases.slice(0,8), true);
-  // All submissions
-  renderReleaseTable('submissions-table', allReleases, true);
-  // Pending
-  renderReleaseTable('pending-list', allReleases.filter(r => r.status==='pending'||r.status==='review'), true);
-  // Live
-  renderReleaseTable('live-list', allReleases.filter(r => r.status==='live'), true);
+  renderTable('ov-list',   releases.slice(0,10));
+  renderTable('pend-list', releases.filter(r=>r.status==='pending'||r.status==='review'));
+  renderTable('live-list', releases.filter(r=>r.status==='live'));
+  applyFilter();
 }
 
-function renderReleaseTable(containerId, releases, showActions) {
-  const el = document.getElementById(containerId);
-  if (!releases.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">◉</div><div class="empty-text">No releases found</div></div>';
+function renderTable(id, list) {
+  const el = document.getElementById(id);
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">◉</div><div class="et">No releases found</div></div>';
     return;
   }
-
+  const bc = {pending:'bp',review:'br',approved:'ba',live:'bl',rejected:'bx'};
   el.innerHTML = `
     <table>
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Artist</th>
-          <th>Type</th>
-          <th>Genre</th>
-          <th>Release Date</th>
-          <th>Submitted</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>Title</th><th>Artist</th><th>Type</th>
+        <th>Genre</th><th>Date</th><th>Submitted</th>
+        <th>Status</th><th>Action</th>
+      </tr></thead>
       <tbody>
-        ${releases.map(r => `
-          <tr data-id="${r.id}" data-title="${(r.title||'').toLowerCase()}" data-artist="${(r.artistName||r.primaryArtist||'').toLowerCase()}">
-            <td style="font-style:italic;color:var(--white)">${r.title || '—'}</td>
-            <td>${r.artistName || r.primaryArtist || '—'}</td>
-            <td><span style="font-family:'DM Mono',monospace;font-size:10px">${r.type || '—'}</span></td>
-            <td style="color:var(--muted);font-size:12px">${r.genre || '—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:10px">${r.releaseDate || '—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${r.submittedAt ? r.submittedAt.substring(0,10) : '—'}</td>
+        ${list.map(r=>`
+          <tr>
+            <td style="font-style:italic;color:var(--wh)">${r.title||'—'}</td>
+            <td>${r.artistName||r.primaryArtist||'—'}</td>
+            <td><span style="font-family:'DM Mono',monospace;font-size:10px">${r.type||'—'}</span></td>
+            <td style="color:var(--mt);font-size:12px">${r.genre||'—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:10px">${r.releaseDate||'—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mt)">${r.submittedAt?r.submittedAt.substring(0,10):'—'}</td>
             <td>
-              <select class="status-select" onchange="updateStatus('${r.id}', this.value)">
-                <option value="pending" ${r.status==='pending'?'selected':''}>Pending</option>
-                <option value="review" ${r.status==='review'?'selected':''}>In Review</option>
-                <option value="approved" ${r.status==='approved'?'selected':''}>Approved</option>
-                <option value="live" ${r.status==='live'?'selected':''}>Live</option>
-                <option value="rejected" ${r.status==='rejected'?'selected':''}>Rejected</option>
+              <select class="ss" onchange="updateStatus('${r.id}',this.value)">
+                <option value="pending"  ${r.status==='pending' ?'selected':''}>⏳ Pending</option>
+                <option value="review"   ${r.status==='review'  ?'selected':''}>🔍 Review</option>
+                <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
+                <option value="live"     ${r.status==='live'    ?'selected':''}>🟢 Live</option>
+                <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
               </select>
             </td>
-            <td>
-              <button class="act-btn" onclick="openRelease('${r.id}')">View</button>
-            </td>
+            <td><button class="vb" onclick="openRelease('${r.id}')">View</button></td>
           </tr>
         `).join('')}
       </tbody>
-    </table>
-  `;
+    </table>`;
 }
 
 function renderArtists() {
-  const el = document.getElementById('artists-list');
-  document.getElementById('s-artists').textContent = allArtists.length;
-
-  if (!allArtists.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">◎</div><div class="empty-text">No artists registered yet</div></div>';
+  document.getElementById('s4').textContent = artists.length;
+  const el = document.getElementById('art-list');
+  if (!artists.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">◎</div><div class="et">No artists registered yet</div></div>';
     return;
   }
-
   el.innerHTML = `
     <table>
-      <thead>
-        <tr>
-          <th>Artist Name</th>
-          <th>Email</th>
-          <th>Genre</th>
-          <th>Country</th>
-          <th>PayPal</th>
-          <th>Instagram</th>
-          <th>Releases</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>Artist Name</th><th>Email</th><th>Genre</th>
+        <th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th>
+      </tr></thead>
       <tbody>
-        ${allArtists.map(a => {
-          const releaseCount = allReleases.filter(r => r.userId === a.id).length;
-          return `
-            <tr>
-              <td style="font-style:italic">${a.name || '—'}</td>
-              <td style="font-family:'DM Mono',monospace;font-size:10px">${a.email || '—'}</td>
-              <td style="color:var(--muted);font-size:12px">${a.genre || '—'}</td>
-              <td style="font-size:12px">${a.country || '—'}</td>
-              <td style="font-family:'DM Mono',monospace;font-size:10px;color:${a.paypal?'var(--gold)':'var(--muted)'}">${a.paypal || 'Not set'}</td>
-              <td style="font-family:'DM Mono',monospace;font-size:10px">${a.instagram || '—'}</td>
-              <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)">${releaseCount}</td>
-            </tr>
-          `;
+        ${artists.map(a=>{
+          const rc = releases.filter(r=>r.userId===a.id).length;
+          return `<tr>
+            <td style="font-style:italic">${a.name||'—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:10px">${a.email||'—'}</td>
+            <td style="color:var(--mt);font-size:12px">${a.genre||'—'}</td>
+            <td style="font-size:12px">${a.country||'—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:10px;color:${a.paypal?'var(--gold)':'var(--mt)'}">${a.paypal||'Not set'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:10px">${a.instagram||'—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)">${rc}</td>
+          </tr>`;
         }).join('')}
       </tbody>
-    </table>
-  `;
+    </table>`;
 }
 
-// ============ STATUS UPDATE ============
-async function updateStatus(releaseId, newStatus) {
-  const { db, doc, updateDoc } = window.__ADMIN;
+// STATUS UPDATE
+async function updateStatus(id, status) {
   try {
-    await updateDoc(doc(db, 'releases', releaseId), { status: newStatus });
-    // Update local
-    const r = allReleases.find(x => x.id === releaseId);
-    if (r) r.status = newStatus;
-    showToast(`Status updated → ${newStatus} ✓`);
-  } catch(e) {
-    showToast('Error: ' + e.message);
-  }
+    await db.collection('releases').doc(id).update({ status });
+    const r = releases.find(x=>x.id===id);
+    if (r) r.status = status;
+    renderAll();
+    toast('Status updated → ' + status + ' ✓');
+  } catch(e) { toast('Error: ' + e.message); }
 }
 
-// ============ RELEASE MODAL ============
+// RELEASE DETAIL MODAL
 function openRelease(id) {
-  const r = allReleases.find(x => x.id === id);
+  const r = releases.find(x=>x.id===id);
   if (!r) return;
-
-  document.getElementById('modal-title').textContent = r.title || 'Release';
-
-  const fields = [
-    ['Artist', r.artistName || r.primaryArtist],
-    ['Featured Artists', r.featuredArtists || '—'],
-    ['Type', r.type],
-    ['Genre', r.genre],
-    ['Sub Genre', r.subGenre || '—'],
+  document.getElementById('mo-title').textContent = r.title || 'Release';
+  const rows = [
+    ['Artist', r.artistName||r.primaryArtist],
+    ['Featured', r.featuredArtists||'—'],
+    ['Type', r.type], ['Genre', r.genre],
+    ['Sub Genre', r.subGenre||'—'],
     ['Language', r.language],
     ['Release Date', r.releaseDate],
-    ['Explicit', r.explicit === 'yes' ? '⚠ Yes' : 'No'],
+    ['Explicit', r.explicit==='yes'?'⚠ Yes':'No'],
     ['Label', r.label],
     ['Copyright Year', r.copyrightYear],
     ['Songwriters', r.writers],
-    ['Producers', r.producers || '—'],
+    ['Producers', r.producers||'—'],
     ['Platforms', r.platforms],
     ['Territories', r.territories],
-    ['UPC/ISRC', r.upc || 'To be assigned'],
-    ['Notes', r.notes || '—'],
-    ['Submitted', r.submittedAt ? r.submittedAt.substring(0,10) : '—'],
-    ['Status', `<span class="badge b-${r.status||'pending'}">${r.status||'pending'}</span>`],
+    ['UPC / ISRC', r.upc||'To be assigned'],
+    ['Notes', r.notes||'—'],
+    ['Submitted', r.submittedAt?r.submittedAt.substring(0,10):'—'],
   ];
+  if (r.audioLink)   rows.push(['Audio File',  `<a href="${r.audioLink}" target="_blank">▶ Open Audio</a>`]);
+  if (r.artworkLink) rows.push(['Artwork',      `<a href="${r.artworkLink}" target="_blank">🖼 Open Artwork</a>`]);
+  if (r.lyrics)      rows.push(['Lyrics',       `<div style="white-space:pre-wrap;font-size:12px;color:var(--mt);max-height:100px;overflow-y:auto">${r.lyrics}</div>`]);
 
-  const links = [];
-  if (r.audioLink) links.push(['Audio File', `<a href="${r.audioLink}" target="_blank">▶ Open Audio</a>`]);
-  if (r.artworkLink) links.push(['Artwork', `<a href="${r.artworkLink}" target="_blank">🖼 Open Artwork</a>`]);
-  if (r.lyrics) links.push(['Lyrics', `<div style="white-space:pre-wrap;font-size:12px;color:var(--muted);max-height:120px;overflow-y:auto">${r.lyrics}</div>`]);
-
-  document.getElementById('modal-body').innerHTML = `
+  document.getElementById('mo-body').innerHTML = `
     <div style="margin-bottom:16px">
-      <select class="status-select" style="width:100%;padding:10px" onchange="updateStatus('${r.id}',this.value)">
-        <option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option>
-        <option value="review" ${r.status==='review'?'selected':''}>🔍 In Review</option>
+      <label style="margin-bottom:6px">Change Status</label>
+      <select class="ss" style="width:100%;padding:10px" onchange="updateStatus('${r.id}',this.value)">
+        <option value="pending"  ${r.status==='pending' ?'selected':''}>⏳ Pending</option>
+        <option value="review"   ${r.status==='review'  ?'selected':''}>🔍 In Review</option>
         <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
-        <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
+        <option value="live"     ${r.status==='live'    ?'selected':''}>🟢 Live</option>
         <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
       </select>
     </div>
-    ${[...fields, ...links].map(([k,v]) => `
-      <div class="detail-row">
-        <div class="detail-key">${k}</div>
-        <div class="detail-val">${v || '—'}</div>
-      </div>
-    `).join('')}
-  `;
+    ${rows.map(([k,v])=>`
+      <div class="dr">
+        <div class="dk">${k}</div>
+        <div class="dv">${v||'—'}</div>
+      </div>`).join('')}`;
 
-  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('mo').classList.add('on');
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+function closeMo(e) { if(e.target===document.getElementById('mo')) closeMoDirect(); }
+function closeMoDirect() { document.getElementById('mo').classList.remove('on'); }
+
+// FILTER
+function setStatus(s, btn) {
+  curFilter = s;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  applyFilter();
 }
 
-function closeModalDirect() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-
-// ============ FILTER ============
-function filterStatus(status, btn) {
-  currentFilter = status;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilters();
-}
-
-function filterTable(query) {
-  applyFilters(query);
-}
-
-function applyFilters(searchQ) {
-  const q = (searchQ || document.querySelector('.search-input')?.value || '').toLowerCase();
-  let filtered = allReleases;
-  if (currentFilter !== 'all') filtered = filtered.filter(r => r.status === currentFilter);
-  if (q) filtered = filtered.filter(r =>
-    (r.title||'').toLowerCase().includes(q) ||
-    (r.artistName||'').toLowerCase().includes(q) ||
+function applyFilter() {
+  const q = (document.querySelector('.si')?.value||'').toLowerCase();
+  let list = releases;
+  if (curFilter !== 'all') list = list.filter(r=>r.status===curFilter);
+  if (q) list = list.filter(r=>
+    (r.title||'').toLowerCase().includes(q)||
+    (r.artistName||'').toLowerCase().includes(q)||
     (r.primaryArtist||'').toLowerCase().includes(q)
   );
-  renderReleaseTable('submissions-table', filtered, true);
+  renderTable('all-list', list);
 }
 
-// ============ NAVIGATION ============
+// NAV
 function goPage(name, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  if (el) el.classList.add('active');
-
-  const titles = {
-    overview: ['Overview', 'Label summary at a glance.'],
-    submissions: ['All Submissions', 'Every release submitted to TIR.'],
-    pending: ['Pending Review', 'Releases waiting for your action.'],
-    live: ['Live Releases', 'Currently distributed releases.'],
-    artists: ['All Artists', 'Registered artist accounts.'],
-  };
-
-  const [t, s] = titles[name] || ['Admin', ''];
-  document.getElementById('pg-title').textContent = t;
-  document.getElementById('pg-sub').textContent = s;
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  if(el) el.classList.add('on');
+  const m={overview:['Overview','Label summary.'],all:['All Submissions','Every release submitted to TIR.'],pending:['Pending Review','Releases waiting for your action.'],live:['Live Releases','Currently distributed.'],artists:['All Artists','Registered artist accounts.']};
+  const [t,s]=m[name]||['Admin',''];
+  document.getElementById('pgt').textContent=t;
+  document.getElementById('pgs').textContent=s;
 }
 
-// ============ TOAST ============
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+// TOAST
+function toast(m) {
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),3000);
 }
 </script>
-
 </body>
 </html>
