@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TIR Admin Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -24,7 +24,7 @@ const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#08080a;--surface:#0f0f12;--card:#16161a;--brd:#22222a;
+  --bg:#08080a;--surface:#0f0f12;--card:#16161a;--brd:#222228;
   --gold:#c9a84c;--gold2:#e8c97a;--gold3:rgba(201,168,76,.1);
   --txt:#f4f4f5;--txt2:#a1a1aa;--txt3:#52525b;
   --grn:#22c55e;--red:#ef4444;--blu:#3b82f6;--org:#f97316;
@@ -32,153 +32,189 @@ const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
 }
 body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px}
 
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
 #ld{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px}
-.ld-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:6px;color:var(--gold)}
-.ld-bar{width:100px;height:2px;background:var(--brd);border-radius:2px;overflow:hidden}
-.ld-fill{height:100%;background:var(--gold);animation:lda 1.4s ease infinite}
-@keyframes lda{0%{width:0;margin-left:0}50%{width:100%;margin-left:0}100%{width:0;margin-left:100%}}
+.ld-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:7px;color:var(--gold);animation:pulse 1.5s ease infinite}
+.ld-bar{width:120px;height:2px;background:var(--brd);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:200% 100%;animation:shimmer 1.2s ease infinite}
 
 #auth{min-height:100vh;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse 50% 40% at 50% 0%,rgba(201,168,76,.06) 0%,transparent 70%)}
-.abox{width:380px;max-width:95vw;background:var(--surface);border:1px solid var(--brd);border-radius:16px;padding:40px 36px;box-shadow:0 24px 80px rgba(0,0,0,.5)}
-.abox-top{text-align:center;margin-bottom:28px}
-.abox-top .brand{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:5px;color:var(--gold)}
+.abox{width:400px;max-width:95vw;background:var(--surface);border:1px solid var(--brd);border-radius:16px;padding:44px 40px;box-shadow:0 32px 100px rgba(0,0,0,.6);animation:fadeUp .5s ease}
+.abox-top{text-align:center;margin-bottom:30px}
+.abox-top .brand{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:6px;color:var(--gold);text-shadow:0 0 20px rgba(201,168,76,.3)}
 .abox-top .sub{font-size:11px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 .abox-top .tag{font-size:13px;color:var(--txt2);margin-top:10px}
-.iw label{display:block;font-size:11px;font-weight:500;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.iw input{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:11px 14px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s;margin-bottom:14px}
-.iw input:focus{border-color:var(--gold)}
-.btn-main{width:100%;padding:12px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
-.btn-main:hover{background:var(--gold2)}
-.btn-main:disabled{background:#4a3d1c;color:#888;cursor:not-allowed}
+.iw{margin-bottom:14px}
+.iw label{display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.iw input{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
+.iw input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.btn-main{width:100%;padding:13px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.btn-main:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(201,168,76,.3)}
+.btn-main:disabled{background:#4a3d1c;color:#666;cursor:not-allowed;transform:none;box-shadow:none}
 .err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#fca5a5;font-size:12px;padding:10px 12px;margin-bottom:14px;display:none}
-.err-box.on{display:block}
+.err-box.on{display:block;animation:fadeIn .3s ease}
 
 #panel{display:none}
 .layout{display:flex;min-height:100vh}
 
-.sb{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.sb-top{padding:18px 14px;border-bottom:1px solid var(--brd)}
-.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold)}
+.sb{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-top{padding:20px 16px 16px;border-bottom:1px solid var(--brd)}
+.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold);text-shadow:0 0 15px rgba(201,168,76,.3)}
 .sb-sub{font-size:10px;color:var(--txt3);letter-spacing:1px}
-.sb-admin{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--brd)}
-.admin-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
-.admin-lbl{font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+.sb-admin{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--brd);background:rgba(201,168,76,.04)}
+.admin-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.5);animation:pulse 2s ease infinite}
+.admin-lbl{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
 nav{flex:1;padding:8px}
-.ns{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;padding:12px 8px 5px}
-.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px;position:relative}
+.ns{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:2px;padding:12px 10px 5px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px;position:relative}
 .ni:hover{background:var(--card);color:var(--txt)}
-.ni.on{background:var(--gold3);color:var(--gold)}
+.ni.on{background:var(--gold3);color:var(--gold);font-weight:600}
+.ni.on::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:0 2px 2px 0}
 .ni svg{width:15px;height:15px;flex-shrink:0}
-.ni .cnt{position:absolute;right:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.ni .cnt{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;animation:pulse 2s ease infinite}
 .sb-bot{padding:10px 8px;border-top:1px solid var(--brd)}
 .so-btn{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt3);cursor:pointer;font-size:13px;width:100%;background:none;border:none;transition:all .15s}
 .so-btn:hover{background:rgba(239,68,68,.1);color:var(--red)}
 
 .main{flex:1;overflow-y:auto}
-.topbar{padding:15px 26px;border-bottom:1px solid var(--brd);background:var(--surface);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
-.topbar h1{font-size:17px;font-weight:600}
+.topbar{padding:15px 26px;border-bottom:1px solid var(--brd);background:var(--surface);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px)}
+.topbar h1{font-size:17px;font-weight:700}
 .topbar p{font-size:12px;color:var(--txt3);margin-top:1px}
-.btn-ref{padding:7px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-ref{padding:8px 16px;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
 .btn-ref:hover{border-color:var(--gold);color:var(--gold)}
 .content{padding:22px 26px}
 
-.pg{display:none;animation:fi .25s ease}
-.pg.on{display:block}
-@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.pg{display:none}
+.pg.on{display:block;animation:fadeUp .4s ease}
 
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
-.sc{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);padding:16px}
-.sc-l{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.sc-v{font-size:26px;font-weight:700}
+.sc{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;transition:all .2s;cursor:default}
+.sc:hover{border-color:rgba(201,168,76,.2);transform:translateY(-1px)}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s}
+.sc:hover::before{opacity:1}
+.sc-l{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.sc-v{font-size:26px;font-weight:800;color:var(--txt)}
 .sc-v.g{color:var(--gold)}
 
-.section{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:18px;overflow:hidden}
+.section{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:18px;overflow:hidden;transition:border-color .2s}
+.section:hover{border-color:rgba(255,255,255,.07)}
 .sh{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
-.sh h3{font-size:14px;font-weight:600}
+.sh h3{font-size:14px;font-weight:700}
 .sh p{font-size:12px;color:var(--txt3)}
 .sb2{padding:18px}
 
-/* FILTER */
 .frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
 .fb{padding:5px 12px;background:none;border:1px solid var(--brd);border-radius:20px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
 .fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:var(--gold3)}
-.si{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;width:200px}
+.si{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;width:220px;transition:border-color .2s}
 .si:focus{border-color:var(--gold)}
 
-/* TABLE */
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--brd);white-space:nowrap}
-td{padding:12px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+th{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--brd);white-space:nowrap}
+td{padding:12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
 tr:hover td{background:rgba(255,255,255,.01)}
 tr:last-child td{border-bottom:none}
 
-.badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .bp{background:rgba(249,115,22,.12);color:#fb923c}
 .br{background:rgba(59,130,246,.12);color:#60a5fa}
 .ba{background:rgba(34,197,94,.12);color:#4ade80}
-.bl{background:rgba(201,168,76,.12);color:var(--gold)}
+.bl{background:rgba(201,168,76,.15);color:var(--gold)}
 .bx{background:rgba(239,68,68,.12);color:#f87171}
-.bo{background:rgba(249,115,22,.12);color:#fb923c}
 
-.ss{background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 8px;cursor:pointer;outline:none}
+.ss{background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 8px;cursor:pointer;outline:none;transition:border-color .2s}
 .ss:focus{border-color:var(--gold)}
 .ss option{background:#1a1a1e}
-
 .vb{padding:5px 12px;background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt2);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .vb:hover{border-color:var(--gold);color:var(--gold)}
 .rb{padding:5px 12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:#4ade80;font-size:12px;cursor:pointer;transition:all .15s}
 .rb:hover{background:rgba(34,197,94,.2)}
+.db{padding:5px 12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:#f87171;font-size:12px;cursor:pointer;transition:all .15s}
+.db:hover{background:rgba(239,68,68,.2)}
 
 /* MODAL */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;display:none;align-items:center;justify-content:center}
-.mo.on{display:flex}
-.mbox{background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:600px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:fi .25s ease}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 20px}
+.mo.on{display:flex;animation:fadeIn .3s ease}
+.mbox{background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:640px;max-width:95vw;box-shadow:0 32px 100px rgba(0,0,0,.6);animation:fadeUp .35s ease}
 .mh{padding:18px 22px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
-.mt2{font-size:16px;font-weight:600}
-.mc{background:none;border:none;color:var(--txt3);font-size:20px;cursor:pointer;line-height:1}
-.mc:hover{color:var(--txt)}
+.mt2{font-size:16px;font-weight:700}
+.mc{background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mc:hover{border-color:var(--red);color:var(--red)}
 .mb{padding:22px}
-.dr{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.dr{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
 .dr:last-child{border-bottom:none}
-.dk{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;min-width:120px;padding-top:1px}
+.dk{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;min-width:120px;padding-top:1px}
 .dv{color:var(--txt);flex:1;word-break:break-all;line-height:1.5}
 .dv a{color:var(--gold);text-decoration:none}
 .dv a:hover{text-decoration:underline}
 
-/* TICKET REPLY BOX */
-.reply-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:16px}
-.reply-box label{display:block;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+/* ROYALTY FORM */
+.roy-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.rf-full{grid-column:1/-1}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:all .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+.fg select option{background:#1a1a1e}
+.fg textarea{resize:vertical;min-height:80px}
+.platform-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.platform-row .fg{margin:0}
+
+/* REPLY BOX */
+.reply-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:14px}
+.reply-box label{display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 .reply-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:100px;transition:border-color .2s}
 .reply-box textarea:focus{border-color:var(--gold)}
-.reply-actions{display:flex;gap:10px;margin-top:10px}
-.btn-reply{padding:9px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.reply-acts{display:flex;gap:10px;margin-top:10px}
+.btn-reply{padding:9px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
 .btn-reply:hover{background:var(--gold2)}
-.btn-reply:disabled{background:#4a3d1c;color:#888;cursor:not-allowed}
-.btn-close-tkt{padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:13px;cursor:pointer;transition:all .2s}
-.btn-close-tkt:hover{border-color:var(--red);color:var(--red)}
-
-/* EXISTING REPLY */
+.btn-reply:disabled{background:#4a3d1c;color:#666;cursor:not-allowed}
+.btn-close-t{padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:13px;cursor:pointer;transition:all .2s}
+.btn-close-t:hover{border-color:var(--red);color:var(--red)}
 .existing-reply{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:12px 16px;margin-bottom:14px}
-.existing-reply .er-label{font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.existing-reply .er-text{font-size:13px;color:var(--txt2);line-height:1.6}
+.er-label{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.er-text{font-size:13px;color:var(--txt2);line-height:1.6}
 
-/* TICKET ROW */
-.tkt-row{cursor:pointer}
-.tkt-row:hover td{background:rgba(255,255,255,.015)}
+/* BLOG FORM */
+.blog-form{display:flex;flex-direction:column;gap:14px}
+.blog-form label{display:block;font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.blog-form input,.blog-form select,.blog-form textarea{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
+.blog-form input:focus,.blog-form select:focus,.blog-form textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+.blog-form textarea{resize:vertical;min-height:200px}
+
+/* BLOG CARD ADMIN */
+.blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
+.blog-admin-card:last-child{border-bottom:none}
+.blog-admin-info{flex:1}
+.blog-admin-title{font-size:14px;font-weight:600}
+.blog-admin-meta{font-size:12px;color:var(--txt3);margin-top:2px}
 
 .empty{text-align:center;padding:40px;color:var(--txt3)}
-.empty-icon{font-size:32px;opacity:.3;margin-bottom:8px}
-.empty-text{font-size:14px;font-weight:500;color:var(--txt2)}
+.empty-icon{font-size:32px;opacity:.25;margin-bottom:8px}
+.empty-text{font-size:14px;font-weight:600;color:var(--txt2)}
 
-.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-size:13px;padding:12px 18px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.toast.on{opacity:1}
+.al{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none}
+.al.on{display:block;animation:fadeIn .3s ease}
+.al-e{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+.al-s{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86efac}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-size:13px;padding:12px 18px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(8px)}
+.toast.on{opacity:1;transform:translateY(0)}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px}
 </style>
 </head>
 <body>
 
 <div id="ld"><div class="ld-logo">T · I · R</div><div class="ld-bar"><div class="ld-fill"></div></div></div>
 
+<!-- AUTH -->
 <div id="auth">
   <div class="abox">
     <div class="abox-top">
@@ -187,16 +223,13 @@ tr:last-child td{border-bottom:none}
       <div class="tag">Label owner access only</div>
     </div>
     <div class="err-box" id="ae"></div>
-    <div class="iw">
-      <label>Admin Email</label>
-      <input type="email" id="em" value="theimaginaryrecords@gmail.com"/>
-      <label>Password</label>
-      <input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
-    </div>
-    <button class="btn-main" id="blg" onclick="doLogin()">Sign In to Admin Panel</button>
+    <div class="iw"><label>Admin Email</label><input type="email" id="em" value="theimaginaryrecords@gmail.com"/></div>
+    <div class="iw"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn-main" id="blg" onclick="doLogin()">Access Admin Panel</button>
   </div>
 </div>
 
+<!-- PANEL -->
 <div id="panel">
   <div class="layout">
     <div class="sb">
@@ -205,44 +238,41 @@ tr:last-child td{border-bottom:none}
       <nav>
         <div class="ns">Dashboard</div>
         <div class="ni on" onclick="goPage('overview',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-          Overview
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview
         </div>
         <div class="ns">Releases</div>
         <div class="ni" onclick="goPage('all',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-          All Submissions
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions
         </div>
         <div class="ni" onclick="goPage('pending',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-          Pending Review <span class="cnt" id="pend-cnt" style="display:none">0</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pending <span class="cnt" id="pend-cnt" style="display:none">0</span>
         </div>
         <div class="ni" onclick="goPage('live',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>
-          Live Releases
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>Live
+        </div>
+        <div class="ns">Finance</div>
+        <div class="ni" onclick="goPage('royalties',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Manage Royalties
+        </div>
+        <div class="ns">Content</div>
+        <div class="ni" onclick="goPage('blog',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Music Blog
         </div>
         <div class="ns">People</div>
         <div class="ni" onclick="goPage('artists',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          All Artists
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>All Artists
         </div>
         <div class="ns">Support</div>
         <div class="ni" onclick="goPage('tickets',this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Support Tickets <span class="cnt" id="tkt-cnt" style="display:none">0</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tickets <span class="cnt" id="tkt-cnt" style="display:none">0</span>
         </div>
       </nav>
-      <div class="sb-bot">
-        <button class="so-btn" onclick="doSignOut()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign Out
-        </button>
-      </div>
+      <div class="sb-bot"><button class="so-btn" onclick="doSignOut()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button></div>
     </div>
 
     <div class="main">
       <div class="topbar">
-        <div><h1 id="pgt">Overview</h1><p id="pgs">The Imaginary Records — Admin</p></div>
+        <div><h1 id="pgt">Overview</h1><p id="pgs">The Imaginary Records</p></div>
         <button class="btn-ref" onclick="loadAll()">↻ Refresh</button>
       </div>
 
@@ -253,12 +283,12 @@ tr:last-child td{border-bottom:none}
           <div class="stats">
             <div class="sc"><div class="sc-l">Total Releases</div><div class="sc-v g" id="s0">—</div></div>
             <div class="sc"><div class="sc-l">Pending</div><div class="sc-v" id="s1">—</div></div>
-            <div class="sc"><div class="sc-l">In Review</div><div class="sc-v" id="s2">—</div></div>
-            <div class="sc"><div class="sc-l">Live</div><div class="sc-v" id="s3">—</div></div>
-            <div class="sc"><div class="sc-l">Artists</div><div class="sc-v" id="s4">—</div></div>
+            <div class="sc"><div class="sc-l">Live</div><div class="sc-v" id="s2">—</div></div>
+            <div class="sc"><div class="sc-l">Artists</div><div class="sc-v" id="s3">—</div></div>
+            <div class="sc"><div class="sc-l">Open Tickets</div><div class="sc-v" id="s4">—</div></div>
           </div>
           <div class="section">
-            <div class="sh"><h3>Latest Submissions</h3><p>Most recent first</p></div>
+            <div class="sh"><h3>Latest Submissions</h3></div>
             <div class="tw" id="ov-list"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading...</div></div></div>
           </div>
           <div class="section">
@@ -267,13 +297,13 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
 
-        <!-- ALL SUBMISSIONS -->
+        <!-- ALL -->
         <div class="pg" id="page-all">
           <div class="section">
             <div class="sh"><h3>All Submissions</h3></div>
             <div style="padding:14px 18px 0">
               <div class="frow">
-                <input class="si" type="text" placeholder="Search title or artist..." oninput="applyFilter()"/>
+                <input class="si" type="text" placeholder="Search..." oninput="applyFilter()"/>
                 <button class="fb on" onclick="setSt('all',this)">All</button>
                 <button class="fb" onclick="setSt('pending',this)">Pending</button>
                 <button class="fb" onclick="setSt('review',this)">Review</button>
@@ -288,17 +318,103 @@ tr:last-child td{border-bottom:none}
 
         <!-- PENDING -->
         <div class="pg" id="page-pending">
-          <div class="section">
-            <div class="sh"><h3>Pending Review</h3><p>Releases waiting for action</p></div>
-            <div class="tw" id="pend-list"></div>
-          </div>
+          <div class="section"><div class="sh"><h3>Pending Review</h3></div><div class="tw" id="pend-list"></div></div>
         </div>
 
         <!-- LIVE -->
         <div class="pg" id="page-live">
+          <div class="section"><div class="sh"><h3>Live Releases</h3></div><div class="tw" id="live-list"></div></div>
+        </div>
+
+        <!-- ROYALTIES MANAGEMENT -->
+        <div class="pg" id="page-royalties">
+          <div class="section" style="margin-bottom:18px">
+            <div class="sh"><h3>Add / Update Royalty Statement</h3><p>Select artist → fill earnings</p></div>
+            <div class="sb2">
+              <div class="al al-e" id="roy-e"></div>
+              <div class="al al-s" id="roy-s"></div>
+              <div class="roy-form">
+                <div class="fg"><label>Select Artist *</label>
+                  <select id="r-artist"><option value="">— Select Artist —</option></select>
+                </div>
+                <div class="fg"><label>Period *</label>
+                  <select id="r-period">
+                    <option value="">— Select Quarter —</option>
+                    <option>Q1 2025 (Jan–Mar)</option>
+                    <option>Q2 2025 (Apr–Jun)</option>
+                    <option>Q3 2025 (Jul–Sep)</option>
+                    <option>Q4 2025 (Oct–Dec)</option>
+                    <option>Q1 2026 (Jan–Mar)</option>
+                    <option>Q2 2026 (Apr–Jun)</option>
+                    <option>Q3 2026 (Jul–Sep)</option>
+                    <option>Q4 2026 (Oct–Dec)</option>
+                  </select>
+                </div>
+                <div class="fg"><label>Total Amount (₹) *</label><input type="number" id="r-total" placeholder="e.g. 1250.00" step="0.01"/></div>
+                <div class="fg"><label>Release Title (for per-release)</label><input type="text" id="r-release-title" placeholder="Song name (optional)"/></div>
+                <div class="fg rf-full"><label>Earnings by Platform (₹ each — leave blank if zero)</label></div>
+                <div class="fg"><label>Spotify</label><input type="number" id="p-spotify" placeholder="0.00" step="0.01"/></div>
+                <div class="fg"><label>Apple Music</label><input type="number" id="p-apple" placeholder="0.00" step="0.01"/></div>
+                <div class="fg"><label>Amazon Music</label><input type="number" id="p-amazon" placeholder="0.00" step="0.01"/></div>
+                <div class="fg"><label>YouTube Music</label><input type="number" id="p-youtube" placeholder="0.00" step="0.01"/></div>
+                <div class="fg"><label>JioSaavn</label><input type="number" id="p-jio" placeholder="0.00" step="0.01"/></div>
+                <div class="fg"><label>Gaana</label><input type="number" id="p-gaana" placeholder="0.00" step="0.01"/></div>
+                <div class="fg"><label>Tidal</label><input type="number" id="p-tidal" placeholder="0.00" step="0.01"/></div>
+                <div class="fg"><label>Other Platforms</label><input type="number" id="p-other" placeholder="0.00" step="0.01"/></div>
+                <div class="fg rf-full"><label>Notes (optional)</label><input type="text" id="r-notes" placeholder="e.g. Q1 2026 royalty payout"/></div>
+                <div class="fg"><label>Mark as Current Quarter?</label><select id="r-current"><option value="true">Yes — Show on artist dashboard</option><option value="false">No — Historical record</option></select></div>
+                <div class="fg"><label>Mark as Payout?</label><select id="r-payout"><option value="false">No — Just a statement</option><option value="true">Yes — Payout made</option></select></div>
+                <div class="fg rf-full">
+                  <button class="btn-main" id="r-btn" style="width:auto;padding:12px 40px" onclick="saveRoyalty()">Save Royalty Statement</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="section">
-            <div class="sh"><h3>Live Releases</h3><p>Currently on platforms</p></div>
-            <div class="tw" id="live-list"></div>
+            <div class="sh"><h3>Royalty History</h3><p>All statements sent</p></div>
+            <div class="tw" id="roy-history-list"><div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No royalty statements yet</div></div></div>
+          </div>
+        </div>
+
+        <!-- BLOG -->
+        <div class="pg" id="page-blog">
+          <div class="section" style="margin-bottom:18px">
+            <div class="sh"><h3>Write New Blog Post</h3><p>Artists will see this in their portal</p></div>
+            <div class="sb2">
+              <div class="al al-e" id="blog-e"></div>
+              <div class="al al-s" id="blog-s"></div>
+              <div class="blog-form">
+                <div>
+                  <label>Post Title *</label>
+                  <input type="text" id="b-title" placeholder="e.g. How to Get Playlisted on Spotify"/>
+                </div>
+                <div>
+                  <label>Category</label>
+                  <select id="b-cat">
+                    <option>Music Tips</option>
+                    <option>Distribution</option>
+                    <option>Industry News</option>
+                    <option>Royalties & Money</option>
+                    <option>Marketing</option>
+                    <option>TIR Updates</option>
+                    <option>Artist Spotlight</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Content *</label>
+                  <textarea id="b-content" placeholder="Write your blog post here... You can use multiple paragraphs."></textarea>
+                </div>
+                <div>
+                  <button class="btn-main" id="b-btn" style="width:auto;padding:12px 40px" onclick="saveBlog()">Publish Post</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="sh"><h3>Published Posts</h3><p id="blog-count">0 posts</p></div>
+            <div class="sb2" id="blog-list"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div></div></div>
           </div>
         </div>
 
@@ -314,14 +430,12 @@ tr:last-child td{border-bottom:none}
         <div class="pg" id="page-tickets">
           <div class="section">
             <div class="sh"><h3>Support Tickets</h3></div>
-            <div style="padding:14px 18px 0">
-              <div class="frow">
-                <button class="fb on" onclick="setTktFilter('all',this)">All</button>
-                <button class="fb" onclick="setTktFilter('open',this)">Open</button>
-                <button class="fb" onclick="setTktFilter('resolved',this)">Resolved</button>
-                <button class="fb" onclick="setTktFilter('closed',this)">Closed</button>
-              </div>
-            </div>
+            <div style="padding:14px 18px 0"><div class="frow">
+              <button class="fb on" onclick="setTF('all',this)">All</button>
+              <button class="fb" onclick="setTF('open',this)">Open</button>
+              <button class="fb" onclick="setTF('resolved',this)">Resolved</button>
+              <button class="fb" onclick="setTF('closed',this)">Closed</button>
+            </div></div>
             <div class="tw" id="tkt-list"></div>
           </div>
         </div>
@@ -334,7 +448,7 @@ tr:last-child td{border-bottom:none}
 <!-- RELEASE MODAL -->
 <div class="mo" id="rmo" onclick="closeMo('rmo',event)">
   <div class="mbox">
-    <div class="mh"><div class="mt2" id="rmo-title">Release Details</div><button class="mc" onclick="closeMoDirect('rmo')">✕</button></div>
+    <div class="mh"><div class="mt2" id="rmo-title">Release</div><button class="mc" onclick="closeMoDirect('rmo')">✕</button></div>
     <div class="mb" id="rmo-body"></div>
   </div>
 </div>
@@ -342,7 +456,7 @@ tr:last-child td{border-bottom:none}
 <!-- TICKET MODAL -->
 <div class="mo" id="tmo" onclick="closeMo('tmo',event)">
   <div class="mbox">
-    <div class="mh"><div class="mt2" id="tmo-title">Support Ticket</div><button class="mc" onclick="closeMoDirect('tmo')">✕</button></div>
+    <div class="mh"><div class="mt2" id="tmo-title">Ticket</div><button class="mc" onclick="closeMoDirect('tmo')">✕</button></div>
     <div class="mb" id="tmo-body"></div>
   </div>
 </div>
@@ -350,15 +464,16 @@ tr:last-child td{border-bottom:none}
 <div class="toast" id="toast"></div>
 
 <script>
-let releases=[],artists=[],tickets=[],curFilter='all',curTktFilter='all';
+let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[];
+let curFilter='all',curTF='all';
 
 auth.onAuthStateChanged(function(user){
   document.getElementById('ld').style.display='none';
-  if(user && user.email===ADMIN_EMAIL){
+  if(user&&user.email===ADMIN_EMAIL){
     document.getElementById('auth').style.display='none';
     document.getElementById('panel').style.display='block';
     loadAll();
-  } else if(user && user.email!==ADMIN_EMAIL){
+  } else if(user&&user.email!==ADMIN_EMAIL){
     auth.signOut();
     document.getElementById('auth').style.display='flex';
   } else {
@@ -382,15 +497,14 @@ async function doLogin(){
     if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential')m+='Wrong password.';
     else m+=e.message;
     err.textContent=m;err.classList.add('on');
-    btn.disabled=false;btn.textContent='Sign In to Admin Panel';
+    btn.disabled=false;btn.textContent='Access Admin Panel';
   }
 }
-
 function doSignOut(){auth.signOut();}
 
 async function loadAll(){
   toast('Loading data...');
-  await Promise.all([loadReleases(),loadArtists(),loadTickets()]);
+  await Promise.all([loadReleases(),loadArtists(),loadTickets(),loadBlogPosts(),loadRoyaltyHistory()]);
   toast('Data loaded ✓');
 }
 
@@ -408,7 +522,7 @@ async function loadReleases(){
     const pc=releases.filter(r=>r.status==='pending').length;
     const pcEl=document.getElementById('pend-cnt');
     if(pc>0){pcEl.textContent=pc;pcEl.style.display='inline';}else{pcEl.style.display='none';}
-  }catch(e){console.error('Releases:',e);toast('Error: '+e.message);}
+  }catch(e){console.error('Releases:',e);}
 }
 
 async function loadArtists(){
@@ -417,7 +531,16 @@ async function loadArtists(){
     artists=[];
     snap.forEach(d=>artists.push({id:d.id,...d.data()}));
     renderArtists();
-    document.getElementById('s4').textContent=artists.length;
+    renderStats();
+    // Populate artist dropdown for royalties
+    const sel=document.getElementById('r-artist');
+    sel.innerHTML='<option value="">— Select Artist —</option>';
+    artists.forEach(a=>{
+      const opt=document.createElement('option');
+      opt.value=a.id;
+      opt.textContent=a.name||a.email||a.id;
+      sel.appendChild(opt);
+    });
   }catch(e){console.error('Artists:',e);}
 }
 
@@ -427,31 +550,51 @@ async function loadTickets(){
     tickets=[];
     snap.forEach(d=>tickets.push({id:d.id,...d.data()}));
     tickets.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
-    renderTickets('tkt-list',tickets);
+    renderTickets(tickets);
     renderOvTickets();
+    renderStats();
     const oc=tickets.filter(t=>t.status==='open').length;
     const tcEl=document.getElementById('tkt-cnt');
     if(oc>0){tcEl.textContent=oc;tcEl.style.display='inline';}else{tcEl.style.display='none';}
   }catch(e){console.error('Tickets:',e);}
 }
 
+async function loadBlogPosts(){
+  try{
+    const snap=await db.collection('blog').orderBy('createdAt','desc').get();
+    blogPosts=[];
+    snap.forEach(d=>blogPosts.push({id:d.id,...d.data()}));
+    renderBlogList();
+  }catch(e){console.log('Blog:',e);}
+}
+
+async function loadRoyaltyHistory(){
+  try{
+    const snap=await db.collection('royalties').orderBy('createdAt','desc').get();
+    royalties=[];
+    snap.forEach(d=>royalties.push({id:d.id,...d.data()}));
+    renderRoyaltyHistory();
+  }catch(e){console.log('Royalties:',e);}
+}
+
 function renderStats(){
   document.getElementById('s0').textContent=releases.length;
   document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;
-  document.getElementById('s2').textContent=releases.filter(r=>r.status==='review').length;
-  document.getElementById('s3').textContent=releases.filter(r=>r.status==='live').length;
+  document.getElementById('s2').textContent=releases.filter(r=>r.status==='live').length;
+  document.getElementById('s3').textContent=artists.length;
+  document.getElementById('s4').textContent=tickets.filter(t=>t.status==='open').length;
+  document.getElementById('art-count').textContent=artists.length+' artist'+(artists.length!==1?'s':'');
 }
 
 function renderTable(id,list){
   const el=document.getElementById(id);
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No releases found</div></div>';return;}
-  const bc={pending:'bp',review:'br',approved:'ba',live:'bl',rejected:'bx'};
   el.innerHTML=`<table><thead><tr><th>Title</th><th>Artist</th><th>Type</th><th>Genre</th><th>Date</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
     ${list.map(r=>`<tr>
-      <td style="font-weight:500">${r.title||'—'}</td>
+      <td style="font-weight:600">${r.title||'—'}</td>
       <td style="color:var(--txt2)">${r.artistName||r.primaryArtist||'—'}</td>
-      <td><span style="font-size:11px;color:var(--txt3)">${r.type||'—'}</span></td>
-      <td style="color:var(--txt3);font-size:12px">${r.genre||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.type||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.genre||'—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.releaseDate||'—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.submittedAt?r.submittedAt.substring(0,10):'—'}</td>
       <td><select class="ss" onchange="updateStatus('${r.id}',this.value)">
@@ -468,19 +611,20 @@ function renderTable(id,list){
 
 function renderArtists(){
   const el=document.getElementById('art-list');
-  document.getElementById('art-count').textContent=artists.length+' artist'+(artists.length!==1?'s':'');
   if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th></tr></thead><tbody>
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th></tr></thead><tbody>
     ${artists.map(a=>{
       const rc=releases.filter(r=>r.userId===a.id).length;
+      const totalRoy=royalties.filter(r=>r.userId===a.id).reduce((s,r)=>s+Number(r.totalAmount||0),0);
       return `<tr>
-        <td style="font-weight:500">${a.name||'—'}</td>
+        <td style="font-weight:600">${a.name||'—'}</td>
         <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td>
-        <td style="color:var(--txt3);font-size:12px">${a.genre||'—'}</td>
+        <td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td>
         <td style="font-size:12px">${a.country||'—'}</td>
         <td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td>
         <td style="font-size:12px;color:var(--txt2)">${a.instagram||'—'}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:600">${rc}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${totalRoy.toFixed(2)}</td>
       </tr>`;}).join('')}
   </tbody></table>`;
 }
@@ -488,10 +632,10 @@ function renderArtists(){
 function renderOvTickets(){
   const open=tickets.filter(t=>t.status==='open');
   const el=document.getElementById('ov-tickets');
-  if(!open.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No open tickets</div></div>';return;}
+  if(!open.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No open tickets — all clear!</div></div>';return;}
   el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Date</th><th>Action</th></tr></thead><tbody>
     ${open.map(t=>`<tr>
-      <td style="font-weight:500">${t.artistName||'—'}</td>
+      <td style="font-weight:600">${t.artistName||'—'}</td>
       <td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td>
       <td>${t.subject||'—'}</td>
       <td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td>
@@ -501,13 +645,13 @@ function renderOvTickets(){
   </tbody></table>`;
 }
 
-function renderTickets(id,list){
-  const el=document.getElementById(id);
+function renderTickets(list){
+  const el=document.getElementById('tkt-list');
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">No tickets found</div></div>';return;}
   const bc={open:'bp',pending:'br',resolved:'ba',closed:'bx'};
   el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>
-    ${list.map(t=>`<tr class="tkt-row">
-      <td style="font-weight:500">${t.artistName||'—'}</td>
+    ${list.map(t=>`<tr>
+      <td style="font-weight:600">${t.artistName||'—'}</td>
       <td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td>
       <td>${t.subject||'—'}</td>
       <td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td>
@@ -518,6 +662,121 @@ function renderTickets(id,list){
   </tbody></table>`;
 }
 
+function renderRoyaltyHistory(){
+  const el=document.getElementById('roy-history-list');
+  if(!royalties.length){el.innerHTML='<div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No royalty statements yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Period</th><th>Release</th><th>Total</th><th>Type</th><th>Date Added</th><th>Action</th></tr></thead><tbody>
+    ${royalties.map(r=>`<tr>
+      <td style="font-weight:600">${r.artistName||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${r.period||'—'}</td>
+      <td style="font-size:12px;color:var(--txt2)">${r.releaseTitle||'Overall'}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--gold)">₹${Number(r.totalAmount||0).toFixed(2)}</td>
+      <td><span class="badge ${r.type==='payout'?'ba':'br'}">${r.type==='payout'?'Payout':'Statement'}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.createdAt?r.createdAt.substring(0,10):'—'}</td>
+      <td><button class="db" onclick="deleteRoyalty('${r.id}')">Delete</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderBlogList(){
+  const el=document.getElementById('blog-list');
+  document.getElementById('blog-count').textContent=blogPosts.length+' post'+(blogPosts.length!==1?'s':'');
+  if(!blogPosts.length){el.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div></div>';return;}
+  el.innerHTML=blogPosts.map(p=>`
+    <div class="blog-admin-card">
+      <div style="width:40px;height:40px;background:var(--card);border:1px solid var(--brd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📝</div>
+      <div class="blog-admin-info">
+        <div class="blog-admin-title">${p.title||'—'}</div>
+        <div class="blog-admin-meta">${p.category||'—'} · ${p.createdAt?p.createdAt.substring(0,10):'—'}</div>
+      </div>
+      <button class="db" onclick="deleteBlog('${p.id}')">Delete</button>
+    </div>`).join('');
+}
+
+// ROYALTY SAVE
+async function saveRoyalty(){
+  const artistId=document.getElementById('r-artist').value;
+  const period=document.getElementById('r-period').value;
+  const total=document.getElementById('r-total').value;
+  document.getElementById('roy-e').classList.remove('on');
+  document.getElementById('roy-s').classList.remove('on');
+  if(!artistId)return showErr2('roy-e','Please select an artist.');
+  if(!period)return showErr2('roy-e','Please select a period.');
+  if(!total)return showErr2('roy-e','Please enter the total amount.');
+  const artist=artists.find(a=>a.id===artistId);
+  const btn=document.getElementById('r-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  const gv=id=>{const v=document.getElementById(id).value;return v?Number(v):0;};
+  const platforms={};
+  if(gv('p-spotify'))platforms['Spotify']=gv('p-spotify');
+  if(gv('p-apple'))platforms['Apple Music']=gv('p-apple');
+  if(gv('p-amazon'))platforms['Amazon Music']=gv('p-amazon');
+  if(gv('p-youtube'))platforms['YouTube Music']=gv('p-youtube');
+  if(gv('p-jio'))platforms['JioSaavn']=gv('p-jio');
+  if(gv('p-gaana'))platforms['Gaana']=gv('p-gaana');
+  if(gv('p-tidal'))platforms['Tidal']=gv('p-tidal');
+  if(gv('p-other'))platforms['Other']=gv('p-other');
+  const data={
+    userId:artistId,
+    artistName:artist?.name||artist?.email||artistId,
+    period,
+    totalAmount:Number(total),
+    releaseTitle:document.getElementById('r-release-title').value.trim()||'',
+    platforms,
+    notes:document.getElementById('r-notes').value.trim(),
+    isCurrent:document.getElementById('r-current').value==='true',
+    type:document.getElementById('r-payout').value==='true'?'payout':'statement',
+    amount:Number(total),
+    createdAt:new Date().toISOString()
+  };
+  try{
+    await db.collection('royalties').add(data);
+    showOk2('roy-s','✓ Royalty statement saved! Artist can now see it in their dashboard.');
+    // Clear form
+    ['r-total','r-release-title','r-notes','p-spotify','p-apple','p-amazon','p-youtube','p-jio','p-gaana','p-tidal','p-other'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('r-artist').value='';
+    document.getElementById('r-period').value='';
+    await loadRoyaltyHistory();
+    toast('Royalty statement saved ✓');
+  }catch(e){showErr2('roy-e','Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Save Royalty Statement';
+}
+
+async function deleteRoyalty(id){
+  if(!confirm('Delete this royalty statement?'))return;
+  try{await db.collection('royalties').doc(id).delete();await loadRoyaltyHistory();toast('Deleted ✓');}
+  catch(e){toast('Error: '+e.message);}
+}
+
+// BLOG
+async function saveBlog(){
+  const title=document.getElementById('b-title').value.trim();
+  const cat=document.getElementById('b-cat').value;
+  const content=document.getElementById('b-content').value.trim();
+  document.getElementById('blog-e').classList.remove('on');
+  document.getElementById('blog-s').classList.remove('on');
+  if(!title)return showErr2('blog-e','Please enter a post title.');
+  if(!content)return showErr2('blog-e','Please write some content.');
+  const btn=document.getElementById('b-btn');
+  btn.disabled=true;btn.textContent='Publishing...';
+  try{
+    await db.collection('blog').add({title,category:cat,content,createdAt:new Date().toISOString()});
+    document.getElementById('b-title').value='';
+    document.getElementById('b-content').value='';
+    showOk2('blog-s','✓ Post published! Artists can now see it in their Music Blog.');
+    await loadBlogPosts();
+    toast('Blog post published ✓');
+  }catch(e){showErr2('blog-e','Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Publish Post';
+}
+
+async function deleteBlog(id){
+  if(!confirm('Delete this blog post?'))return;
+  try{await db.collection('blog').doc(id).delete();await loadBlogPosts();toast('Deleted ✓');}
+  catch(e){toast('Error: '+e.message);}
+}
+
+// STATUS UPDATE
 async function updateStatus(id,status){
   try{
     await db.collection('releases').doc(id).update({status});
@@ -528,17 +787,18 @@ async function updateStatus(id,status){
   }catch(e){toast('Error: '+e.message);}
 }
 
+// MODALS
 function openRelease(id){
   const r=releases.find(x=>x.id===id);
   if(!r)return;
   document.getElementById('rmo-title').textContent=r.title||'Release';
   const rows=[['Artist',r.artistName||r.primaryArtist],['Featured',r.featuredArtists||'—'],['Type',r.type],['Genre',r.genre],['Sub Genre',r.subGenre||'—'],['Language',r.language],['Release Date',r.releaseDate],['Explicit',r.explicit==='yes'?'⚠ Yes':'No'],['Label',r.label],['Copyright Year',r.copyrightYear],['Songwriters',r.writers],['Producers',r.producers||'—'],['Platforms',r.platforms],['Territories',r.territories],['UPC/ISRC',r.upc||'To be assigned'],['Notes',r.notes||'—'],['Submitted',r.submittedAt?r.submittedAt.substring(0,10):'—']];
-  if(r.audioLink)rows.push(['Audio File',`<a href="${r.audioLink}" target="_blank">▶ Open Audio File</a>`]);
+  if(r.audioLink)rows.push(['Audio',`<a href="${r.audioLink}" target="_blank">▶ Open Audio</a>`]);
   if(r.artworkLink)rows.push(['Artwork',`<a href="${r.artworkLink}" target="_blank">🖼 Open Artwork</a>`]);
   if(r.lyrics)rows.push(['Lyrics',`<div style="white-space:pre-wrap;font-size:12px;color:var(--txt2);max-height:100px;overflow-y:auto;background:var(--card);padding:10px;border-radius:6px;margin-top:4px">${r.lyrics}</div>`]);
   document.getElementById('rmo-body').innerHTML=`
     <div style="margin-bottom:16px">
-      <label style="display:block;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Change Status</label>
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Change Status</label>
       <select class="ss" style="width:100%;padding:10px;font-size:13px" onchange="updateStatus('${r.id}',this.value)">
         <option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option>
         <option value="review" ${r.status==='review'?'selected':''}>🔍 In Review</option>
@@ -554,7 +814,7 @@ function openRelease(id){
 function openTicket(id){
   const t=tickets.find(x=>x.id===id);
   if(!t)return;
-  document.getElementById('tmo-title').textContent='Ticket: '+t.subject;
+  document.getElementById('tmo-title').textContent=t.subject||'Ticket';
   document.getElementById('tmo-body').innerHTML=`
     <div class="dr"><div class="dk">Artist</div><div class="dv">${t.artistName||'—'}</div></div>
     <div class="dr"><div class="dk">Email</div><div class="dv">${t.artistEmail||'—'}</div></div>
@@ -568,22 +828,22 @@ function openTicket(id){
         <option value="closed" ${t.status==='closed'?'selected':''}>Closed</option>
       </select>
     </div></div>
-    <div class="dr"><div class="dk">Submitted</div><div class="dv">${t.createdAt?t.createdAt.substring(0,10):'—'}</div></div>
-    <div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--card);padding:12px;border-radius:8px;margin-top:4px">${t.message||'—'}</div></div>
+    <div class="dr"><div class="dk">Date</div><div class="dv">${t.createdAt?t.createdAt.substring(0,10):'—'}</div></div>
+    <div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--card);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${t.message||'—'}</div></div>
     ${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${t.reply}</div></div>`:''}
     <div class="reply-box">
       <label>Reply to Artist</label>
-      <textarea id="reply-txt" placeholder="Type your response here... The artist will see this in their dashboard.">${t.reply||''}</textarea>
-      <div class="reply-actions">
+      <textarea id="reply-txt" placeholder="Type your response... The artist will see this in their Tickets page.">${t.reply||''}</textarea>
+      <div class="reply-acts">
         <button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button>
-        <button class="btn-close-tkt" onclick="updateTicketStatus('${t.id}','closed');closeMoDirect('tmo')">Close Ticket</button>
+        <button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMoDirect('tmo')">Close Ticket</button>
       </div>
     </div>`;
   document.getElementById('tmo').classList.add('on');
 }
 
 async function sendReply(id){
-  const reply=document.getElementById('reply-txt').value.trim();
+  const reply=document.getElementById('reply-txt')?.value.trim();
   if(!reply){toast('Please type a reply first.');return;}
   const btn=document.getElementById('btn-reply');
   btn.disabled=true;btn.textContent='Sending...';
@@ -603,12 +863,13 @@ async function updateTicketStatus(id,status){
     await db.collection('tickets').doc(id).update({status});
     const t=tickets.find(x=>x.id===id);
     if(t)t.status=status;
-    toast('Ticket status → '+status);
+    toast('Ticket → '+status);
     await loadTickets();
   }catch(e){toast('Error: '+e.message);}
 }
 
-function setSt(s,btn){curFilter=s;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyFilter();}
+// FILTERS
+function setSt(s,btn){curFilter=s;document.querySelectorAll('#page-all .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyFilter();}
 function applyFilter(){
   const q=(document.querySelector('.si')?.value||'').toLowerCase();
   let list=releases;
@@ -616,22 +877,27 @@ function applyFilter(){
   if(q)list=list.filter(r=>(r.title||'').toLowerCase().includes(q)||(r.artistName||'').toLowerCase().includes(q));
   renderTable('all-list',list);
 }
+function setTF(s,btn){curTF=s;document.querySelectorAll('#page-tickets .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');let list=tickets;if(s!=='all')list=list.filter(t=>t.status===s);renderTickets(list);}
 
-function setTktFilter(s,btn){curTktFilter=s;document.querySelectorAll('#page-tickets .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');let list=tickets;if(s!=='all')list=list.filter(t=>t.status===s);renderTickets('tkt-list',list);}
-
+// NAV
 function goPage(name,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('page-'+name)?.classList.add('on');
   if(el)el.classList.add('on');
-  const m={overview:['Overview','Label summary.'],all:['All Submissions','Every release.'],pending:['Pending Review','Awaiting action.'],live:['Live Releases','On platforms now.'],artists:['All Artists','Registered accounts.'],tickets:['Support Tickets','Artist support requests.']};
+  const m={overview:['Overview','Label summary.'],all:['All Submissions','Every release.'],pending:['Pending Review','Awaiting action.'],live:['Live Releases','On platforms.'],royalties:['Manage Royalties','Update artist earnings.'],blog:['Music Blog','Publish posts for artists.'],artists:['All Artists','Registered accounts.'],tickets:['Support Tickets','Artist support requests.']};
   const [t,s]=m[name]||['Admin',''];
   document.getElementById('pgt').textContent=t;
   document.getElementById('pgs').textContent=s;
+  if(name==='blog')loadBlogPosts();
+  if(name==='royalties'){loadRoyaltyHistory();loadArtists();}
 }
 
 function closeMo(id,e){if(e.target===document.getElementById(id))closeMoDirect(id);}
-function closeMoDirect(id){document.getElementById(id).classList.remove('on');}
+function closeMoDirect(id){document.getElementById(id)?.classList.remove('on');}
+
+function showErr2(id,m){const e=document.getElementById(id);e.textContent=m;e.classList.add('on');}
+function showOk2(id,m){const e=document.getElementById(id);e.textContent=m;e.classList.add('on');}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
 </script>
 </body>
