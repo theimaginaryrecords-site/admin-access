@@ -3,219 +3,247 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TIR Admin Panel — The Imaginary Records</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
-
-<!-- Firebase COMPAT SDK — same as artist dashboard -->
+<title>TIR Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
 <script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
-    authDomain: "tir-portal.firebaseapp.com",
-    projectId: "tir-portal",
-    storageBucket: "tir-portal.firebasestorage.app",
-    messagingSenderId: "941411383328",
-    appId: "1:941411383328:web:4b7b0aa63e2c7e44d82a445"
-  });
-  const auth = firebase.auth();
-  const db   = firebase.firestore();
-  const ADMIN_EMAIL = 'theimaginaryrecords@gmail.com';
+firebase.initializeApp({
+  apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
+  authDomain:"tir-portal.firebaseapp.com",
+  projectId:"tir-portal",
+  storageBucket:"tir-portal.firebasestorage.app",
+  messagingSenderId:"941411383328",
+  appId:"1:941411383328:web:4b7b0aa63e2c7e44d82a445"
+});
+const auth=firebase.auth();
+const db=firebase.firestore();
+const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
 </script>
-
 <style>
-:root{
-  --blk:#060606;--deep:#0c0c0c;--card:#111;--brd:#1e1e1e;
-  --gold:#c9a84c;--gl:#e8c97a;--gd:#6b5520;
-  --wh:#f0ede6;--mt:#666;--grn:#27ae60;--red:#c0392b;--blu:#2980b9;
-}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--blk);color:var(--wh);font-family:'Cormorant Garamond',serif;min-height:100vh}
+:root{
+  --bg:#08080a;--surface:#0f0f12;--card:#16161a;--brd:#22222a;
+  --gold:#c9a84c;--gold2:#e8c97a;--gold3:rgba(201,168,76,.1);
+  --txt:#f4f4f5;--txt2:#a1a1aa;--txt3:#52525b;
+  --grn:#22c55e;--red:#ef4444;--blu:#3b82f6;--org:#f97316;
+  --r:10px;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px}
 
-/* LOADING */
-#ld{position:fixed;inset:0;background:var(--blk);display:flex;align-items:center;justify-content:center;z-index:9999}
-.ldt{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:4px;color:var(--gold);animation:pulse 1.4s ease infinite}
-@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+#ld{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px}
+.ld-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:6px;color:var(--gold)}
+.ld-bar{width:100px;height:2px;background:var(--brd);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:var(--gold);animation:lda 1.4s ease infinite}
+@keyframes lda{0%{width:0;margin-left:0}50%{width:100%;margin-left:0}100%{width:0;margin-left:100%}}
 
-/* AUTH */
-#auth{min-height:100vh;display:none;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at 50% 20%,rgba(201,168,76,.07) 0%,transparent 60%)}
-.abox{width:380px;max-width:95vw;background:var(--card);border:1px solid var(--brd);padding:48px 36px;position:relative;animation:up .5s ease}
-.abox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-.abox::after{content:'ADMIN ACCESS ONLY';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--card);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);padding:0 12px}
-.logo{text-align:center;margin-bottom:32px}
-.logo .t{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:6px;color:var(--gold);line-height:1}
-.logo .s{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mt);margin-top:4px}
-label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mt);margin-bottom:5px}
-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--brd);color:var(--wh);padding:11px 13px;font-family:'Cormorant Garamond',serif;font-size:16px;outline:none;transition:border-color .2s;margin-bottom:14px}
-input:focus{border-color:var(--gd)}
-.btn-g{width:100%;padding:13px;background:var(--gold);border:none;color:#000;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;cursor:pointer;transition:background .2s}
-.btn-g:hover{background:var(--gl)}
-.btn-g:disabled{background:var(--gd);cursor:not-allowed}
-.al{padding:10px 14px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:11px;display:none}
-.al.on{display:block}
-.al-e{background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.3);color:#e74c3c}
+#auth{min-height:100vh;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse 50% 40% at 50% 0%,rgba(201,168,76,.06) 0%,transparent 70%)}
+.abox{width:380px;max-width:95vw;background:var(--surface);border:1px solid var(--brd);border-radius:16px;padding:40px 36px;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.abox-top{text-align:center;margin-bottom:28px}
+.abox-top .brand{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:5px;color:var(--gold)}
+.abox-top .sub{font-size:11px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.abox-top .tag{font-size:13px;color:var(--txt2);margin-top:10px}
+.iw label{display:block;font-size:11px;font-weight:500;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.iw input{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:11px 14px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s;margin-bottom:14px}
+.iw input:focus{border-color:var(--gold)}
+.btn-main{width:100%;padding:12px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-main:hover{background:var(--gold2)}
+.btn-main:disabled{background:#4a3d1c;color:#888;cursor:not-allowed}
+.err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#fca5a5;font-size:12px;padding:10px 12px;margin-bottom:14px;display:none}
+.err-box.on{display:block}
 
-/* PANEL */
 #panel{display:none}
 .layout{display:flex;min-height:100vh}
 
-/* SIDEBAR */
-.sb{width:200px;min-width:200px;background:var(--deep);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.sbl{padding:20px 16px 16px;border-bottom:1px solid var(--brd)}
-.sbl .t{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--gold)}
-.sbl .s{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mt)}
-nav{flex:1;padding:12px 0}
-.ns{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gd);text-transform:uppercase;padding:10px 16px 4px}
-.ni{display:flex;align-items:center;gap:8px;padding:9px 16px;color:var(--mt);cursor:pointer;font-size:13px;transition:all .2s;border-left:2px solid transparent}
-.ni:hover{color:var(--wh);background:rgba(255,255,255,.02)}
-.ni.on{color:var(--gold);background:rgba(201,168,76,.05);border-left-color:var(--gold)}
-.ni .ic{font-size:13px;width:16px;text-align:center}
-.sbb{padding:14px 16px;border-top:1px solid var(--brd)}
-.adm{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;background:rgba(201,168,76,.08);border:1px solid var(--gd);padding:4px 8px;margin-bottom:8px;display:inline-block}
-.btn-o{width:100%;padding:8px;background:none;border:1px solid var(--brd);color:var(--mt);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.btn-o:hover{border-color:var(--gd);color:var(--gold)}
+.sb{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sb-top{padding:18px 14px;border-bottom:1px solid var(--brd)}
+.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold)}
+.sb-sub{font-size:10px;color:var(--txt3);letter-spacing:1px}
+.sb-admin{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--brd)}
+.admin-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.admin-lbl{font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+nav{flex:1;padding:8px}
+.ns{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;padding:12px 8px 5px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px;position:relative}
+.ni:hover{background:var(--card);color:var(--txt)}
+.ni.on{background:var(--gold3);color:var(--gold)}
+.ni svg{width:15px;height:15px;flex-shrink:0}
+.ni .cnt{position:absolute;right:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sb-bot{padding:10px 8px;border-top:1px solid var(--brd)}
+.so-btn{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt3);cursor:pointer;font-size:13px;width:100%;background:none;border:none;transition:all .15s}
+.so-btn:hover{background:rgba(239,68,68,.1);color:var(--red)}
 
-/* MAIN */
 .main{flex:1;overflow-y:auto}
-.topbar{padding:18px 26px;border-bottom:1px solid var(--brd);background:var(--deep);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
-.pt{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px}
-.ps{font-family:'DM Mono',monospace;font-size:9px;color:var(--mt);margin-top:2px}
-.btn-sm{padding:8px 16px;background:none;border:1px solid var(--brd);color:var(--mt);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.btn-sm:hover{border-color:var(--gd);color:var(--gold)}
-.content{padding:26px}
+.topbar{padding:15px 26px;border-bottom:1px solid var(--brd);background:var(--surface);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:17px;font-weight:600}
+.topbar p{font-size:12px;color:var(--txt3);margin-top:1px}
+.btn-ref{padding:7px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-ref:hover{border-color:var(--gold);color:var(--gold)}
+.content{padding:22px 26px}
 
-/* PAGES */
-.pg{display:none;animation:fi .3s ease}
+.pg{display:none;animation:fi .25s ease}
 .pg.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
-/* STATS */
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
-.stat{background:var(--card);border:1px solid var(--brd);padding:16px;text-align:center;position:relative}
-.stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gd),transparent)}
-.sn{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1}
-.sl{font-family:'DM Mono',monospace;font-size:8px;color:var(--mt);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.sc{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);padding:16px}
+.sc-l{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.sc-v{font-size:26px;font-weight:700}
+.sc-v.g{color:var(--gold)}
 
-/* CARD */
-.card{background:var(--card);border:1px solid var(--brd);padding:20px;margin-bottom:20px}
-.ct{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--brd)}
+.section{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:18px;overflow:hidden}
+.sh{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.sh h3{font-size:14px;font-weight:600}
+.sh p{font-size:12px;color:var(--txt3)}
+.sb2{padding:18px}
+
+/* FILTER */
+.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.fb{padding:5px 12px;background:none;border:1px solid var(--brd);border-radius:20px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:var(--gold3)}
+.si{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;width:200px}
+.si:focus{border-color:var(--gold)}
 
 /* TABLE */
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--mt);text-align:left;padding:10px 10px;border-bottom:1px solid var(--brd);white-space:nowrap}
-td{padding:12px 10px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
-tr:hover td{background:rgba(255,255,255,.015)}
+th{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--brd);white-space:nowrap}
+td{padding:12px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.01)}
 tr:last-child td{border-bottom:none}
 
-/* BADGES */
-.badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border:1px solid;white-space:nowrap}
-.bp{color:#f39c12;border-color:rgba(243,156,18,.4);background:rgba(243,156,18,.06)}
-.br{color:var(--blu);border-color:rgba(41,128,185,.4);background:rgba(41,128,185,.06)}
-.ba{color:var(--grn);border-color:rgba(39,174,96,.4);background:rgba(39,174,96,.06)}
-.bl{color:var(--gold);border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.06)}
-.bx{color:var(--red);border-color:rgba(192,57,43,.4);background:rgba(192,57,43,.06)}
+.badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.bp{background:rgba(249,115,22,.12);color:#fb923c}
+.br{background:rgba(59,130,246,.12);color:#60a5fa}
+.ba{background:rgba(34,197,94,.12);color:#4ade80}
+.bl{background:rgba(201,168,76,.12);color:var(--gold)}
+.bx{background:rgba(239,68,68,.12);color:#f87171}
+.bo{background:rgba(249,115,22,.12);color:#fb923c}
 
-/* STATUS SELECT */
-.ss{background:var(--deep);border:1px solid var(--brd);color:var(--wh);font-family:'DM Mono',monospace;font-size:10px;padding:4px 8px;cursor:pointer;outline:none}
-.ss:focus{border-color:var(--gd)}
-.ss option{background:#1a1a1a}
+.ss{background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 8px;cursor:pointer;outline:none}
+.ss:focus{border-color:var(--gold)}
+.ss option{background:#1a1a1e}
 
-/* VIEW BTN */
-.vb{background:none;border:1px solid var(--brd);color:var(--mt);padding:4px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
-.vb:hover{border-color:var(--gd);color:var(--gold)}
-
-/* FILTER */
-.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
-.fb{background:none;border:1px solid var(--brd);color:var(--mt);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;cursor:pointer;transition:all .2s}
-.fb:hover,.fb.on{border-color:var(--gd);color:var(--gold);background:rgba(201,168,76,.05)}
-.si{background:var(--deep);border:1px solid var(--brd);color:var(--wh);padding:7px 12px;font-family:'DM Mono',monospace;font-size:11px;outline:none;width:220px;transition:border-color .2s}
-.si:focus{border-color:var(--gd)}
+.vb{padding:5px 12px;background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt2);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.vb:hover{border-color:var(--gold);color:var(--gold)}
+.rb{padding:5px 12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:#4ade80;font-size:12px;cursor:pointer;transition:all .15s}
+.rb:hover{background:rgba(34,197,94,.2)}
 
 /* MODAL */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;display:none;align-items:center;justify-content:center}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;display:none;align-items:center;justify-content:center}
 .mo.on{display:flex}
-.mbox{background:var(--card);border:1px solid var(--brd);width:580px;max-width:95vw;max-height:88vh;overflow-y:auto;position:relative;animation:up .3s ease}
-.mbox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.mbox{background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:600px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:fi .25s ease}
 .mh{padding:18px 22px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
-.mt2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold)}
-.mc{background:none;border:none;color:var(--mt);font-size:20px;cursor:pointer;line-height:1}
-.mc:hover{color:var(--wh)}
+.mt2{font-size:16px;font-weight:600}
+.mc{background:none;border:none;color:var(--txt3);font-size:20px;cursor:pointer;line-height:1}
+.mc:hover{color:var(--txt)}
 .mb{padding:22px}
-.dr{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.dr{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
 .dr:last-child{border-bottom:none}
-.dk{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mt);min-width:110px;padding-top:2px}
-.dv{color:var(--wh);flex:1;word-break:break-all}
+.dk{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;min-width:120px;padding-top:1px}
+.dv{color:var(--txt);flex:1;word-break:break-all;line-height:1.5}
 .dv a{color:var(--gold);text-decoration:none}
 .dv a:hover{text-decoration:underline}
 
-/* EMPTY */
-.empty{text-align:center;padding:48px 20px;color:var(--mt)}
-.ei{font-size:32px;opacity:.25;margin-bottom:10px}
-.et{font-size:16px;font-style:italic}
+/* TICKET REPLY BOX */
+.reply-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:16px}
+.reply-box label{display:block;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.reply-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:100px;transition:border-color .2s}
+.reply-box textarea:focus{border-color:var(--gold)}
+.reply-actions{display:flex;gap:10px;margin-top:10px}
+.btn-reply{padding:9px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-reply:hover{background:var(--gold2)}
+.btn-reply:disabled{background:#4a3d1c;color:#888;cursor:not-allowed}
+.btn-close-tkt{padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:13px;cursor:pointer;transition:all .2s}
+.btn-close-tkt:hover{border-color:var(--red);color:var(--red)}
 
-/* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--gd);color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;padding:11px 18px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+/* EXISTING REPLY */
+.existing-reply{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:12px 16px;margin-bottom:14px}
+.existing-reply .er-label{font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.existing-reply .er-text{font-size:13px;color:var(--txt2);line-height:1.6}
+
+/* TICKET ROW */
+.tkt-row{cursor:pointer}
+.tkt-row:hover td{background:rgba(255,255,255,.015)}
+
+.empty{text-align:center;padding:40px;color:var(--txt3)}
+.empty-icon{font-size:32px;opacity:.3;margin-bottom:8px}
+.empty-text{font-size:14px;font-weight:500;color:var(--txt2)}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-size:13px;padding:12px 18px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .toast.on{opacity:1}
-
-@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fi{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div id="ld"><div class="ldt">Loading Admin Panel...</div></div>
+<div id="ld"><div class="ld-logo">T · I · R</div><div class="ld-bar"><div class="ld-fill"></div></div></div>
 
-<!-- AUTH -->
 <div id="auth">
   <div class="abox">
-    <div class="logo">
-      <div class="t">T·I·R</div>
-      <div class="s">Label Admin Panel</div>
+    <div class="abox-top">
+      <div class="brand">T·I·R</div>
+      <div class="sub">Admin Panel</div>
+      <div class="tag">Label owner access only</div>
     </div>
-    <div class="al al-e" id="ae"></div>
-    <div>
+    <div class="err-box" id="ae"></div>
+    <div class="iw">
       <label>Admin Email</label>
       <input type="email" id="em" value="theimaginaryrecords@gmail.com"/>
       <label>Password</label>
       <input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
-      <button class="btn-g" id="blg" onclick="doLogin()">Access Admin Panel</button>
     </div>
+    <button class="btn-main" id="blg" onclick="doLogin()">Sign In to Admin Panel</button>
   </div>
 </div>
 
-<!-- PANEL -->
 <div id="panel">
   <div class="layout">
-
     <div class="sb">
-      <div class="sbl"><div class="t">T·I·R</div><div class="s">Admin Panel</div></div>
+      <div class="sb-top"><div class="sb-brand">T·I·R</div><div class="sb-sub">Admin Panel</div></div>
+      <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
       <nav>
-        <div class="ns">Overview</div>
-        <div class="ni on" onclick="goPage('overview',this)"><span class="ic">◈</span> Overview</div>
+        <div class="ns">Dashboard</div>
+        <div class="ni on" onclick="goPage('overview',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Overview
+        </div>
         <div class="ns">Releases</div>
-        <div class="ni" onclick="goPage('all',this)"><span class="ic">♪</span> All Submissions</div>
-        <div class="ni" onclick="goPage('pending',this)"><span class="ic">◌</span> Pending</div>
-        <div class="ni" onclick="goPage('live',this)"><span class="ic">◉</span> Live</div>
-        <div class="ns">Artists</div>
-        <div class="ni" onclick="goPage('artists',this)"><span class="ic">◎</span> All Artists</div>
+        <div class="ni" onclick="goPage('all',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          All Submissions
+        </div>
+        <div class="ni" onclick="goPage('pending',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          Pending Review <span class="cnt" id="pend-cnt" style="display:none">0</span>
+        </div>
+        <div class="ni" onclick="goPage('live',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>
+          Live Releases
+        </div>
+        <div class="ns">People</div>
+        <div class="ni" onclick="goPage('artists',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          All Artists
+        </div>
+        <div class="ns">Support</div>
+        <div class="ni" onclick="goPage('tickets',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Support Tickets <span class="cnt" id="tkt-cnt" style="display:none">0</span>
+        </div>
       </nav>
-      <div class="sbb">
-        <div class="adm">✦ Admin</div>
-        <button class="btn-o" onclick="doSignOut()">Sign Out</button>
+      <div class="sb-bot">
+        <button class="so-btn" onclick="doSignOut()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
       </div>
     </div>
 
     <div class="main">
       <div class="topbar">
-        <div>
-          <div class="pt" id="pgt">Overview</div>
-          <div class="ps" id="pgs">The Imaginary Records — Admin Dashboard</div>
-        </div>
-        <button class="btn-sm" onclick="loadAll()">↻ Refresh Data</button>
+        <div><h1 id="pgt">Overview</h1><p id="pgs">The Imaginary Records — Admin</p></div>
+        <button class="btn-ref" onclick="loadAll()">↻ Refresh</button>
       </div>
 
       <div class="content">
@@ -223,56 +251,78 @@ tr:last-child td{border-bottom:none}
         <!-- OVERVIEW -->
         <div class="pg on" id="page-overview">
           <div class="stats">
-            <div class="stat"><div class="sn" id="s0">—</div><div class="sl">Total</div></div>
-            <div class="stat"><div class="sn" id="s1">—</div><div class="sl">Pending</div></div>
-            <div class="stat"><div class="sn" id="s2">—</div><div class="sl">In Review</div></div>
-            <div class="stat"><div class="sn" id="s3">—</div><div class="sl">Live</div></div>
-            <div class="stat"><div class="sn" id="s4">—</div><div class="sl">Artists</div></div>
+            <div class="sc"><div class="sc-l">Total Releases</div><div class="sc-v g" id="s0">—</div></div>
+            <div class="sc"><div class="sc-l">Pending</div><div class="sc-v" id="s1">—</div></div>
+            <div class="sc"><div class="sc-l">In Review</div><div class="sc-v" id="s2">—</div></div>
+            <div class="sc"><div class="sc-l">Live</div><div class="sc-v" id="s3">—</div></div>
+            <div class="sc"><div class="sc-l">Artists</div><div class="sc-v" id="s4">—</div></div>
           </div>
-          <div class="card">
-            <div class="ct">Latest Submissions</div>
-            <div id="ov-list"><div class="empty"><div class="ei">◉</div><div class="et">Loading...</div></div></div>
+          <div class="section">
+            <div class="sh"><h3>Latest Submissions</h3><p>Most recent first</p></div>
+            <div class="tw" id="ov-list"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading...</div></div></div>
+          </div>
+          <div class="section">
+            <div class="sh"><h3>Open Support Tickets</h3><p>Needs your response</p></div>
+            <div class="tw" id="ov-tickets"><div class="empty"><div class="empty-icon">💬</div><div class="empty-text">Loading...</div></div></div>
           </div>
         </div>
 
         <!-- ALL SUBMISSIONS -->
         <div class="pg" id="page-all">
-          <div class="card">
-            <div class="ct">All Release Submissions</div>
-            <div class="frow">
-              <input class="si" type="text" placeholder="Search title or artist..." oninput="applyFilter()"/>
-              <button class="fb on" onclick="setStatus('all',this)">All</button>
-              <button class="fb" onclick="setStatus('pending',this)">Pending</button>
-              <button class="fb" onclick="setStatus('review',this)">Review</button>
-              <button class="fb" onclick="setStatus('approved',this)">Approved</button>
-              <button class="fb" onclick="setStatus('live',this)">Live</button>
-              <button class="fb" onclick="setStatus('rejected',this)">Rejected</button>
+          <div class="section">
+            <div class="sh"><h3>All Submissions</h3></div>
+            <div style="padding:14px 18px 0">
+              <div class="frow">
+                <input class="si" type="text" placeholder="Search title or artist..." oninput="applyFilter()"/>
+                <button class="fb on" onclick="setSt('all',this)">All</button>
+                <button class="fb" onclick="setSt('pending',this)">Pending</button>
+                <button class="fb" onclick="setSt('review',this)">Review</button>
+                <button class="fb" onclick="setSt('approved',this)">Approved</button>
+                <button class="fb" onclick="setSt('live',this)">Live</button>
+                <button class="fb" onclick="setSt('rejected',this)">Rejected</button>
+              </div>
             </div>
-            <div class="tw" id="all-list"><div class="empty"><div class="et">Loading...</div></div></div>
+            <div class="tw" id="all-list"></div>
           </div>
         </div>
 
         <!-- PENDING -->
         <div class="pg" id="page-pending">
-          <div class="card">
-            <div class="ct">Pending Review</div>
-            <div class="tw" id="pend-list"><div class="empty"><div class="et">Loading...</div></div></div>
+          <div class="section">
+            <div class="sh"><h3>Pending Review</h3><p>Releases waiting for action</p></div>
+            <div class="tw" id="pend-list"></div>
           </div>
         </div>
 
         <!-- LIVE -->
         <div class="pg" id="page-live">
-          <div class="card">
-            <div class="ct">Live Releases</div>
-            <div class="tw" id="live-list"><div class="empty"><div class="et">Loading...</div></div></div>
+          <div class="section">
+            <div class="sh"><h3>Live Releases</h3><p>Currently on platforms</p></div>
+            <div class="tw" id="live-list"></div>
           </div>
         </div>
 
         <!-- ARTISTS -->
         <div class="pg" id="page-artists">
-          <div class="card">
-            <div class="ct">Registered Artists</div>
-            <div class="tw" id="art-list"><div class="empty"><div class="et">Loading...</div></div></div>
+          <div class="section">
+            <div class="sh"><h3>Registered Artists</h3><p id="art-count">0 artists</p></div>
+            <div class="tw" id="art-list"></div>
+          </div>
+        </div>
+
+        <!-- TICKETS -->
+        <div class="pg" id="page-tickets">
+          <div class="section">
+            <div class="sh"><h3>Support Tickets</h3></div>
+            <div style="padding:14px 18px 0">
+              <div class="frow">
+                <button class="fb on" onclick="setTktFilter('all',this)">All</button>
+                <button class="fb" onclick="setTktFilter('open',this)">Open</button>
+                <button class="fb" onclick="setTktFilter('resolved',this)">Resolved</button>
+                <button class="fb" onclick="setTktFilter('closed',this)">Closed</button>
+              </div>
+            </div>
+            <div class="tw" id="tkt-list"></div>
           </div>
         </div>
 
@@ -281,287 +331,308 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="mo" id="mo" onclick="closeMo(event)">
+<!-- RELEASE MODAL -->
+<div class="mo" id="rmo" onclick="closeMo('rmo',event)">
   <div class="mbox">
-    <div class="mh">
-      <div class="mt2" id="mo-title">Release Details</div>
-      <button class="mc" onclick="closeMoDirect()">✕</button>
-    </div>
-    <div class="mb" id="mo-body"></div>
+    <div class="mh"><div class="mt2" id="rmo-title">Release Details</div><button class="mc" onclick="closeMoDirect('rmo')">✕</button></div>
+    <div class="mb" id="rmo-body"></div>
+  </div>
+</div>
+
+<!-- TICKET MODAL -->
+<div class="mo" id="tmo" onclick="closeMo('tmo',event)">
+  <div class="mbox">
+    <div class="mh"><div class="mt2" id="tmo-title">Support Ticket</div><button class="mc" onclick="closeMoDirect('tmo')">✕</button></div>
+    <div class="mb" id="tmo-body"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-let releases = [], artists = [], curFilter = 'all';
+let releases=[],artists=[],tickets=[],curFilter='all',curTktFilter='all';
 
-// AUTH STATE
-auth.onAuthStateChanged(function(user) {
-  document.getElementById('ld').style.display = 'none';
-  if (user && user.email === ADMIN_EMAIL) {
-    document.getElementById('auth').style.display = 'none';
-    document.getElementById('panel').style.display = 'block';
+auth.onAuthStateChanged(function(user){
+  document.getElementById('ld').style.display='none';
+  if(user && user.email===ADMIN_EMAIL){
+    document.getElementById('auth').style.display='none';
+    document.getElementById('panel').style.display='block';
     loadAll();
-  } else if (user && user.email !== ADMIN_EMAIL) {
+  } else if(user && user.email!==ADMIN_EMAIL){
     auth.signOut();
-    document.getElementById('auth').style.display = 'flex';
+    document.getElementById('auth').style.display='flex';
   } else {
-    document.getElementById('auth').style.display = 'flex';
-    document.getElementById('panel').style.display = 'none';
+    document.getElementById('auth').style.display='flex';
+    document.getElementById('panel').style.display='none';
   }
 });
 
-// LOGIN
-async function doLogin() {
-  const email = document.getElementById('em').value.trim();
-  const pass  = document.getElementById('pw').value;
-  const btn   = document.getElementById('blg');
-  const err   = document.getElementById('ae');
+async function doLogin(){
+  const em=document.getElementById('em').value.trim();
+  const pw=document.getElementById('pw').value;
+  const btn=document.getElementById('blg');
+  const err=document.getElementById('ae');
   err.classList.remove('on');
-
-  if (email !== ADMIN_EMAIL) {
-    err.textContent = 'Access denied — admin only.';
-    err.classList.add('on'); return;
-  }
-  if (!pass) {
-    err.textContent = 'Please enter your password.';
-    err.classList.add('on'); return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Signing in...';
-  try {
-    await auth.signInWithEmailAndPassword(email, pass);
-  } catch(e) {
-    let m = 'Login failed. ';
-    if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential') m+='Wrong password.';
-    else if(e.code==='auth/user-not-found') m+='Account not found.';
+  if(em!==ADMIN_EMAIL){err.textContent='Access denied.';err.classList.add('on');return;}
+  if(!pw){err.textContent='Please enter your password.';err.classList.add('on');return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{await auth.signInWithEmailAndPassword(em,pw);}
+  catch(e){
+    let m='Login failed. ';
+    if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential')m+='Wrong password.';
     else m+=e.message;
-    err.textContent = m; err.classList.add('on');
-    btn.disabled = false; btn.textContent = 'Access Admin Panel';
+    err.textContent=m;err.classList.add('on');
+    btn.disabled=false;btn.textContent='Sign In to Admin Panel';
   }
 }
 
-function doSignOut() { auth.signOut(); }
+function doSignOut(){auth.signOut();}
 
-// LOAD ALL DATA
-async function loadAll() {
+async function loadAll(){
   toast('Loading data...');
-  await Promise.all([loadReleases(), loadArtists()]);
+  await Promise.all([loadReleases(),loadArtists(),loadTickets()]);
   toast('Data loaded ✓');
 }
 
-async function loadReleases() {
-  try {
-    const snap = await db.collection('releases').get();
-    releases = [];
-    snap.forEach(d => releases.push({ id: d.id, ...d.data() }));
-    releases.sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0));
-    renderAll();
-  } catch(e) {
-    console.error('Releases error:', e);
-    toast('Error loading releases: ' + e.message);
-  }
+async function loadReleases(){
+  try{
+    const snap=await db.collection('releases').get();
+    releases=[];
+    snap.forEach(d=>releases.push({id:d.id,...d.data()}));
+    releases.sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
+    renderStats();
+    renderTable('ov-list',releases.slice(0,8));
+    renderTable('all-list',releases);
+    renderTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review'));
+    renderTable('live-list',releases.filter(r=>r.status==='live'));
+    const pc=releases.filter(r=>r.status==='pending').length;
+    const pcEl=document.getElementById('pend-cnt');
+    if(pc>0){pcEl.textContent=pc;pcEl.style.display='inline';}else{pcEl.style.display='none';}
+  }catch(e){console.error('Releases:',e);toast('Error: '+e.message);}
 }
 
-async function loadArtists() {
-  try {
-    const snap = await db.collection('users').get();
-    artists = [];
-    snap.forEach(d => artists.push({ id: d.id, ...d.data() }));
+async function loadArtists(){
+  try{
+    const snap=await db.collection('users').get();
+    artists=[];
+    snap.forEach(d=>artists.push({id:d.id,...d.data()}));
     renderArtists();
-  } catch(e) {
-    console.error('Artists error:', e);
-    toast('Error loading artists: ' + e.message);
-  }
+    document.getElementById('s4').textContent=artists.length;
+  }catch(e){console.error('Artists:',e);}
 }
 
-// RENDER ALL
-function renderAll() {
-  const pending  = releases.filter(r=>r.status==='pending').length;
-  const review   = releases.filter(r=>r.status==='review').length;
-  const live     = releases.filter(r=>r.status==='live').length;
-  document.getElementById('s0').textContent = releases.length;
-  document.getElementById('s1').textContent = pending;
-  document.getElementById('s2').textContent = review;
-  document.getElementById('s3').textContent = live;
-  document.getElementById('s4').textContent = artists.length;
-
-  renderTable('ov-list',   releases.slice(0,10));
-  renderTable('pend-list', releases.filter(r=>r.status==='pending'||r.status==='review'));
-  renderTable('live-list', releases.filter(r=>r.status==='live'));
-  applyFilter();
+async function loadTickets(){
+  try{
+    const snap=await db.collection('tickets').get();
+    tickets=[];
+    snap.forEach(d=>tickets.push({id:d.id,...d.data()}));
+    tickets.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+    renderTickets('tkt-list',tickets);
+    renderOvTickets();
+    const oc=tickets.filter(t=>t.status==='open').length;
+    const tcEl=document.getElementById('tkt-cnt');
+    if(oc>0){tcEl.textContent=oc;tcEl.style.display='inline';}else{tcEl.style.display='none';}
+  }catch(e){console.error('Tickets:',e);}
 }
 
-function renderTable(id, list) {
-  const el = document.getElementById(id);
-  if (!list.length) {
-    el.innerHTML = '<div class="empty"><div class="ei">◉</div><div class="et">No releases found</div></div>';
-    return;
-  }
-  const bc = {pending:'bp',review:'br',approved:'ba',live:'bl',rejected:'bx'};
-  el.innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Title</th><th>Artist</th><th>Type</th>
-        <th>Genre</th><th>Date</th><th>Submitted</th>
-        <th>Status</th><th>Action</th>
-      </tr></thead>
-      <tbody>
-        ${list.map(r=>`
-          <tr>
-            <td style="font-style:italic;color:var(--wh)">${r.title||'—'}</td>
-            <td>${r.artistName||r.primaryArtist||'—'}</td>
-            <td><span style="font-family:'DM Mono',monospace;font-size:10px">${r.type||'—'}</span></td>
-            <td style="color:var(--mt);font-size:12px">${r.genre||'—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:10px">${r.releaseDate||'—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mt)">${r.submittedAt?r.submittedAt.substring(0,10):'—'}</td>
-            <td>
-              <select class="ss" onchange="updateStatus('${r.id}',this.value)">
-                <option value="pending"  ${r.status==='pending' ?'selected':''}>⏳ Pending</option>
-                <option value="review"   ${r.status==='review'  ?'selected':''}>🔍 Review</option>
-                <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
-                <option value="live"     ${r.status==='live'    ?'selected':''}>🟢 Live</option>
-                <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
-              </select>
-            </td>
-            <td><button class="vb" onclick="openRelease('${r.id}')">View</button></td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>`;
+function renderStats(){
+  document.getElementById('s0').textContent=releases.length;
+  document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;
+  document.getElementById('s2').textContent=releases.filter(r=>r.status==='review').length;
+  document.getElementById('s3').textContent=releases.filter(r=>r.status==='live').length;
 }
 
-function renderArtists() {
-  document.getElementById('s4').textContent = artists.length;
-  const el = document.getElementById('art-list');
-  if (!artists.length) {
-    el.innerHTML = '<div class="empty"><div class="ei">◎</div><div class="et">No artists registered yet</div></div>';
-    return;
-  }
-  el.innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Artist Name</th><th>Email</th><th>Genre</th>
-        <th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th>
-      </tr></thead>
-      <tbody>
-        ${artists.map(a=>{
-          const rc = releases.filter(r=>r.userId===a.id).length;
-          return `<tr>
-            <td style="font-style:italic">${a.name||'—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:10px">${a.email||'—'}</td>
-            <td style="color:var(--mt);font-size:12px">${a.genre||'—'}</td>
-            <td style="font-size:12px">${a.country||'—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:10px;color:${a.paypal?'var(--gold)':'var(--mt)'}">${a.paypal||'Not set'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:10px">${a.instagram||'—'}</td>
-            <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)">${rc}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
-}
-
-// STATUS UPDATE
-async function updateStatus(id, status) {
-  try {
-    await db.collection('releases').doc(id).update({ status });
-    const r = releases.find(x=>x.id===id);
-    if (r) r.status = status;
-    renderAll();
-    toast('Status updated → ' + status + ' ✓');
-  } catch(e) { toast('Error: ' + e.message); }
-}
-
-// RELEASE DETAIL MODAL
-function openRelease(id) {
-  const r = releases.find(x=>x.id===id);
-  if (!r) return;
-  document.getElementById('mo-title').textContent = r.title || 'Release';
-  const rows = [
-    ['Artist', r.artistName||r.primaryArtist],
-    ['Featured', r.featuredArtists||'—'],
-    ['Type', r.type], ['Genre', r.genre],
-    ['Sub Genre', r.subGenre||'—'],
-    ['Language', r.language],
-    ['Release Date', r.releaseDate],
-    ['Explicit', r.explicit==='yes'?'⚠ Yes':'No'],
-    ['Label', r.label],
-    ['Copyright Year', r.copyrightYear],
-    ['Songwriters', r.writers],
-    ['Producers', r.producers||'—'],
-    ['Platforms', r.platforms],
-    ['Territories', r.territories],
-    ['UPC / ISRC', r.upc||'To be assigned'],
-    ['Notes', r.notes||'—'],
-    ['Submitted', r.submittedAt?r.submittedAt.substring(0,10):'—'],
-  ];
-  if (r.audioLink)   rows.push(['Audio File',  `<a href="${r.audioLink}" target="_blank">▶ Open Audio</a>`]);
-  if (r.artworkLink) rows.push(['Artwork',      `<a href="${r.artworkLink}" target="_blank">🖼 Open Artwork</a>`]);
-  if (r.lyrics)      rows.push(['Lyrics',       `<div style="white-space:pre-wrap;font-size:12px;color:var(--mt);max-height:100px;overflow-y:auto">${r.lyrics}</div>`]);
-
-  document.getElementById('mo-body').innerHTML = `
-    <div style="margin-bottom:16px">
-      <label style="margin-bottom:6px">Change Status</label>
-      <select class="ss" style="width:100%;padding:10px" onchange="updateStatus('${r.id}',this.value)">
-        <option value="pending"  ${r.status==='pending' ?'selected':''}>⏳ Pending</option>
-        <option value="review"   ${r.status==='review'  ?'selected':''}>🔍 In Review</option>
+function renderTable(id,list){
+  const el=document.getElementById(id);
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No releases found</div></div>';return;}
+  const bc={pending:'bp',review:'br',approved:'ba',live:'bl',rejected:'bx'};
+  el.innerHTML=`<table><thead><tr><th>Title</th><th>Artist</th><th>Type</th><th>Genre</th><th>Date</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${list.map(r=>`<tr>
+      <td style="font-weight:500">${r.title||'—'}</td>
+      <td style="color:var(--txt2)">${r.artistName||r.primaryArtist||'—'}</td>
+      <td><span style="font-size:11px;color:var(--txt3)">${r.type||'—'}</span></td>
+      <td style="color:var(--txt3);font-size:12px">${r.genre||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.releaseDate||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.submittedAt?r.submittedAt.substring(0,10):'—'}</td>
+      <td><select class="ss" onchange="updateStatus('${r.id}',this.value)">
+        <option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option>
+        <option value="review" ${r.status==='review'?'selected':''}>🔍 Review</option>
         <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
-        <option value="live"     ${r.status==='live'    ?'selected':''}>🟢 Live</option>
+        <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
+        <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
+      </select></td>
+      <td><button class="vb" onclick="openRelease('${r.id}')">View</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderArtists(){
+  const el=document.getElementById('art-list');
+  document.getElementById('art-count').textContent=artists.length+' artist'+(artists.length!==1?'s':'');
+  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th></tr></thead><tbody>
+    ${artists.map(a=>{
+      const rc=releases.filter(r=>r.userId===a.id).length;
+      return `<tr>
+        <td style="font-weight:500">${a.name||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td>
+        <td style="color:var(--txt3);font-size:12px">${a.genre||'—'}</td>
+        <td style="font-size:12px">${a.country||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td>
+        <td style="font-size:12px;color:var(--txt2)">${a.instagram||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:600">${rc}</td>
+      </tr>`;}).join('')}
+  </tbody></table>`;
+}
+
+function renderOvTickets(){
+  const open=tickets.filter(t=>t.status==='open');
+  const el=document.getElementById('ov-tickets');
+  if(!open.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No open tickets</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${open.map(t=>`<tr>
+      <td style="font-weight:500">${t.artistName||'—'}</td>
+      <td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td>
+      <td>${t.subject||'—'}</td>
+      <td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td>
+      <td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderTickets(id,list){
+  const el=document.getElementById(id);
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">No tickets found</div></div>';return;}
+  const bc={open:'bp',pending:'br',resolved:'ba',closed:'bx'};
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${list.map(t=>`<tr class="tkt-row">
+      <td style="font-weight:500">${t.artistName||'—'}</td>
+      <td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td>
+      <td>${t.subject||'—'}</td>
+      <td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td>
+      <td><span class="badge ${bc[t.status]||'bp'}">${t.status||'Open'}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td>
+      <td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function updateStatus(id,status){
+  try{
+    await db.collection('releases').doc(id).update({status});
+    const r=releases.find(x=>x.id===id);
+    if(r)r.status=status;
+    renderStats();
+    toast('Status → '+status+' ✓');
+  }catch(e){toast('Error: '+e.message);}
+}
+
+function openRelease(id){
+  const r=releases.find(x=>x.id===id);
+  if(!r)return;
+  document.getElementById('rmo-title').textContent=r.title||'Release';
+  const rows=[['Artist',r.artistName||r.primaryArtist],['Featured',r.featuredArtists||'—'],['Type',r.type],['Genre',r.genre],['Sub Genre',r.subGenre||'—'],['Language',r.language],['Release Date',r.releaseDate],['Explicit',r.explicit==='yes'?'⚠ Yes':'No'],['Label',r.label],['Copyright Year',r.copyrightYear],['Songwriters',r.writers],['Producers',r.producers||'—'],['Platforms',r.platforms],['Territories',r.territories],['UPC/ISRC',r.upc||'To be assigned'],['Notes',r.notes||'—'],['Submitted',r.submittedAt?r.submittedAt.substring(0,10):'—']];
+  if(r.audioLink)rows.push(['Audio File',`<a href="${r.audioLink}" target="_blank">▶ Open Audio File</a>`]);
+  if(r.artworkLink)rows.push(['Artwork',`<a href="${r.artworkLink}" target="_blank">🖼 Open Artwork</a>`]);
+  if(r.lyrics)rows.push(['Lyrics',`<div style="white-space:pre-wrap;font-size:12px;color:var(--txt2);max-height:100px;overflow-y:auto;background:var(--card);padding:10px;border-radius:6px;margin-top:4px">${r.lyrics}</div>`]);
+  document.getElementById('rmo-body').innerHTML=`
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Change Status</label>
+      <select class="ss" style="width:100%;padding:10px;font-size:13px" onchange="updateStatus('${r.id}',this.value)">
+        <option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option>
+        <option value="review" ${r.status==='review'?'selected':''}>🔍 In Review</option>
+        <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
+        <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
         <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
       </select>
     </div>
-    ${rows.map(([k,v])=>`
-      <div class="dr">
-        <div class="dk">${k}</div>
-        <div class="dv">${v||'—'}</div>
-      </div>`).join('')}`;
-
-  document.getElementById('mo').classList.add('on');
+    ${rows.map(([k,v])=>`<div class="dr"><div class="dk">${k}</div><div class="dv">${v||'—'}</div></div>`).join('')}`;
+  document.getElementById('rmo').classList.add('on');
 }
 
-function closeMo(e) { if(e.target===document.getElementById('mo')) closeMoDirect(); }
-function closeMoDirect() { document.getElementById('mo').classList.remove('on'); }
-
-// FILTER
-function setStatus(s, btn) {
-  curFilter = s;
-  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  applyFilter();
+function openTicket(id){
+  const t=tickets.find(x=>x.id===id);
+  if(!t)return;
+  document.getElementById('tmo-title').textContent='Ticket: '+t.subject;
+  document.getElementById('tmo-body').innerHTML=`
+    <div class="dr"><div class="dk">Artist</div><div class="dv">${t.artistName||'—'}</div></div>
+    <div class="dr"><div class="dk">Email</div><div class="dv">${t.artistEmail||'—'}</div></div>
+    <div class="dr"><div class="dk">Category</div><div class="dv">${t.category||'—'}</div></div>
+    <div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></div></div>
+    <div class="dr"><div class="dk">Status</div><div class="dv">
+      <select class="ss" onchange="updateTicketStatus('${t.id}',this.value)">
+        <option value="open" ${t.status==='open'?'selected':''}>Open</option>
+        <option value="pending" ${t.status==='pending'?'selected':''}>Pending</option>
+        <option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option>
+        <option value="closed" ${t.status==='closed'?'selected':''}>Closed</option>
+      </select>
+    </div></div>
+    <div class="dr"><div class="dk">Submitted</div><div class="dv">${t.createdAt?t.createdAt.substring(0,10):'—'}</div></div>
+    <div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--card);padding:12px;border-radius:8px;margin-top:4px">${t.message||'—'}</div></div>
+    ${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${t.reply}</div></div>`:''}
+    <div class="reply-box">
+      <label>Reply to Artist</label>
+      <textarea id="reply-txt" placeholder="Type your response here... The artist will see this in their dashboard.">${t.reply||''}</textarea>
+      <div class="reply-actions">
+        <button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button>
+        <button class="btn-close-tkt" onclick="updateTicketStatus('${t.id}','closed');closeMoDirect('tmo')">Close Ticket</button>
+      </div>
+    </div>`;
+  document.getElementById('tmo').classList.add('on');
 }
 
-function applyFilter() {
-  const q = (document.querySelector('.si')?.value||'').toLowerCase();
-  let list = releases;
-  if (curFilter !== 'all') list = list.filter(r=>r.status===curFilter);
-  if (q) list = list.filter(r=>
-    (r.title||'').toLowerCase().includes(q)||
-    (r.artistName||'').toLowerCase().includes(q)||
-    (r.primaryArtist||'').toLowerCase().includes(q)
-  );
-  renderTable('all-list', list);
+async function sendReply(id){
+  const reply=document.getElementById('reply-txt').value.trim();
+  if(!reply){toast('Please type a reply first.');return;}
+  const btn=document.getElementById('btn-reply');
+  btn.disabled=true;btn.textContent='Sending...';
+  try{
+    await db.collection('tickets').doc(id).update({reply,status:'resolved',repliedAt:new Date().toISOString()});
+    const t=tickets.find(x=>x.id===id);
+    if(t){t.reply=reply;t.status='resolved';}
+    toast('Reply sent ✓');
+    closeMoDirect('tmo');
+    await loadTickets();
+  }catch(e){toast('Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Send Reply';
 }
 
-// NAV
-function goPage(name, el) {
+async function updateTicketStatus(id,status){
+  try{
+    await db.collection('tickets').doc(id).update({status});
+    const t=tickets.find(x=>x.id===id);
+    if(t)t.status=status;
+    toast('Ticket status → '+status);
+    await loadTickets();
+  }catch(e){toast('Error: '+e.message);}
+}
+
+function setSt(s,btn){curFilter=s;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyFilter();}
+function applyFilter(){
+  const q=(document.querySelector('.si')?.value||'').toLowerCase();
+  let list=releases;
+  if(curFilter!=='all')list=list.filter(r=>r.status===curFilter);
+  if(q)list=list.filter(r=>(r.title||'').toLowerCase().includes(q)||(r.artistName||'').toLowerCase().includes(q));
+  renderTable('all-list',list);
+}
+
+function setTktFilter(s,btn){curTktFilter=s;document.querySelectorAll('#page-tickets .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');let list=tickets;if(s!=='all')list=list.filter(t=>t.status===s);renderTickets('tkt-list',list);}
+
+function goPage(name,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  document.getElementById('page-'+name).classList.add('on');
-  if(el) el.classList.add('on');
-  const m={overview:['Overview','Label summary.'],all:['All Submissions','Every release submitted to TIR.'],pending:['Pending Review','Releases waiting for your action.'],live:['Live Releases','Currently distributed.'],artists:['All Artists','Registered artist accounts.']};
+  document.getElementById('page-'+name)?.classList.add('on');
+  if(el)el.classList.add('on');
+  const m={overview:['Overview','Label summary.'],all:['All Submissions','Every release.'],pending:['Pending Review','Awaiting action.'],live:['Live Releases','On platforms now.'],artists:['All Artists','Registered accounts.'],tickets:['Support Tickets','Artist support requests.']};
   const [t,s]=m[name]||['Admin',''];
   document.getElementById('pgt').textContent=t;
   document.getElementById('pgs').textContent=s;
 }
 
-// TOAST
-function toast(m) {
-  const t=document.getElementById('toast');
-  t.textContent=m; t.classList.add('on');
-  setTimeout(()=>t.classList.remove('on'),3000);
-}
+function closeMo(id,e){if(e.target===document.getElementById(id))closeMoDirect(id);}
+function closeMoDirect(id){document.getElementById(id).classList.remove('on');}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
 </script>
 </body>
 </html>
