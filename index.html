@@ -30,12 +30,13 @@ const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
   --grn:#22c55e;--red:#ef4444;--blu:#3b82f6;--org:#f97316;
   --r:10px;
 }
-body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes slideRight{from{transform:translateX(-100%)}to{transform:translateX(0)}}
 
 #ld{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px}
 .ld-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:7px;color:var(--gold);animation:pulse 1.5s ease infinite}
@@ -61,6 +62,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-he
 #panel{display:none}
 .layout{display:flex;min-height:100vh}
 
+/* DESKTOP SIDEBAR */
 .sb{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .sb-top{padding:20px 16px 16px;border-bottom:1px solid var(--brd)}
 .sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold);text-shadow:0 0 15px rgba(201,168,76,.3)}
@@ -80,6 +82,33 @@ nav{flex:1;padding:8px}
 .so-btn{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt3);cursor:pointer;font-size:13px;width:100%;background:none;border:none;transition:all .15s}
 .so-btn:hover{background:rgba(239,68,68,.1);color:var(--red)}
 
+/* MOBILE OVERLAY */
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;backdrop-filter:blur(2px)}
+.mob-overlay.on{display:block;animation:fadeIn .2s ease}
+
+/* MOBILE DRAWER */
+.mob-drawer{display:none;position:fixed;left:0;top:0;bottom:0;width:270px;background:var(--surface);border-right:1px solid var(--brd);z-index:1001;flex-direction:column;overflow-y:auto;transform:translateX(-100%);transition:transform .3s ease}
+.mob-drawer.on{transform:translateX(0)}
+
+/* MOBILE TOPBAR */
+.mob-topbar{display:none;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:100}
+.mob-topbar-brand{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:4px;color:var(--gold)}
+.mob-menu-btn{background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.mob-menu-btn:hover{border-color:var(--gold);color:var(--gold)}
+.mob-ref-btn{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:600;padding:7px 11px;cursor:pointer;transition:all .2s}
+.mob-ref-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* MOBILE BOTTOM NAV */
+.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--brd);z-index:200;padding:0 2px;padding-bottom:env(safe-area-inset-bottom)}
+.mob-nav-items{display:flex;justify-content:space-around;align-items:stretch}
+.mob-ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 5px;cursor:pointer;color:var(--txt3);transition:color .2s;position:relative;gap:3px;min-width:0}
+.mob-ni.on{color:var(--gold)}
+.mob-ni svg{width:19px;height:19px;flex-shrink:0}
+.mob-ni-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.mob-ni .m-cnt{position:absolute;top:5px;right:50%;transform:translateX(10px);background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:8px;animation:pulse 2s ease infinite}
+.mob-ni.on::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+
+/* MAIN */
 .main{flex:1;overflow-y:auto}
 .topbar{padding:15px 26px;border-bottom:1px solid var(--brd);background:var(--surface);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px)}
 .topbar h1{font-size:17px;font-weight:700}
@@ -102,7 +131,7 @@ nav{flex:1;padding:8px}
 
 .section{background:var(--surface);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:18px;overflow:hidden;transition:border-color .2s}
 .section:hover{border-color:rgba(255,255,255,.07)}
-.sh{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.sh{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .sh h3{font-size:14px;font-weight:700}
 .sh p{font-size:12px;color:var(--txt3)}
 .sb2{padding:18px}
@@ -113,8 +142,8 @@ nav{flex:1;padding:8px}
 .si{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;width:220px;transition:border-color .2s}
 .si:focus{border-color:var(--gold)}
 
-.tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:600px}
 th{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--brd);white-space:nowrap}
 td{padding:12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
 tr:hover td{background:rgba(255,255,255,.01)}
@@ -138,7 +167,7 @@ tr:last-child td{border-bottom:none}
 .db:hover{background:rgba(239,68,68,.2)}
 
 /* MODAL */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 20px}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:2000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 20px}
 .mo.on{display:flex;animation:fadeIn .3s ease}
 .mbox{background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:640px;max-width:95vw;box-shadow:0 32px 100px rgba(0,0,0,.6);animation:fadeUp .35s ease}
 .mh{padding:18px 22px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
@@ -148,7 +177,7 @@ tr:last-child td{border-bottom:none}
 .mb{padding:22px}
 .dr{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
 .dr:last-child{border-bottom:none}
-.dk{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;min-width:120px;padding-top:1px}
+.dk{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;min-width:110px;padding-top:1px;flex-shrink:0}
 .dv{color:var(--txt);flex:1;word-break:break-all;line-height:1.5}
 .dv a{color:var(--gold);text-decoration:none}
 .dv a:hover{text-decoration:underline}
@@ -161,15 +190,13 @@ tr:last-child td{border-bottom:none}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
 .fg select option{background:#1a1a1e}
 .fg textarea{resize:vertical;min-height:80px}
-.platform-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.platform-row .fg{margin:0}
 
 /* REPLY BOX */
 .reply-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:14px}
 .reply-box label{display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 .reply-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:100px;transition:border-color .2s}
 .reply-box textarea:focus{border-color:var(--gold)}
-.reply-acts{display:flex;gap:10px;margin-top:10px}
+.reply-acts{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
 .btn-reply{padding:9px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
 .btn-reply:hover{background:var(--gold2)}
 .btn-reply:disabled{background:#4a3d1c;color:#666;cursor:not-allowed}
@@ -186,11 +213,10 @@ tr:last-child td{border-bottom:none}
 .blog-form input:focus,.blog-form select:focus,.blog-form textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
 .blog-form textarea{resize:vertical;min-height:200px}
 
-/* BLOG CARD ADMIN */
 .blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
 .blog-admin-card:last-child{border-bottom:none}
-.blog-admin-info{flex:1}
-.blog-admin-title{font-size:14px;font-weight:600}
+.blog-admin-info{flex:1;min-width:0}
+.blog-admin-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .blog-admin-meta{font-size:12px;color:var(--txt3);margin-top:2px}
 
 .empty{text-align:center;padding:40px;color:var(--txt3)}
@@ -208,6 +234,66 @@ tr:last-child td{border-bottom:none}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px}
+
+/* =====================
+   MOBILE RESPONSIVE
+   ===================== */
+@media(max-width:768px){
+  /* Hide desktop sidebar & topbar */
+  .sb{display:none}
+  .topbar{display:none}
+
+  /* Show mobile UI */
+  .mob-topbar{display:flex}
+  .mob-bottom-nav{display:block}
+  .mob-drawer{display:flex}
+
+  /* Content area padding for bottom nav */
+  .content{padding:14px 12px 90px}
+
+  /* Stats: 2x2 + 1 on mobile */
+  .stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .sc{padding:12px}
+  .sc-v{font-size:22px}
+
+  /* Royalty form: single column */
+  .roy-form{grid-template-columns:1fr}
+  .rf-full{grid-column:1}
+
+  /* Blog form textarea shorter on mobile */
+  .blog-form textarea{min-height:140px}
+
+  /* Filter rows: scroll horizontally */
+  .frow{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .frow::-webkit-scrollbar{height:2px}
+  .si{width:100%;min-width:160px}
+
+  /* Section headers */
+  .sh{padding:12px 14px}
+  .sb2{padding:14px}
+
+  /* Buttons full width in forms */
+  .btn-main[style*="width:auto"]{width:100%!important}
+
+  /* Toast offset for bottom nav */
+  .toast{bottom:72px;right:12px;left:12px;text-align:center}
+
+  /* Modal padding */
+  .mo{padding:16px 10px}
+  .mb{padding:16px}
+  .mh{padding:14px 16px}
+
+  /* Detail rows stack on very small screens */
+  .dr{gap:8px}
+  .dk{min-width:80px;font-size:10px}
+}
+
+@media(max-width:400px){
+  .mob-ni-label{display:none}
+  .mob-ni{padding:10px 2px}
+  .stats{grid-template-columns:1fr 1fr}
+  .sc-v{font-size:18px}
+}
 </style>
 </head>
 <body>
@@ -232,6 +318,8 @@ tr:last-child td{border-bottom:none}
 <!-- PANEL -->
 <div id="panel">
   <div class="layout">
+
+    <!-- DESKTOP SIDEBAR -->
     <div class="sb">
       <div class="sb-top"><div class="sb-brand">T·I·R</div><div class="sb-sub">Admin Panel</div></div>
       <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
@@ -271,9 +359,19 @@ tr:last-child td{border-bottom:none}
     </div>
 
     <div class="main">
+      <!-- DESKTOP TOPBAR -->
       <div class="topbar">
         <div><h1 id="pgt">Overview</h1><p id="pgs">The Imaginary Records</p></div>
         <button class="btn-ref" onclick="loadAll()">↻ Refresh</button>
+      </div>
+
+      <!-- MOBILE TOPBAR -->
+      <div class="mob-topbar">
+        <button class="mob-menu-btn" onclick="openDrawer()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="mob-topbar-brand">T·I·R Admin</div>
+        <button class="mob-ref-btn" onclick="loadAll()">↻</button>
       </div>
 
       <div class="content">
@@ -351,8 +449,8 @@ tr:last-child td{border-bottom:none}
                   </select>
                 </div>
                 <div class="fg"><label>Total Amount (₹) *</label><input type="number" id="r-total" placeholder="e.g. 1250.00" step="0.01"/></div>
-                <div class="fg"><label>Release Title (for per-release)</label><input type="text" id="r-release-title" placeholder="Song name (optional)"/></div>
-                <div class="fg rf-full"><label>Earnings by Platform (₹ each — leave blank if zero)</label></div>
+                <div class="fg"><label>Release Title (optional)</label><input type="text" id="r-release-title" placeholder="Song name (optional)"/></div>
+                <div class="fg rf-full"><label>Earnings by Platform (₹ each)</label></div>
                 <div class="fg"><label>Spotify</label><input type="number" id="p-spotify" placeholder="0.00" step="0.01"/></div>
                 <div class="fg"><label>Apple Music</label><input type="number" id="p-apple" placeholder="0.00" step="0.01"/></div>
                 <div class="fg"><label>Amazon Music</label><input type="number" id="p-amazon" placeholder="0.00" step="0.01"/></div>
@@ -365,12 +463,11 @@ tr:last-child td{border-bottom:none}
                 <div class="fg"><label>Mark as Current Quarter?</label><select id="r-current"><option value="true">Yes — Show on artist dashboard</option><option value="false">No — Historical record</option></select></div>
                 <div class="fg"><label>Mark as Payout?</label><select id="r-payout"><option value="false">No — Just a statement</option><option value="true">Yes — Payout made</option></select></div>
                 <div class="fg rf-full">
-                  <button class="btn-main" id="r-btn" style="width:auto;padding:12px 40px" onclick="saveRoyalty()">Save Royalty Statement</button>
+                  <button class="btn-main" id="r-btn" onclick="saveRoyalty()">Save Royalty Statement</button>
                 </div>
               </div>
             </div>
           </div>
-
           <div class="section">
             <div class="sh"><h3>Royalty History</h3><p>All statements sent</p></div>
             <div class="tw" id="roy-history-list"><div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No royalty statements yet</div></div></div>
@@ -403,15 +500,14 @@ tr:last-child td{border-bottom:none}
                 </div>
                 <div>
                   <label>Content *</label>
-                  <textarea id="b-content" placeholder="Write your blog post here... You can use multiple paragraphs."></textarea>
+                  <textarea id="b-content" placeholder="Write your blog post here..."></textarea>
                 </div>
                 <div>
-                  <button class="btn-main" id="b-btn" style="width:auto;padding:12px 40px" onclick="saveBlog()">Publish Post</button>
+                  <button class="btn-main" id="b-btn" onclick="saveBlog()">Publish Post</button>
                 </div>
               </div>
             </div>
           </div>
-
           <div class="section">
             <div class="sh"><h3>Published Posts</h3><p id="blog-count">0 posts</p></div>
             <div class="sb2" id="blog-list"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div></div></div>
@@ -440,10 +536,86 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
 
+      </div><!-- /content -->
+    </div><!-- /main -->
+  </div><!-- /layout -->
+
+  <!-- MOBILE OVERLAY -->
+  <div class="mob-overlay" id="mob-overlay" onclick="closeDrawer()"></div>
+
+  <!-- MOBILE DRAWER -->
+  <div class="mob-drawer" id="mob-drawer">
+    <div class="sb-top" style="display:flex;align-items:center;justify-content:space-between">
+      <div><div class="sb-brand">T·I·R</div><div class="sb-sub">Admin Panel</div></div>
+      <button class="mob-menu-btn" onclick="closeDrawer()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
+    <nav>
+      <div class="ns">Dashboard</div>
+      <div class="ni on" onclick="goPage('overview',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview
+      </div>
+      <div class="ns">Releases</div>
+      <div class="ni" onclick="goPage('all',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions
+      </div>
+      <div class="ni" onclick="goPage('pending',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pending <span class="cnt" id="pend-cnt-m" style="display:none">0</span>
+      </div>
+      <div class="ni" onclick="goPage('live',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>Live
+      </div>
+      <div class="ns">Finance</div>
+      <div class="ni" onclick="goPage('royalties',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Manage Royalties
+      </div>
+      <div class="ns">Content</div>
+      <div class="ni" onclick="goPage('blog',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Music Blog
+      </div>
+      <div class="ns">People</div>
+      <div class="ni" onclick="goPage('artists',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>All Artists
+      </div>
+      <div class="ns">Support</div>
+      <div class="ni" onclick="goPage('tickets',this);closeDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tickets <span class="cnt" id="tkt-cnt-m" style="display:none">0</span>
+      </div>
+    </nav>
+    <div class="sb-bot"><button class="so-btn" onclick="doSignOut()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button></div>
+  </div>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mob-bottom-nav">
+    <div class="mob-nav-items">
+      <div class="mob-ni on" id="mni-overview" onclick="goPage('overview',null);setMobNav('overview')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="mob-ni-label">Overview</span>
+      </div>
+      <div class="mob-ni" id="mni-pending" onclick="goPage('pending',null);setMobNav('pending')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        <span class="mob-ni-label">Pending</span>
+        <span class="m-cnt" id="mni-pend-cnt" style="display:none">0</span>
+      </div>
+      <div class="mob-ni" id="mni-tickets" onclick="goPage('tickets',null);setMobNav('tickets')" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="mob-ni-label">Tickets</span>
+        <span class="m-cnt" id="mni-tkt-cnt" style="display:none">0</span>
+      </div>
+      <div class="mob-ni" id="mni-royalties" onclick="goPage('royalties',null);setMobNav('royalties')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="mob-ni-label">Royalties</span>
+      </div>
+      <div class="mob-ni" id="mni-more" onclick="openDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
+        <span class="mob-ni-label">More</span>
       </div>
     </div>
   </div>
-</div>
+
+</div><!-- /panel -->
 
 <!-- RELEASE MODAL -->
 <div class="mo" id="rmo" onclick="closeMo('rmo',event)">
@@ -466,6 +638,23 @@ tr:last-child td{border-bottom:none}
 <script>
 let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[];
 let curFilter='all',curTF='all';
+
+// MOBILE DRAWER
+function openDrawer(){
+  document.getElementById('mob-drawer').classList.add('on');
+  document.getElementById('mob-overlay').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  document.getElementById('mob-drawer').classList.remove('on');
+  document.getElementById('mob-overlay').classList.remove('on');
+  document.body.style.overflow='';
+}
+function setMobNav(name){
+  document.querySelectorAll('.mob-ni').forEach(n=>n.classList.remove('on'));
+  const el=document.getElementById('mni-'+name);
+  if(el)el.classList.add('on');
+}
 
 auth.onAuthStateChanged(function(user){
   document.getElementById('ld').style.display='none';
@@ -521,7 +710,15 @@ async function loadReleases(){
     renderTable('live-list',releases.filter(r=>r.status==='live'));
     const pc=releases.filter(r=>r.status==='pending').length;
     const pcEl=document.getElementById('pend-cnt');
-    if(pc>0){pcEl.textContent=pc;pcEl.style.display='inline';}else{pcEl.style.display='none';}
+    const pcElM=document.getElementById('pend-cnt-m');
+    const pcElMni=document.getElementById('mni-pend-cnt');
+    if(pc>0){
+      pcEl.textContent=pc;pcEl.style.display='inline';
+      pcElM.textContent=pc;pcElM.style.display='inline';
+      pcElMni.textContent=pc;pcElMni.style.display='inline';
+    }else{
+      pcEl.style.display='none';pcElM.style.display='none';pcElMni.style.display='none';
+    }
   }catch(e){console.error('Releases:',e);}
 }
 
@@ -532,7 +729,6 @@ async function loadArtists(){
     snap.forEach(d=>artists.push({id:d.id,...d.data()}));
     renderArtists();
     renderStats();
-    // Populate artist dropdown for royalties
     const sel=document.getElementById('r-artist');
     sel.innerHTML='<option value="">— Select Artist —</option>';
     artists.forEach(a=>{
@@ -555,7 +751,15 @@ async function loadTickets(){
     renderStats();
     const oc=tickets.filter(t=>t.status==='open').length;
     const tcEl=document.getElementById('tkt-cnt');
-    if(oc>0){tcEl.textContent=oc;tcEl.style.display='inline';}else{tcEl.style.display='none';}
+    const tcElM=document.getElementById('tkt-cnt-m');
+    const tcElMni=document.getElementById('mni-tkt-cnt');
+    if(oc>0){
+      tcEl.textContent=oc;tcEl.style.display='inline';
+      tcElM.textContent=oc;tcElM.style.display='inline';
+      tcElMni.textContent=oc;tcElMni.style.display='inline';
+    }else{
+      tcEl.style.display='none';tcElM.style.display='none';tcElMni.style.display='none';
+    }
   }catch(e){console.error('Tickets:',e);}
 }
 
@@ -693,7 +897,6 @@ function renderBlogList(){
     </div>`).join('');
 }
 
-// ROYALTY SAVE
 async function saveRoyalty(){
   const artistId=document.getElementById('r-artist').value;
   const period=document.getElementById('r-period').value;
@@ -716,23 +919,10 @@ async function saveRoyalty(){
   if(gv('p-gaana'))platforms['Gaana']=gv('p-gaana');
   if(gv('p-tidal'))platforms['Tidal']=gv('p-tidal');
   if(gv('p-other'))platforms['Other']=gv('p-other');
-  const data={
-    userId:artistId,
-    artistName:artist?.name||artist?.email||artistId,
-    period,
-    totalAmount:Number(total),
-    releaseTitle:document.getElementById('r-release-title').value.trim()||'',
-    platforms,
-    notes:document.getElementById('r-notes').value.trim(),
-    isCurrent:document.getElementById('r-current').value==='true',
-    type:document.getElementById('r-payout').value==='true'?'payout':'statement',
-    amount:Number(total),
-    createdAt:new Date().toISOString()
-  };
+  const data={userId:artistId,artistName:artist?.name||artist?.email||artistId,period,totalAmount:Number(total),releaseTitle:document.getElementById('r-release-title').value.trim()||'',platforms,notes:document.getElementById('r-notes').value.trim(),isCurrent:document.getElementById('r-current').value==='true',type:document.getElementById('r-payout').value==='true'?'payout':'statement',amount:Number(total),createdAt:new Date().toISOString()};
   try{
     await db.collection('royalties').add(data);
     showOk2('roy-s','✓ Royalty statement saved! Artist can now see it in their dashboard.');
-    // Clear form
     ['r-total','r-release-title','r-notes','p-spotify','p-apple','p-amazon','p-youtube','p-jio','p-gaana','p-tidal','p-other'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('r-artist').value='';
     document.getElementById('r-period').value='';
@@ -748,7 +938,6 @@ async function deleteRoyalty(id){
   catch(e){toast('Error: '+e.message);}
 }
 
-// BLOG
 async function saveBlog(){
   const title=document.getElementById('b-title').value.trim();
   const cat=document.getElementById('b-cat').value;
@@ -776,7 +965,6 @@ async function deleteBlog(id){
   catch(e){toast('Error: '+e.message);}
 }
 
-// STATUS UPDATE
 async function updateStatus(id,status){
   try{
     await db.collection('releases').doc(id).update({status});
@@ -787,7 +975,6 @@ async function updateStatus(id,status){
   }catch(e){toast('Error: '+e.message);}
 }
 
-// MODALS
 function openRelease(id){
   const r=releases.find(x=>x.id===id);
   if(!r)return;
@@ -833,7 +1020,7 @@ function openTicket(id){
     ${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${t.reply}</div></div>`:''}
     <div class="reply-box">
       <label>Reply to Artist</label>
-      <textarea id="reply-txt" placeholder="Type your response... The artist will see this in their Tickets page.">${t.reply||''}</textarea>
+      <textarea id="reply-txt" placeholder="Type your response...">${t.reply||''}</textarea>
       <div class="reply-acts">
         <button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button>
         <button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMoDirect('tmo')">Close Ticket</button>
@@ -868,7 +1055,6 @@ async function updateTicketStatus(id,status){
   }catch(e){toast('Error: '+e.message);}
 }
 
-// FILTERS
 function setSt(s,btn){curFilter=s;document.querySelectorAll('#page-all .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyFilter();}
 function applyFilter(){
   const q=(document.querySelector('.si')?.value||'').toLowerCase();
@@ -879,7 +1065,6 @@ function applyFilter(){
 }
 function setTF(s,btn){curTF=s;document.querySelectorAll('#page-tickets .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');let list=tickets;if(s!=='all')list=list.filter(t=>t.status===s);renderTickets(list);}
 
-// NAV
 function goPage(name,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
@@ -891,11 +1076,11 @@ function goPage(name,el){
   document.getElementById('pgs').textContent=s;
   if(name==='blog')loadBlogPosts();
   if(name==='royalties'){loadRoyaltyHistory();loadArtists();}
+  window.scrollTo(0,0);
 }
 
 function closeMo(id,e){if(e.target===document.getElementById(id))closeMoDirect(id);}
 function closeMoDirect(id){document.getElementById(id)?.classList.remove('on');}
-
 function showErr2(id,m){const e=document.getElementById(id);e.textContent=m;e.classList.add('on');}
 function showOk2(id,m){const e=document.getElementById(id);e.textContent=m;e.classList.add('on');}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
