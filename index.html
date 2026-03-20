@@ -1,223 +1,948 @@
 <!DOCTYPE html>
-<!-- 
-  TIR COMBINED ADMIN - ADDITIONS ONLY
-  Add these to your existing combined admin HTML
-  (admin-access-two.vercel.app / Document 4)
-  
-  Step 1: Add CSS before </style>
-  Step 2: Add Portal Settings nav item (shown below)
-  Step 3: Add Portal Settings page HTML  
-  Step 4: Add JS injection before </body>
--->
-
-<!-- STEP 1: ADD THIS CSS before closing </style> tag -->
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TIR Unified Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
+  authDomain:"tir-portal.firebaseapp.com",
+  projectId:"tir-portal",
+  storageBucket:"tir-portal.firebasestorage.app",
+  messagingSenderId:"941411383328",
+  appId:"1:941411383328:web:4b7b0aa63e2c7e44d82a445"
+});
+const auth=firebase.auth();
+const db=firebase.firestore();
+const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
+</script>
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08080a;--surface:#0f0f12;--card:#16161a;--brd:#222228;
+  --gold:#c9a84c;--gold2:#e8c97a;--gold3:rgba(201,168,76,.1);
+  --txt:#f4f4f5;--txt2:#a1a1aa;--txt3:#52525b;
+  --grn:#22c55e;--red:#ef4444;--blu:#3b82f6;--org:#f97316;
+  --demo:#e8000d;--demo-bg:rgba(232,0,13,.08);--demo-brd:rgba(232,0,13,.2);
+}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
 
-/* ─── TIR Admin v2 Additions ─── */
-.portal-setting-group{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-bottom:14px}
-.announce-item{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.announce-item input{flex:1;background:var(--bg);border:1px solid var(--brd);border-radius:6px;color:var(--txt);padding:8px 12px;font-size:13px;outline:none;transition:border-color .2s}
-.announce-item input:focus{border-color:var(--gold)}
-.btn-add-row{background:var(--gold3);border:1px solid rgba(201,168,76,.3);border-radius:6px;color:var(--gold);padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s}
-.btn-add-row:hover{background:rgba(201,168,76,.2)}
-.btn-rm-row{background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt3);width:28px;height:28px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;transition:all .2s}
-.btn-rm-row:hover{border-color:var(--red);color:var(--red)}
-.isrc-assign-box{background:var(--card);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:14px;margin-top:14px;border-left:3px solid var(--gold)}
-.art-thumb-sm{width:44px;height:44px;border-radius:6px;background:var(--card);border:1px solid var(--brd);overflow:hidden;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:8px;flex-shrink:0}
-.art-thumb-sm img{width:100%;height:100%;object-fit:cover}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
+/* ── LOADING ── */
+#ld{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px}
+.ld-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:7px;color:var(--gold);animation:pulse 1.5s ease infinite}
+.ld-bar{width:120px;height:2px;background:var(--brd);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:200% 100%;animation:shimmer 1.2s ease infinite}
+
+/* ── AUTH ── */
+#auth{min-height:100vh;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse 50% 40% at 50% 0%,rgba(201,168,76,.06) 0%,transparent 70%)}
+.abox{width:400px;max-width:95vw;background:var(--surface);border:1px solid var(--brd);border-radius:16px;padding:44px 40px;box-shadow:0 32px 100px rgba(0,0,0,.6);animation:fadeUp .5s ease}
+.abox-top{text-align:center;margin-bottom:30px}
+.abox-brand{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:6px;color:var(--gold);text-shadow:0 0 20px rgba(201,168,76,.3)}
+.abox-sub{font-size:11px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.abox-tag{font-size:13px;color:var(--txt2);margin-top:10px}
+.iw{margin-bottom:14px}
+.iw label{display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.iw input{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
+.iw input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.btn-gold{width:100%;padding:13px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-gold:disabled{background:#4a3d1c;color:#666;cursor:not-allowed;transform:none}
+.err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#fca5a5;font-size:12px;padding:10px 12px;margin-bottom:14px;display:none}
+.err-box.on{display:block;animation:fadeIn .3s ease}
+
+/* ── PANEL LAYOUT ── */
+#panel{display:none}
+.layout{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sb{width:230px;min-width:230px;background:var(--surface);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-top{padding:20px 16px 14px;border-bottom:1px solid var(--brd)}
+.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold)}
+.sb-sub{font-size:10px;color:var(--txt3);letter-spacing:1px}
+.sb-admin{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--brd);background:rgba(201,168,76,.04)}
+.admin-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.5);animation:pulse 2s ease infinite}
+.admin-lbl{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+nav{flex:1;padding:8px}
+.ns{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:2px;padding:10px 10px 4px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px;position:relative}
+.ni:hover{background:var(--card);color:var(--txt)}
+.ni.on{background:var(--gold3);color:var(--gold);font-weight:600}
+.ni.on::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:0 2px 2px 0}
+/* Demo nav items */
+.ni.demo-ni:hover{background:var(--demo-bg);color:var(--txt)}
+.ni.demo-ni.on{background:var(--demo-bg);color:var(--demo);font-weight:600}
+.ni.demo-ni.on::before{background:var(--demo)}
+.ni svg{width:15px;height:15px;flex-shrink:0}
+.ni .cnt{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;animation:pulse 2s ease infinite}
+.ni .cnt-demo{margin-left:auto;background:var(--demo);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;animation:pulse 2s ease infinite}
+/* Demo section separator */
+.demo-sep{height:1px;background:var(--demo-brd);margin:6px 10px 2px}
+.ns-demo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:6px 10px 4px;color:var(--demo);opacity:.9}
+.sb-bot{padding:10px 8px;border-top:1px solid var(--brd)}
+.so-btn{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt3);cursor:pointer;font-size:13px;width:100%;background:none;border:none;transition:all .15s}
+.so-btn:hover{background:rgba(239,68,68,.1);color:var(--red)}
+
+/* ── MOBILE OVERLAY + DRAWER ── */
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;backdrop-filter:blur(2px)}
+.mob-overlay.on{display:block;animation:fadeIn .2s ease}
+.mob-drawer{display:none;position:fixed;left:0;top:0;bottom:0;width:270px;background:var(--surface);border-right:1px solid var(--brd);z-index:1001;flex-direction:column;overflow-y:auto;transform:translateX(-100%);transition:transform .3s ease}
+.mob-drawer.on{transform:translateX(0)}
+.mob-topbar{display:none;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:100}
+.mob-topbar-brand{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:4px;color:var(--gold)}
+.mob-menu-btn{background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.mob-menu-btn:hover{border-color:var(--gold);color:var(--gold)}
+.mob-ref-btn{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:600;padding:7px 11px;cursor:pointer}
+
+/* ── MOBILE BOTTOM NAV ── */
+.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--brd);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.mob-nav-items{display:flex;justify-content:space-around;align-items:stretch}
+.mob-ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 5px;cursor:pointer;color:var(--txt3);transition:color .2s;position:relative;gap:3px;min-width:0}
+.mob-ni.on{color:var(--gold)}
+.mob-ni.on-demo{color:var(--demo)}
+.mob-ni svg{width:19px;height:19px;flex-shrink:0}
+.mob-ni-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.mob-ni .m-cnt{position:absolute;top:5px;right:50%;transform:translateX(10px);background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:8px;animation:pulse 2s ease infinite}
+.mob-ni.on::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+.mob-ni.on-demo::after{background:var(--demo)}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto}
+.topbar{padding:15px 26px;border-bottom:1px solid var(--brd);background:var(--surface);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px)}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar p{font-size:12px;color:var(--txt3);margin-top:1px}
+.section-pill{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:1px}
+.pill-label{background:var(--gold3);color:var(--gold)}
+.pill-demo{background:var(--demo-bg);color:var(--demo)}
+.btn-ref{padding:8px 16px;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-ref:hover{border-color:var(--gold);color:var(--gold)}
+.content{padding:22px 26px}
+.pg{display:none}
+.pg.on{display:block;animation:fadeUp .4s ease}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.sc{background:var(--surface);border:1px solid var(--brd);border-radius:10px;padding:16px;position:relative;overflow:hidden;transition:all .2s;cursor:default}
+.sc:hover{border-color:rgba(201,168,76,.2);transform:translateY(-1px)}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s}
+.sc:hover::before{opacity:1}
+.sc.demo-sc:hover{border-color:var(--demo-brd)}
+.sc.demo-sc::before{background:linear-gradient(90deg,transparent,var(--demo),transparent)}
+.sc-l{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.sc-v{font-size:26px;font-weight:800;color:var(--txt)}
+.sc-v.g{color:var(--gold)}
+.sc-v.r{color:var(--demo)}
+.sc-v.gr{color:var(--grn)}
+
+/* ── SECTIONS ── */
+.section{background:var(--surface);border:1px solid var(--brd);border-radius:10px;margin-bottom:18px;overflow:hidden;transition:border-color .2s}
+.section:hover{border-color:rgba(255,255,255,.07)}
+.section.demo-section{border-color:var(--brd)}
+.section.demo-section .sh{border-left:3px solid var(--demo)}
+.sh{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.sh h3{font-size:14px;font-weight:700}
+.sh p{font-size:12px;color:var(--txt3)}
+.sb2{padding:18px}
+
+/* ── FILTER ROW ── */
+.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.fb{padding:5px 12px;background:none;border:1px solid var(--brd);border-radius:20px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:var(--gold3)}
+.fb.demo-fb:hover,.fb.demo-fb.on{border-color:var(--demo);color:var(--demo);background:var(--demo-bg)}
+.si{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;width:220px;transition:border-color .2s}
+.si:focus{border-color:var(--gold)}
+
+/* ── TABLES ── */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--brd);white-space:nowrap}
+td{padding:12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.01)}
+tr:last-child td{border-bottom:none}
+.demo-table tr:hover td{background:rgba(232,0,13,.02)}
+
+/* ── BADGES ── */
+.badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.bp{background:rgba(249,115,22,.12);color:#fb923c}
+.br{background:rgba(59,130,246,.12);color:#60a5fa}
+.ba{background:rgba(34,197,94,.12);color:#4ade80}
+.bl{background:rgba(201,168,76,.15);color:var(--gold)}
+.bx{background:rgba(239,68,68,.12);color:#f87171}
+.b-new{background:rgba(59,130,246,.12);color:#60a5fa}
+.b-reviewing{background:rgba(249,115,22,.12);color:#fb923c}
+.b-shortlisted{background:rgba(232,0,13,.12);color:var(--demo)}
+.b-signed{background:rgba(34,197,94,.12);color:#4ade80}
+.b-rejected{background:rgba(82,82,91,.2);color:#71717a}
+.b-archived{background:rgba(82,82,91,.1);color:#52525b}
+
+/* ── ACTION BUTTONS ── */
+.ss{background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 8px;cursor:pointer;outline:none;transition:border-color .2s}
+.ss:focus{border-color:var(--gold)}
+.ss.demo-ss:focus{border-color:var(--demo)}
+.ss option{background:#1a1a1e}
+.vb{padding:5px 12px;background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt2);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.vb:hover{border-color:var(--gold);color:var(--gold)}
+.vb.demo-vb:hover{border-color:var(--demo);color:var(--demo)}
+.rb{padding:5px 12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:#4ade80;font-size:12px;cursor:pointer;transition:all .15s}
+.rb:hover{background:rgba(34,197,94,.2)}
+.db{padding:5px 12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:#f87171;font-size:12px;cursor:pointer;transition:all .15s}
+.db:hover{background:rgba(239,68,68,.2)}
+.ref-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);background:var(--card);border:1px solid var(--brd);padding:2px 8px;border-radius:4px;letter-spacing:1px}
+
+/* ── MODALS ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:2000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 20px}
+.mo.on{display:flex;animation:fadeIn .3s ease}
+.mbox{background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:640px;max-width:95vw;box-shadow:0 32px 100px rgba(0,0,0,.6);animation:fadeUp .35s ease}
+.mbox.demo-mbox{border-top:3px solid var(--demo)}
+.mh{padding:18px 22px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.mt2{font-size:16px;font-weight:700}
+.mc{background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mc:hover{border-color:var(--red);color:var(--red)}
+.mb{padding:22px}
+.dr{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.dr:last-child{border-bottom:none}
+.dk{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;min-width:110px;padding-top:1px;flex-shrink:0}
+.dv{color:var(--txt);flex:1;word-break:break-all;line-height:1.5}
+.dv a{color:var(--gold);text-decoration:none}
+.dv a:hover{text-decoration:underline}
+
+/* ── DEMO DETAIL ── */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.demo-field{background:var(--card);border:1px solid var(--brd);border-radius:8px;padding:12px 14px}
+.demo-field.full{grid-column:1/-1}
+.df-label{font-size:10px;font-weight:700;color:var(--demo);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.df-val{font-size:13px;color:var(--txt);line-height:1.5;word-break:break-all}
+.df-val a{color:var(--demo);text-decoration:none}
+.df-val a:hover{text-decoration:underline}
+.df-val.bio{white-space:pre-wrap;color:var(--txt2);max-height:140px;overflow-y:auto;font-size:13px;line-height:1.7}
+
+/* ── FORMS ── */
+.roy-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.rf-full{grid-column:1/-1}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:all .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+.fg select option{background:#1a1a1e}
+.fg textarea{resize:vertical;min-height:80px}
+.reply-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:14px}
+.reply-box label{display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.reply-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:100px;transition:border-color .2s}
+.reply-box textarea:focus{border-color:var(--gold)}
+.reply-acts{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.btn-reply{padding:9px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-reply:hover{background:var(--gold2)}
+.btn-reply:disabled{background:#4a3d1c;color:#666;cursor:not-allowed}
+.btn-close-t{padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:13px;cursor:pointer;transition:all .2s}
+.btn-close-t:hover{border-color:var(--red);color:var(--red)}
+.existing-reply{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:12px 16px;margin-bottom:14px}
+.er-label{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.er-text{font-size:13px;color:var(--txt2);line-height:1.6}
+.update-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:16px;border-left:3px solid var(--demo)}
+.update-box label{display:block;font-size:11px;font-weight:700;color:var(--demo);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.update-box select,.update-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-size:13px;outline:none;cursor:pointer;transition:border-color .2s;font-family:'Inter',sans-serif;line-height:1.5}
+.update-box select{margin-bottom:10px}
+.update-box textarea{resize:vertical;min-height:80px}
+.update-box select:focus,.update-box textarea:focus{border-color:var(--demo)}
+.update-box select option{background:#1a1a1e}
+.update-acts{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.btn-save-demo{padding:9px 24px;background:var(--demo);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-save-demo:hover{background:#b50009}
+.btn-save-demo:disabled{background:#4a0004;color:#666;cursor:not-allowed}
+.btn-del-demo{padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt3);font-size:13px;cursor:pointer;transition:all .2s}
+.btn-del-demo:hover{border-color:var(--red);color:var(--red)}
+.blog-form{display:flex;flex-direction:column;gap:14px}
+.blog-form label{display:block;font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.blog-form input,.blog-form select,.blog-form textarea{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
+.blog-form input:focus,.blog-form select:focus,.blog-form textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+.blog-form textarea{resize:vertical;min-height:200px}
+.blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
+.blog-admin-card:last-child{border-bottom:none}
+.blog-admin-info{flex:1;min-width:0}
+.blog-admin-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blog-admin-meta{font-size:12px;color:var(--txt3);margin-top:2px}
+.empty{text-align:center;padding:40px;color:var(--txt3)}
+.empty-icon{font-size:32px;opacity:.25;margin-bottom:8px}
+.empty-text{font-size:14px;font-weight:600;color:var(--txt2)}
+.al{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none}
+.al.on{display:block;animation:fadeIn .3s ease}
+.al-e{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+.al-s{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86efac}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-size:13px;padding:12px 18px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(8px)}
+.toast.on{opacity:1;transform:translateY(0)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sb{display:none}
+  .topbar{display:none}
+  .mob-topbar{display:flex}
+  .mob-bottom-nav{display:block}
+  .mob-drawer{display:flex}
+  .content{padding:14px 12px 90px}
+  .stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .sc{padding:12px}
+  .sc-v{font-size:22px}
+  .roy-form{grid-template-columns:1fr}
+  .rf-full{grid-column:1}
+  .blog-form textarea{min-height:140px}
+  .frow{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .si{width:100%;min-width:160px}
+  .sh{padding:12px 14px}
+  .sb2{padding:14px}
+  .toast{bottom:72px;right:12px;left:12px;text-align:center}
+  .mo{padding:16px 10px}
+  .mb{padding:16px}
+  .mh{padding:14px 16px}
+  .dr{gap:8px}
+  .dk{min-width:80px;font-size:10px}
+  .demo-grid{grid-template-columns:1fr}
+  .demo-field.full{grid-column:1}
+}
+@media(max-width:400px){
+  .mob-ni-label{display:none}
+  .mob-ni{padding:10px 2px}
+}
 </style>
+</head>
+<body>
 
-<!-- STEP 2: ADD THIS NAV ITEM (after Support section, before sb-bottom div in sidebar) -->
-    <div class="ns">Artist Portal</div>
-    <div class="ni" onclick="goPage('portal-settings',this);loadPortalSettingsAdmin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>Portal Settings</div>
+<div id="ld"><div class="ld-logo">T · I · R</div><div class="ld-bar"><div class="ld-fill"></div></div></div>
 
-<!-- SAME NAV ITEM also in mobile drawer (after Support section) -->
-    <div class="ns">Artist Portal</div>
-    <div class="ni" onclick="goPage('portal-settings',this);loadPortalSettingsAdmin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>Portal Settings</div>
-
-<!-- STEP 3: ADD THIS PAGE (after page-demo-rejected div) -->
-
-<!-- PORTAL SETTINGS PAGE -->
-<div class="pg" id="page-portal-settings">
-  <div class="section" style="margin-bottom:18px">
-    <div class="sh"><h3>Artist Portal Settings</h3><p>Customize what artists see in their dashboard</p></div>
-    <div class="sb2">
-      <div class="al al-s" id="portal-ok"></div>
-      <div class="portal-setting-group">
-        <div style="font-size:12px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
-          Announcements
-          <button class="btn-add-row" onclick="addAnnouncement()">+ Add</button>
-        </div>
-        <div style="font-size:12px;color:var(--txt3);margin-bottom:12px;line-height:1.6">These appear as banners on the artist dashboard home page. HTML like <strong>&lt;strong&gt;</strong> is supported.</div>
-        <div id="announce-list"><div style="font-size:12px;color:var(--txt3)">Loading...</div></div>
-      </div>
-      <div class="portal-setting-group">
-        <div style="font-size:12px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Contact & Support</div>
-        <div class="fg" style="margin-bottom:12px">
-          <label style="display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Support Email (shown to artists)</label>
-          <input type="email" id="portal-support-email" value="support@theimaginaryrecords.in" style="width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-size:13px;outline:none"/>
-        </div>
-        <div class="fg">
-          <label style="display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Distribution Notice</label>
-          <input type="text" id="portal-dist-note" placeholder="e.g. We distribute to 200+ platforms" style="width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-size:13px;outline:none"/>
-        </div>
-      </div>
-      <div class="portal-setting-group">
-        <div style="font-size:12px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Custom FAQs</div>
-        <div style="font-size:12px;color:var(--txt3);margin-bottom:10px;line-height:1.6">Paste JSON array. Leave blank for default FAQs.<br/>Format: <code style="color:var(--gold);background:rgba(201,168,76,.06);padding:1px 5px;border-radius:3px">[{"cat":"Category","q":"Question","a":"Answer"}]</code></div>
-        <textarea id="portal-faqs-json" placeholder='[{"cat":"Getting Started","q":"How do I submit?","a":"Answer here..."}]' style="width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'DM Mono',monospace;font-size:12px;outline:none;resize:vertical;min-height:120px;line-height:1.5"></textarea>
-      </div>
-      <button class="btn-gold" id="portal-save-btn" onclick="savePortalSettings()" style="padding:11px 32px">Save Portal Settings</button>
+<!-- AUTH -->
+<div id="auth">
+  <div class="abox">
+    <div class="abox-top">
+      <div class="abox-brand">T·I·R</div>
+      <div class="abox-sub">Unified Admin Panel</div>
+      <div class="abox-tag">Label owner access only</div>
     </div>
+    <div class="err-box" id="ae"></div>
+    <div class="iw"><label>Email</label><input type="email" id="em" value="theimaginaryrecords@gmail.com"/></div>
+    <div class="iw"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn-gold" id="blg" onclick="doLogin()">Access Admin Panel</button>
   </div>
 </div>
 
-<!-- STEP 4: ADD THIS JS INJECTION before </body> tag -->
-<!-- ADD THIS BEFORE </body> IN YOUR COMBINED ADMIN -->
+<!-- PANEL -->
+<div id="panel">
+<div class="layout">
+
+<!-- DESKTOP SIDEBAR -->
+<div class="sb">
+  <div class="sb-top"><div class="sb-brand">T·I·R</div><div class="sb-sub">Unified Admin</div></div>
+  <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
+  <nav>
+    <div class="ns">Dashboard</div>
+    <div class="ni on" onclick="goPage('overview',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</div>
+    <div class="ns">Releases</div>
+    <div class="ni" onclick="goPage('all',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions</div>
+    <div class="ni" onclick="goPage('pending',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pending <span class="cnt" id="pend-cnt" style="display:none">0</span></div>
+    <div class="ni" onclick="goPage('live',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>Live</div>
+    <div class="ns">Finance</div>
+    <div class="ni" onclick="goPage('royalties',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Manage Royalties</div>
+    <div class="ns">Content</div>
+    <div class="ni" onclick="goPage('blog',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Music Blog</div>
+    <div class="ns">People</div>
+    <div class="ni" onclick="goPage('artists',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>All Artists</div>
+    <div class="ns">Support</div>
+    <div class="ni" onclick="goPage('tickets',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tickets <span class="cnt" id="tkt-cnt" style="display:none">0</span></div>
+    <!-- DEMO DIVIDER -->
+    <div class="demo-sep"></div>
+    <div class="ns-demo">🎵 Demo Submissions</div>
+    <div class="ni demo-ni" onclick="goPage('demo-inbox',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Demo Inbox <span class="cnt-demo" id="demo-new-cnt" style="display:none">0</span></div>
+    <div class="ni demo-ni" onclick="goPage('demo-all',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>All Demos</div>
+    <div class="ni demo-ni" onclick="goPage('demo-shortlisted',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Shortlisted</div>
+    <div class="ni demo-ni" onclick="goPage('demo-signed',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Signed</div>
+    <div class="ni demo-ni" onclick="goPage('demo-rejected',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Rejected</div>
+  </nav>
+  <div class="sb-bot"><button class="so-btn" onclick="doSignOut()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button></div>
+</div>
+
+<div class="main">
+  <!-- DESKTOP TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div><h1 id="pgt">Overview</h1><p id="pgs">The Imaginary Records</p></div>
+      <span class="section-pill pill-label" id="section-pill">Label</span>
+    </div>
+    <button class="btn-ref" onclick="loadAll()">↻ Refresh</button>
+  </div>
+  <!-- MOBILE TOPBAR -->
+  <div class="mob-topbar">
+    <button class="mob-menu-btn" onclick="openDrawer()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="mob-topbar-brand">T·I·R Admin</div>
+    <button class="mob-ref-btn" onclick="loadAll()">↻</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div class="pg on" id="page-overview">
+      <div class="stats">
+        <div class="sc"><div class="sc-l">Total Releases</div><div class="sc-v g" id="s0">—</div></div>
+        <div class="sc"><div class="sc-l">Pending</div><div class="sc-v" id="s1">—</div></div>
+        <div class="sc"><div class="sc-l">Live</div><div class="sc-v" id="s2">—</div></div>
+        <div class="sc"><div class="sc-l">Artists</div><div class="sc-v" id="s3">—</div></div>
+        <div class="sc"><div class="sc-l">Open Tickets</div><div class="sc-v" id="s4">—</div></div>
+      </div>
+      <div class="stats">
+        <div class="sc demo-sc"><div class="sc-l">Total Demos</div><div class="sc-v r" id="d0">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">New Demos</div><div class="sc-v" id="d1">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Reviewing</div><div class="sc-v" id="d2">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Shortlisted</div><div class="sc-v r" id="d3">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Signed</div><div class="sc-v gr" id="d4">—</div></div>
+      </div>
+      <div class="section"><div class="sh"><h3>Latest Releases</h3></div><div class="tw" id="ov-list"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading...</div></div></div></div>
+      <div class="section"><div class="sh"><h3>Open Support Tickets</h3><p>Needs your response</p></div><div class="tw" id="ov-tickets"><div class="empty"><div class="empty-icon">💬</div><div class="empty-text">Loading...</div></div></div></div>
+      <div class="section demo-section"><div class="sh"><h3>New Demo Submissions</h3><p>Unreviewed</p></div><div class="tw" id="ov-demos"><div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">Loading...</div></div></div></div>
+    </div>
+
+    <!-- ══ ALL RELEASES ══ -->
+    <div class="pg" id="page-all">
+      <div class="section"><div class="sh"><h3>All Submissions</h3></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <input class="si" type="text" id="rel-search" placeholder="Search title or artist..." oninput="applyRelFilter()"/>
+          <button class="fb on" onclick="setRelSt('all',this)">All</button>
+          <button class="fb" onclick="setRelSt('pending',this)">Pending</button>
+          <button class="fb" onclick="setRelSt('review',this)">Review</button>
+          <button class="fb" onclick="setRelSt('approved',this)">Approved</button>
+          <button class="fb" onclick="setRelSt('live',this)">Live</button>
+          <button class="fb" onclick="setRelSt('rejected',this)">Rejected</button>
+        </div></div>
+        <div class="tw" id="all-list"></div>
+      </div>
+    </div>
+
+    <!-- ══ PENDING ══ -->
+    <div class="pg" id="page-pending"><div class="section"><div class="sh"><h3>Pending Review</h3></div><div class="tw" id="pend-list"></div></div></div>
+
+    <!-- ══ LIVE ══ -->
+    <div class="pg" id="page-live"><div class="section"><div class="sh"><h3>Live Releases</h3></div><div class="tw" id="live-list"></div></div></div>
+
+    <!-- ══ ROYALTIES ══ -->
+    <div class="pg" id="page-royalties">
+      <div class="section" style="margin-bottom:18px">
+        <div class="sh"><h3>Add / Update Royalty Statement</h3><p>Select artist → fill earnings</p></div>
+        <div class="sb2">
+          <div class="al al-e" id="roy-e"></div><div class="al al-s" id="roy-s"></div>
+          <div class="roy-form">
+            <div class="fg"><label>Select Artist *</label><select id="r-artist"><option value="">— Select Artist —</option></select></div>
+            <div class="fg"><label>Period *</label><select id="r-period"><option value="">— Select Quarter —</option><option>Q1 2025 (Jan–Mar)</option><option>Q2 2025 (Apr–Jun)</option><option>Q3 2025 (Jul–Sep)</option><option>Q4 2025 (Oct–Dec)</option><option>Q1 2026 (Jan–Mar)</option><option>Q2 2026 (Apr–Jun)</option><option>Q3 2026 (Jul–Sep)</option><option>Q4 2026 (Oct–Dec)</option></select></div>
+            <div class="fg"><label>Total Amount (₹) *</label><input type="number" id="r-total" placeholder="e.g. 1250.00" step="0.01"/></div>
+            <div class="fg"><label>Release Title (optional)</label><input type="text" id="r-release-title" placeholder="Song name"/></div>
+            <div class="fg rf-full"><label>Earnings by Platform (₹ each)</label></div>
+            <div class="fg"><label>Spotify</label><input type="number" id="p-spotify" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Apple Music</label><input type="number" id="p-apple" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Amazon Music</label><input type="number" id="p-amazon" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>YouTube Music</label><input type="number" id="p-youtube" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>JioSaavn</label><input type="number" id="p-jio" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Gaana</label><input type="number" id="p-gaana" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Tidal</label><input type="number" id="p-tidal" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Other Platforms</label><input type="number" id="p-other" placeholder="0.00" step="0.01"/></div>
+            <div class="fg rf-full"><label>Notes (optional)</label><input type="text" id="r-notes" placeholder="e.g. Q1 2026 royalty payout"/></div>
+            <div class="fg"><label>Mark as Current Quarter?</label><select id="r-current"><option value="true">Yes — Show on artist dashboard</option><option value="false">No — Historical record</option></select></div>
+            <div class="fg"><label>Mark as Payout?</label><select id="r-payout"><option value="false">No — Just a statement</option><option value="true">Yes — Payout made</option></select></div>
+            <div class="fg rf-full"><button class="btn-gold" id="r-btn" onclick="saveRoyalty()">Save Royalty Statement</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="sh"><h3>Royalty History</h3><p>All statements sent</p></div><div class="tw" id="roy-history-list"><div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No statements yet</div></div></div></div>
+    </div>
+
+    <!-- ══ BLOG ══ -->
+    <div class="pg" id="page-blog">
+      <div class="section" style="margin-bottom:18px">
+        <div class="sh"><h3>Write New Blog Post</h3><p>Artists will see this in their portal</p></div>
+        <div class="sb2">
+          <div class="al al-e" id="blog-e"></div><div class="al al-s" id="blog-s"></div>
+          <div class="blog-form">
+            <div><label>Post Title *</label><input type="text" id="b-title" placeholder="e.g. How to Get Playlisted on Spotify"/></div>
+            <div><label>Category</label><select id="b-cat"><option>Music Tips</option><option>Distribution</option><option>Industry News</option><option>Royalties & Money</option><option>Marketing</option><option>TIR Updates</option><option>Artist Spotlight</option></select></div>
+            <div><label>Content *</label><textarea id="b-content" placeholder="Write your blog post here..."></textarea></div>
+            <div><button class="btn-gold" id="b-btn" onclick="saveBlog()">Publish Post</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="sh"><h3>Published Posts</h3><p id="blog-count">0 posts</p></div><div class="sb2" id="blog-list"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div></div></div></div>
+    </div>
+
+    <!-- ══ ARTISTS ══ -->
+    <div class="pg" id="page-artists"><div class="section"><div class="sh"><h3>Registered Artists</h3><p id="art-count">0 artists</p></div><div class="tw" id="art-list"></div></div></div>
+
+    <!-- ══ TICKETS ══ -->
+    <div class="pg" id="page-tickets">
+      <div class="section"><div class="sh"><h3>Support Tickets</h3></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <button class="fb on" onclick="setTF('all',this)">All</button>
+          <button class="fb" onclick="setTF('open',this)">Open</button>
+          <button class="fb" onclick="setTF('resolved',this)">Resolved</button>
+          <button class="fb" onclick="setTF('closed',this)">Closed</button>
+        </div></div>
+        <div class="tw" id="tkt-list"></div>
+      </div>
+    </div>
+
+    <!-- ══ DEMO INBOX ══ -->
+    <div class="pg" id="page-demo-inbox">
+      <div class="stats">
+        <div class="sc demo-sc"><div class="sc-l">Total</div><div class="sc-v r" id="ds0">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">New</div><div class="sc-v" id="ds1">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Reviewing</div><div class="sc-v" id="ds2">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Shortlisted</div><div class="sc-v r" id="ds3">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Signed</div><div class="sc-v gr" id="ds4">—</div></div>
+      </div>
+      <div class="section demo-section"><div class="sh"><h3>New Submissions</h3><p>Unreviewed</p></div><div class="tw" id="demo-new-list"><div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">Loading...</div></div></div></div>
+      <div class="section demo-section"><div class="sh"><h3>Currently Reviewing</h3></div><div class="tw" id="demo-rev-list"><div class="empty"><div class="empty-icon">👂</div><div class="empty-text">None in review</div></div></div></div>
+    </div>
+
+    <!-- ══ ALL DEMOS ══ -->
+    <div class="pg" id="page-demo-all">
+      <div class="section demo-section">
+        <div class="sh"><h3>All Demo Submissions</h3><p id="demo-all-count"></p></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <input class="si" type="text" id="demo-search" placeholder="Search name, email, genre..." oninput="applyDemoFilter()"/>
+          <button class="fb demo-fb on" onclick="setDF('all',this)">All</button>
+          <button class="fb demo-fb" onclick="setDF('new',this)">New</button>
+          <button class="fb demo-fb" onclick="setDF('reviewing',this)">Reviewing</button>
+          <button class="fb demo-fb" onclick="setDF('shortlisted',this)">Shortlisted</button>
+          <button class="fb demo-fb" onclick="setDF('signed',this)">Signed</button>
+          <button class="fb demo-fb" onclick="setDF('rejected',this)">Rejected</button>
+        </div></div>
+        <div class="tw" id="demo-all-list"></div>
+      </div>
+    </div>
+
+    <!-- ══ DEMO SHORTLISTED ══ -->
+    <div class="pg" id="page-demo-shortlisted"><div class="section demo-section"><div class="sh"><h3>Shortlisted Demos</h3><p>Strong potential</p></div><div class="tw" id="demo-short-list"></div></div></div>
+
+    <!-- ══ DEMO SIGNED ══ -->
+    <div class="pg" id="page-demo-signed"><div class="section demo-section"><div class="sh"><h3>Signed Artists</h3><p>From demo pipeline</p></div><div class="tw" id="demo-signed-list"></div></div></div>
+
+    <!-- ══ DEMO REJECTED ══ -->
+    <div class="pg" id="page-demo-rejected"><div class="section demo-section"><div class="sh"><h3>Rejected Demos</h3></div><div class="tw" id="demo-rej-list"></div></div></div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- MOBILE OVERLAY -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeDrawer()"></div>
+
+<!-- MOBILE DRAWER -->
+<div class="mob-drawer" id="mob-drawer">
+  <div class="sb-top" style="display:flex;align-items:center;justify-content:space-between">
+    <div><div class="sb-brand">T·I·R</div><div class="sb-sub">Unified Admin</div></div>
+    <button class="mob-menu-btn" onclick="closeDrawer()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
+  <nav>
+    <div class="ns">Dashboard</div>
+    <div class="ni" onclick="goPage('overview',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</div>
+    <div class="ns">Releases</div>
+    <div class="ni" onclick="goPage('all',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions</div>
+    <div class="ni" onclick="goPage('pending',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pending</div>
+    <div class="ni" onclick="goPage('live',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>Live</div>
+    <div class="ns">Finance & Content</div>
+    <div class="ni" onclick="goPage('royalties',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Royalties</div>
+    <div class="ni" onclick="goPage('blog',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Music Blog</div>
+    <div class="ni" onclick="goPage('artists',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>All Artists</div>
+    <div class="ni" onclick="goPage('tickets',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tickets</div>
+    <div class="demo-sep"></div>
+    <div class="ns-demo">🎵 Demo Submissions</div>
+    <div class="ni demo-ni" onclick="goPage('demo-inbox',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Demo Inbox</div>
+    <div class="ni demo-ni" onclick="goPage('demo-all',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>All Demos</div>
+    <div class="ni demo-ni" onclick="goPage('demo-shortlisted',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Shortlisted</div>
+    <div class="ni demo-ni" onclick="goPage('demo-signed',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Signed</div>
+  </nav>
+  <div class="sb-bot"><button class="so-btn" onclick="doSignOut()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button></div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mob-bottom-nav">
+  <div class="mob-nav-items">
+    <div class="mob-ni on" id="mni-overview" onclick="goPage('overview',null);setMN('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="mob-ni-label">Overview</span></div>
+    <div class="mob-ni" id="mni-pending" onclick="goPage('pending',null);setMN('pending')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span class="mob-ni-label">Pending</span><span class="m-cnt" id="mni-pend-cnt" style="display:none">0</span></div>
+    <div class="mob-ni" id="mni-tickets" onclick="goPage('tickets',null);setMN('tickets')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="mob-ni-label">Tickets</span><span class="m-cnt" id="mni-tkt-cnt" style="display:none">0</span></div>
+    <div class="mob-ni" id="mni-demos" onclick="goPage('demo-inbox',null);setMN('demos',true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="mob-ni-label">Demos</span><span class="m-cnt" id="mni-demo-cnt" style="display:none;background:var(--demo)">0</span></div>
+    <div class="mob-ni" id="mni-more" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><span class="mob-ni-label">More</span></div>
+  </div>
+</div>
+
+</div><!-- /panel -->
+
+<!-- RELEASE MODAL -->
+<div class="mo" id="rmo" onclick="if(event.target===this)closeMo('rmo')">
+  <div class="mbox"><div class="mh"><div class="mt2" id="rmo-title">Release</div><button class="mc" onclick="closeMo('rmo')">✕</button></div><div class="mb" id="rmo-body"></div></div>
+</div>
+<!-- TICKET MODAL -->
+<div class="mo" id="tmo" onclick="if(event.target===this)closeMo('tmo')">
+  <div class="mbox"><div class="mh"><div class="mt2" id="tmo-title">Ticket</div><button class="mc" onclick="closeMo('tmo')">✕</button></div><div class="mb" id="tmo-body"></div></div>
+</div>
+<!-- DEMO MODAL -->
+<div class="mo" id="dmo" onclick="if(event.target===this)closeMo('dmo')">
+  <div class="mbox demo-mbox"><div class="mh"><div><div class="mt2" id="dmo-title">Demo</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center" id="dmo-ref"></div></div><button class="mc" onclick="closeMo('dmo')">✕</button></div><div class="mb" id="dmo-body"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-// ═══════════════════════════════════════════════
-// TIR ADMIN ADDITIONS v2 — ISRC/UPC + Portal Settings
-// ═══════════════════════════════════════════════
+// ── DATA ──
+let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[],demos=[];
+let relFilter='all',tktFilter='all',demoFilter='all';
 
-// Override openRelease to add ISRC/UPC section
-const _orig_openRelease = openRelease;
-function openRelease(id){
-  _orig_openRelease(id);
-  const r = releases.find(x=>x.id===id);
-  if(!r) return;
-  // Add ISRC/UPC assignment box to modal
-  const body = document.getElementById('rmo-body');
-  if(!body) return;
-  const isrcBox = document.createElement('div');
-  isrcBox.className = 'isrc-assign-box';
-  isrcBox.innerHTML = `
-    <div class="isrc-assign-title">🔒 ISRC / UPC Assignment (Admin Only)</div>
-    <div style="font-size:12px;color:var(--txt2);margin-bottom:12px;line-height:1.6">
-      Current: <strong style="color:var(--gold)">ISRC: ${r.isrc||'Not assigned'}</strong> 
-      &nbsp;·&nbsp; <strong style="color:var(--gold)">UPC: ${r.upc||'Not assigned'}</strong>
-    </div>
-    <div id="show-isrc" style="display:none">${r.isrc||''}</div>
-    <div id="show-upc" style="display:none">${r.upc||''}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div>
-        <label style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:5px">ISRC Code</label>
-        <input type="text" id="assign-isrc" placeholder="e.g. INXXX2600001" value="${r.isrc||''}" 
-          style="width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:6px;color:var(--txt);padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s"
-          onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--brd)'"/>
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:5px">UPC Code</label>
-        <input type="text" id="assign-upc" placeholder="12-digit UPC" value="${r.upc||''}"
-          style="width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:6px;color:var(--txt);padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s"
-          onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--brd)'"/>
-      </div>
-    </div>
-    <button id="assign-btn" onclick="assignIsrcUpc('${r.id}')" 
-      style="padding:9px 22px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;cursor:pointer">
-      Save ISRC/UPC
-    </button>
-  `;
-  body.appendChild(isrcBox);
-  
-  // Also add artwork thumbnail if available
-  if(r.artworkUrl){
-    const artDiv = document.createElement('div');
-    artDiv.style.cssText='margin-bottom:14px;display:flex;align-items:center;gap:12px;padding:10px;background:var(--card);border-radius:8px;border:1px solid var(--brd)';
-    artDiv.innerHTML=`<img src="${r.artworkUrl}" style="width:60px;height:60px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'"/><div><div style="font-size:12px;font-weight:600">${r.title||'—'}</div><div style="font-size:11px;color:var(--txt3);margin-top:2px">Artwork loaded ✓</div></div>`;
-    body.insertBefore(artDiv, body.firstChild);
-  }
+// ── MOBILE ──
+function openDrawer(){document.getElementById('mob-drawer').classList.add('on');document.getElementById('mob-overlay').classList.add('on');document.body.style.overflow='hidden';}
+function closeDrawer(){document.getElementById('mob-drawer').classList.remove('on');document.getElementById('mob-overlay').classList.remove('on');document.body.style.overflow='';}
+function setMN(name,isDemo=false){
+  document.querySelectorAll('.mob-ni').forEach(n=>{n.classList.remove('on');n.classList.remove('on-demo');});
+  const el=document.getElementById('mni-'+name);
+  if(el)el.classList.add(isDemo?'on-demo':'on');
 }
 
-async function assignIsrcUpc(releaseId){
-  const isrc=document.getElementById('assign-isrc')?.value.trim()||'';
-  const upc=document.getElementById('assign-upc')?.value.trim()||'';
-  if(!isrc&&!upc){toast('Enter at least ISRC or UPC.');return;}
-  const btn=document.getElementById('assign-btn');
-  btn.disabled=true;btn.textContent='Saving...';
-  try{
-    const updates={};
-    if(isrc)updates.isrc=isrc;
-    if(upc)updates.upc=upc;
-    await db.collection('releases').doc(releaseId).update(updates);
-    const r=releases.find(x=>x.id===releaseId);
-    if(r){if(isrc)r.isrc=isrc;if(upc)r.upc=upc;}
-    toast('✓ ISRC/UPC saved! Artist can now see this in their portal.');
-    await loadReleases();
-  }catch(e){toast('Error: '+e.message);}
-  btn.disabled=false;btn.textContent='Save ISRC/UPC';
+// ── AUTH ──
+auth.onAuthStateChanged(u=>{
+  document.getElementById('ld').style.display='none';
+  if(u&&u.email===ADMIN_EMAIL){document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();}
+  else if(u&&u.email!==ADMIN_EMAIL){auth.signOut();document.getElementById('auth').style.display='flex';}
+  else{document.getElementById('auth').style.display='flex';document.getElementById('panel').style.display='none';}
+});
+async function doLogin(){
+  const em=document.getElementById('em').value.trim(),pw=document.getElementById('pw').value;
+  const btn=document.getElementById('blg'),err=document.getElementById('ae');
+  err.classList.remove('on');
+  if(em!==ADMIN_EMAIL){err.textContent='Access denied.';err.classList.add('on');return;}
+  if(!pw){err.textContent='Please enter your password.';err.classList.add('on');return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{await auth.signInWithEmailAndPassword(em,pw);}
+  catch(e){err.textContent='Login failed: '+e.message;err.classList.add('on');btn.disabled=false;btn.textContent='Access Admin Panel';}
 }
+function doSignOut(){auth.signOut();}
 
-// ─── PORTAL SETTINGS ───
-let portalSettingsData={announcements:[],faqs:[]};
-
-async function loadPortalSettingsAdmin(){
-  try{
-    const snap=await db.collection('portal_settings').doc('main').get();
-    if(snap.exists){
-      portalSettingsData=snap.data();
-      renderAnnouncements();
-      if(portalSettingsData.supportEmail){const el=document.getElementById('portal-support-email');if(el)el.value=portalSettingsData.supportEmail;}
-      if(portalSettingsData.distributionNote){const el=document.getElementById('portal-dist-note');if(el)el.value=portalSettingsData.distributionNote;}
-      if(portalSettingsData.faqs&&portalSettingsData.faqs.length){const el=document.getElementById('portal-faqs-json');if(el)el.value=JSON.stringify(portalSettingsData.faqs,null,2);}
-    }
-  }catch(e){console.log('Portal settings:',e);}
-}
-
-function renderAnnouncements(){
-  const container=document.getElementById('announce-list');
-  if(!container)return;
-  const anns=portalSettingsData.announcements||[];
-  if(!anns.length){container.innerHTML='<div style="font-size:12px;color:var(--txt3)">No announcements yet. Click + Add.</div>';return;}
-  container.innerHTML=anns.map((a,i)=>`
-    <div class="announce-item">
-      <input type="text" value="${(a||'').replace(/"/g,'&quot;').replace(/'/g,"&#39;")}" id="ann-${i}" placeholder="Announcement text..."/>
-      <button class="btn-rm-row" onclick="removeAnnouncement(${i})">✕</button>
-    </div>`).join('');
-}
-
-function addAnnouncement(){
-  if(!portalSettingsData.announcements)portalSettingsData.announcements=[];
-  portalSettingsData.announcements.push('');
-  renderAnnouncements();
-  setTimeout(()=>{const inputs=document.querySelectorAll('[id^="ann-"]');if(inputs.length)inputs[inputs.length-1].focus();},50);
-}
-
-function removeAnnouncement(i){
-  portalSettingsData.announcements.splice(i,1);
-  renderAnnouncements();
-}
-
-async function savePortalSettings(){
-  const anns=[];
-  document.querySelectorAll('[id^="ann-"]').forEach(el=>{const v=el.value.trim();if(v)anns.push(v);});
-  const faqsRaw=document.getElementById('portal-faqs-json')?.value.trim();
-  let faqs=[];
-  if(faqsRaw){try{faqs=JSON.parse(faqsRaw);}catch(e){toast('Invalid FAQ JSON format.');return;}}
-  const data={
-    announcements:anns,faqs:faqs,
-    supportEmail:document.getElementById('portal-support-email')?.value.trim()||'support@theimaginaryrecords.in',
-    distributionNote:document.getElementById('portal-dist-note')?.value.trim()||'',
-    updatedAt:new Date().toISOString()
-  };
-  const btn=document.getElementById('portal-save-btn');
-  btn.disabled=true;btn.textContent='Saving...';
-  try{
-    await db.collection('portal_settings').doc('main').set(data,{merge:true});
-    portalSettingsData={...portalSettingsData,...data};
-    toast('✓ Portal settings saved! Artists see these on next login.');
-  }catch(e){toast('Error: '+e.message);}
-  btn.disabled=false;btn.textContent='Save Portal Settings';
-}
-
-// Also load portal settings when admin loads (add to loadAll)
-const _orig_loadAll = loadAll;
+// ── LOAD ALL ──
 async function loadAll(){
-  await _orig_loadAll();
-  loadPortalSettingsAdmin();
+  toast('Loading...');
+  await Promise.all([loadReleases(),loadArtists(),loadTickets(),loadBlogPosts(),loadRoyaltyHistory(),loadDemos()]);
+  toast('All data loaded ✓');
 }
+
+// ── LOADERS ──
+async function loadReleases(){
+  try{
+    const snap=await db.collection('releases').get();
+    releases=[];snap.forEach(d=>releases.push({id:d.id,...d.data()}));
+    releases.sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
+    renderLabelStats();
+    renderRelTable('ov-list',releases.slice(0,8));
+    renderRelTable('all-list',releases);
+    renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review'));
+    renderRelTable('live-list',releases.filter(r=>r.status==='live'));
+    const pc=releases.filter(r=>r.status==='pending').length;
+    ['pend-cnt','mni-pend-cnt'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=pc;el.style.display=pc>0?'inline':'none';}});
+  }catch(e){console.error(e);}
+}
+async function loadArtists(){
+  try{
+    const snap=await db.collection('users').get();
+    artists=[];snap.forEach(d=>artists.push({id:d.id,...d.data()}));
+    renderArtists();renderLabelStats();
+    const sel=document.getElementById('r-artist');
+    sel.innerHTML='<option value="">— Select Artist —</option>';
+    artists.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.name||a.email||a.id;sel.appendChild(o);});
+  }catch(e){console.error(e);}
+}
+async function loadTickets(){
+  try{
+    const snap=await db.collection('tickets').get();
+    tickets=[];snap.forEach(d=>tickets.push({id:d.id,...d.data()}));
+    tickets.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+    renderTickets(tickets);renderOvTickets();renderLabelStats();
+    const oc=tickets.filter(t=>t.status==='open').length;
+    ['tkt-cnt','mni-tkt-cnt'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=oc;el.style.display=oc>0?'inline':'none';}});
+  }catch(e){console.error(e);}
+}
+async function loadBlogPosts(){
+  try{const snap=await db.collection('blog').orderBy('createdAt','desc').get();blogPosts=[];snap.forEach(d=>blogPosts.push({id:d.id,...d.data()}));renderBlogList();}catch(e){console.log(e);}
+}
+async function loadRoyaltyHistory(){
+  try{const snap=await db.collection('royalties').orderBy('createdAt','desc').get();royalties=[];snap.forEach(d=>royalties.push({id:d.id,...d.data()}));renderRoyaltyHistory();}catch(e){console.log(e);}
+}
+async function loadDemos(){
+  try{
+    const snap=await db.collection('demos').orderBy('submittedAt','desc').get();
+    demos=[];snap.forEach(d=>demos.push({id:d.id,...d.data()}));
+    renderDemoStats();
+    renderDemoTable('ov-demos',demos.filter(d=>d.status==='new').slice(0,6));
+    renderDemoTable('demo-new-list',demos.filter(d=>d.status==='new'));
+    renderDemoTable('demo-rev-list',demos.filter(d=>d.status==='reviewing'));
+    renderDemoTable('demo-all-list',demos);
+    renderDemoTable('demo-short-list',demos.filter(d=>d.status==='shortlisted'));
+    renderDemoTable('demo-signed-list',demos.filter(d=>d.status==='signed'));
+    renderDemoTable('demo-rej-list',demos.filter(d=>d.status==='rejected'));
+    const nw=demos.filter(d=>d.status==='new').length;
+    ['demo-new-cnt','mni-demo-cnt'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=nw;el.style.display=nw>0?'inline':'none';}});
+    document.getElementById('demo-all-count').textContent=demos.length+' submission'+(demos.length!==1?'s':'');
+  }catch(e){console.log(e);}
+}
+
+// ── RENDER STATS ──
+function renderLabelStats(){
+  document.getElementById('s0').textContent=releases.length;
+  document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;
+  document.getElementById('s2').textContent=releases.filter(r=>r.status==='live').length;
+  document.getElementById('s3').textContent=artists.length;
+  document.getElementById('s4').textContent=tickets.filter(t=>t.status==='open').length;
+  document.getElementById('art-count').textContent=artists.length+' artist'+(artists.length!==1?'s':'');
+}
+function renderDemoStats(){
+  const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length,sh=demos.filter(d=>d.status==='shortlisted').length,sg=demos.filter(d=>d.status==='signed').length;
+  // overview row
+  ['d0','ds0'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=total;});
+  ['d1','ds1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nw;});
+  ['d2','ds2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=rv;});
+  ['d3','ds3'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sh;});
+  ['d4','ds4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sg;});
+}
+
+// ── RENDER TABLES ──
+function renderRelTable(id,list){
+  const el=document.getElementById(id);if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No releases found</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Title</th><th>Artist</th><th>Type</th><th>Genre</th><th>Date</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${list.map(r=>`<tr>
+      <td style="font-weight:600">${r.title||'—'}</td>
+      <td style="color:var(--txt2)">${r.artistName||r.primaryArtist||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.type||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.genre||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.releaseDate||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.submittedAt?r.submittedAt.substring(0,10):'—'}</td>
+      <td><select class="ss" onchange="updateRelStatus('${r.id}',this.value)">
+        <option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option>
+        <option value="review" ${r.status==='review'?'selected':''}>🔍 Review</option>
+        <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
+        <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
+        <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
+      </select></td>
+      <td><button class="vb" onclick="openRelease('${r.id}')">View</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderDemoTable(id,list){
+  const el=document.getElementById(id);if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No demos found</div></div>';return;}
+  el.innerHTML=`<table class="demo-table"><thead><tr><th>Artist</th><th>Genre</th><th>Email</th><th>Instagram</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${list.map(d=>`<tr>
+      <td><div style="font-weight:600">${d.name||'—'}</div><span class="ref-badge">${d.refId||'—'}</span></td>
+      <td style="color:var(--txt2);font-size:12px">${d.genre||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${d.email||'—'}</td>
+      <td style="font-size:12px;color:var(--txt2)">${d.instagram||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</td>
+      <td><select class="ss demo-ss" onchange="updateDemoStatus('${d.id}',this.value)">
+        <option value="new" ${d.status==='new'?'selected':''}>🆕 New</option>
+        <option value="reviewing" ${d.status==='reviewing'?'selected':''}>👂 Reviewing</option>
+        <option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>⭐ Shortlisted</option>
+        <option value="signed" ${d.status==='signed'?'selected':''}>✅ Signed</option>
+        <option value="rejected" ${d.status==='rejected'?'selected':''}>❌ Rejected</option>
+        <option value="archived" ${d.status==='archived'?'selected':''}>📦 Archived</option>
+      </select></td>
+      <td><button class="vb demo-vb" onclick="openDemo('${d.id}')">View</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderArtists(){
+  const el=document.getElementById('art-list');if(!el)return;
+  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th></tr></thead><tbody>
+    ${artists.map(a=>{
+      const rc=releases.filter(r=>r.userId===a.id).length;
+      const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r)=>s+Number(r.totalAmount||0),0);
+      return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px;color:var(--txt2)">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td></tr>`;
+    }).join('')}
+  </tbody></table>`;
+}
+
+function renderOvTickets(){
+  const open=tickets.filter(t=>t.status==='open');
+  const el=document.getElementById('ov-tickets');if(!el)return;
+  if(!open.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No open tickets</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${open.map(t=>`<tr><td style="font-weight:600">${t.artistName||'—'}</td><td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td><td>${t.subject||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderTickets(list){
+  const el=document.getElementById('tkt-list');if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">No tickets</div></div>';return;}
+  const bc={open:'bp',pending:'br',resolved:'ba',closed:'bx'};
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${list.map(t=>`<tr><td style="font-weight:600">${t.artistName||'—'}</td><td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td><td>${t.subject||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td><td><span class="badge ${bc[t.status]||'bp'}">${t.status||'Open'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderRoyaltyHistory(){
+  const el=document.getElementById('roy-history-list');if(!el)return;
+  if(!royalties.length){el.innerHTML='<div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No statements yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Period</th><th>Release</th><th>Total</th><th>Type</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${royalties.map(r=>`<tr><td style="font-weight:600">${r.artistName||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px">${r.period||'—'}</td><td style="font-size:12px;color:var(--txt2)">${r.releaseTitle||'Overall'}</td><td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--gold)">₹${Number(r.totalAmount||0).toFixed(2)}</td><td><span class="badge ${r.type==='payout'?'ba':'br'}">${r.type==='payout'?'Payout':'Statement'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.createdAt?r.createdAt.substring(0,10):'—'}</td><td><button class="db" onclick="deleteRoyalty('${r.id}')">Delete</button></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderBlogList(){
+  const el=document.getElementById('blog-list');if(!el)return;
+  document.getElementById('blog-count').textContent=blogPosts.length+' post'+(blogPosts.length!==1?'s':'');
+  if(!blogPosts.length){el.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div></div>';return;}
+  el.innerHTML=blogPosts.map(p=>`<div class="blog-admin-card"><div style="width:40px;height:40px;background:var(--card);border:1px solid var(--brd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📝</div><div class="blog-admin-info"><div class="blog-admin-title">${p.title||'—'}</div><div class="blog-admin-meta">${p.category||'—'} · ${p.createdAt?p.createdAt.substring(0,10):'—'}</div></div><button class="db" onclick="deleteBlog('${p.id}')">Delete</button></div>`).join('');
+}
+
+// ── STATUS UPDATES ──
+async function updateRelStatus(id,status){try{await db.collection('releases').doc(id).update({status});const r=releases.find(x=>x.id===id);if(r)r.status=status;renderLabelStats();toast('Status → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
+async function updateDemoStatus(id,status){try{await db.collection('demos').doc(id).update({status});const d=demos.find(x=>x.id===id);if(d)d.status=status;renderDemoStats();toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
+async function updateTicketStatus(id,status){try{await db.collection('tickets').doc(id).update({status});const t=tickets.find(x=>x.id===id);if(t)t.status=status;toast('Ticket → '+status);await loadTickets();}catch(e){toast('Error: '+e.message);}}
+
+// ── ROYALTY ──
+async function saveRoyalty(){
+  const artistId=document.getElementById('r-artist').value,period=document.getElementById('r-period').value,total=document.getElementById('r-total').value;
+  document.getElementById('roy-e').classList.remove('on');document.getElementById('roy-s').classList.remove('on');
+  if(!artistId)return showAl('roy-e','Please select an artist.');
+  if(!period)return showAl('roy-e','Please select a period.');
+  if(!total)return showAl('roy-e','Please enter the total amount.');
+  const artist=artists.find(a=>a.id===artistId);
+  const btn=document.getElementById('r-btn');btn.disabled=true;btn.textContent='Saving...';
+  const gv=id=>{const v=document.getElementById(id)?.value;return v?Number(v):0;};
+  const platforms={};
+  if(gv('p-spotify'))platforms['Spotify']=gv('p-spotify');if(gv('p-apple'))platforms['Apple Music']=gv('p-apple');if(gv('p-amazon'))platforms['Amazon Music']=gv('p-amazon');if(gv('p-youtube'))platforms['YouTube Music']=gv('p-youtube');if(gv('p-jio'))platforms['JioSaavn']=gv('p-jio');if(gv('p-gaana'))platforms['Gaana']=gv('p-gaana');if(gv('p-tidal'))platforms['Tidal']=gv('p-tidal');if(gv('p-other'))platforms['Other']=gv('p-other');
+  try{
+    await db.collection('royalties').add({userId:artistId,artistName:artist?.name||artistId,period,totalAmount:Number(total),releaseTitle:document.getElementById('r-release-title').value.trim()||'',platforms,notes:document.getElementById('r-notes').value.trim(),isCurrent:document.getElementById('r-current').value==='true',type:document.getElementById('r-payout').value==='true'?'payout':'statement',amount:Number(total),createdAt:new Date().toISOString()});
+    showAl('roy-s','✓ Royalty statement saved!');
+    ['r-total','r-release-title','r-notes','p-spotify','p-apple','p-amazon','p-youtube','p-jio','p-gaana','p-tidal','p-other'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('r-artist').value='';document.getElementById('r-period').value='';
+    await loadRoyaltyHistory();toast('Royalty saved ✓');
+  }catch(e){showAl('roy-e','Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Save Royalty Statement';
+}
+async function deleteRoyalty(id){if(!confirm('Delete this royalty statement?'))return;try{await db.collection('royalties').doc(id).delete();await loadRoyaltyHistory();toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+
+// ── BLOG ──
+async function saveBlog(){
+  const title=document.getElementById('b-title').value.trim(),cat=document.getElementById('b-cat').value,content=document.getElementById('b-content').value.trim();
+  document.getElementById('blog-e').classList.remove('on');document.getElementById('blog-s').classList.remove('on');
+  if(!title)return showAl('blog-e','Please enter a post title.');if(!content)return showAl('blog-e','Please write some content.');
+  const btn=document.getElementById('b-btn');btn.disabled=true;btn.textContent='Publishing...';
+  try{await db.collection('blog').add({title,category:cat,content,createdAt:new Date().toISOString()});document.getElementById('b-title').value='';document.getElementById('b-content').value='';showAl('blog-s','✓ Post published!');await loadBlogPosts();toast('Post published ✓');}
+  catch(e){showAl('blog-e','Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Publish Post';
+}
+async function deleteBlog(id){if(!confirm('Delete this blog post?'))return;try{await db.collection('blog').doc(id).delete();await loadBlogPosts();toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+
+// ── MODALS ──
+function openRelease(id){
+  const r=releases.find(x=>x.id===id);if(!r)return;
+  document.getElementById('rmo-title').textContent=r.title||'Release';
+  const rows=[['Artist',r.artistName||r.primaryArtist],['Featured',r.featuredArtists||'—'],['Type',r.type],['Genre',r.genre],['Sub Genre',r.subGenre||'—'],['Language',r.language],['Release Date',r.releaseDate],['Explicit',r.explicit==='yes'?'⚠ Yes':'No'],['Label',r.label],['Copyright Year',r.copyrightYear],['Songwriters',r.writers],['Producers',r.producers||'—'],['Platforms',r.platforms],['Territories',r.territories],['UPC/ISRC',r.upc||'To be assigned'],['Notes',r.notes||'—'],['Submitted',r.submittedAt?r.submittedAt.substring(0,10):'—']];
+  if(r.audioLink)rows.push(['Audio',`<a href="${r.audioLink}" target="_blank">▶ Open Audio</a>`]);
+  if(r.artworkLink)rows.push(['Artwork',`<a href="${r.artworkLink}" target="_blank">🖼 Open Artwork</a>`]);
+  if(r.lyrics)rows.push(['Lyrics',`<div style="white-space:pre-wrap;font-size:12px;color:var(--txt2);max-height:100px;overflow-y:auto;background:var(--card);padding:10px;border-radius:6px;margin-top:4px">${r.lyrics}</div>`]);
+  document.getElementById('rmo-body').innerHTML=`<div style="margin-bottom:16px"><label style="display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Change Status</label><select class="ss" style="width:100%;padding:10px;font-size:13px" onchange="updateRelStatus('${r.id}',this.value)"><option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option><option value="review" ${r.status==='review'?'selected':''}>🔍 Review</option><option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option><option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option><option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option></select></div>${rows.map(([k,v])=>`<div class="dr"><div class="dk">${k}</div><div class="dv">${v||'—'}</div></div>`).join('')}`;
+  document.getElementById('rmo').classList.add('on');
+}
+
+function openTicket(id){
+  const t=tickets.find(x=>x.id===id);if(!t)return;
+  document.getElementById('tmo-title').textContent=t.subject||'Ticket';
+  document.getElementById('tmo-body').innerHTML=`<div class="dr"><div class="dk">Artist</div><div class="dv">${t.artistName||'—'}</div></div><div class="dr"><div class="dk">Email</div><div class="dv">${t.artistEmail||'—'}</div></div><div class="dr"><div class="dk">Category</div><div class="dv">${t.category||'—'}</div></div><div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></div></div><div class="dr"><div class="dk">Status</div><div class="dv"><select class="ss" onchange="updateTicketStatus('${t.id}',this.value)"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option></select></div></div><div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--card);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${t.message||'—'}</div></div>${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${t.reply}</div></div>`:''}<div class="reply-box"><label>Reply to Artist</label><textarea id="reply-txt" placeholder="Type your response...">${t.reply||''}</textarea><div class="reply-acts"><button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button><button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMo('tmo')">Close Ticket</button></div></div>`;
+  document.getElementById('tmo').classList.add('on');
+}
+
+function openDemo(id){
+  const d=demos.find(x=>x.id===id);if(!d)return;
+  const bc={new:'b-new',reviewing:'b-reviewing',shortlisted:'b-shortlisted',signed:'b-signed',rejected:'b-rejected',archived:'b-archived'};
+  document.getElementById('dmo-title').textContent=d.name||'Demo';
+  document.getElementById('dmo-ref').innerHTML=`<span class="ref-badge">${d.refId||'—'}</span><span class="badge ${bc[d.status]||'b-new'}" style="margin-left:6px">${(d.status||'new').toUpperCase()}</span>`;
+  const links=[];if(d.demoLink)links.push(`<a href="${d.demoLink}" target="_blank">🎵 Demo Link</a>`);if(d.youtubeLink)links.push(`<a href="${d.youtubeLink}" target="_blank">▶️ YouTube/SC</a>`);
+  document.getElementById('dmo-body').innerHTML=`<div class="demo-grid"><div class="demo-field"><div class="df-label">Artist</div><div class="df-val" style="font-weight:700;font-size:15px">${d.name||'—'}</div></div><div class="demo-field"><div class="df-label">Genre</div><div class="df-val">${d.genre||'—'}</div></div><div class="demo-field"><div class="df-label">Email</div><div class="df-val"><a href="mailto:${d.email}">${d.email||'—'}</a></div></div><div class="demo-field"><div class="df-label">Phone</div><div class="df-val">${d.phone||'—'}</div></div><div class="demo-field"><div class="df-label">Instagram</div><div class="df-val"><a href="https://instagram.com/${(d.instagram||'').replace('@','')}" target="_blank">${d.instagram||'—'}</a></div></div><div class="demo-field"><div class="df-label">Submitted</div><div class="df-val">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</div></div><div class="demo-field full"><div class="df-label">Music Links</div><div class="df-val" style="display:flex;gap:16px;flex-wrap:wrap">${links.length?links.join(''):'No links provided'}</div></div><div class="demo-field full"><div class="df-label">Artist Bio</div><div class="df-val bio">${d.bio||'—'}</div></div></div><div class="update-box"><label>Update Status</label><select onchange="updateDemoStatus('${d.id}',this.value)"><option value="new" ${d.status==='new'?'selected':''}>🆕 New</option><option value="reviewing" ${d.status==='reviewing'?'selected':''}>👂 Reviewing</option><option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>⭐ Shortlisted</option><option value="signed" ${d.status==='signed'?'selected':''}>✅ Signed</option><option value="rejected" ${d.status==='rejected'?'selected':''}>❌ Rejected</option><option value="archived" ${d.status==='archived'?'selected':''}>📦 Archived</option></select><label>Internal Notes</label><textarea id="modal-notes" placeholder="Private notes about this artist...">${d.notes||''}</textarea><div class="update-acts"><button class="btn-save-demo" id="save-notes-btn" onclick="saveDemoNotes('${d.id}')">Save Notes</button><button class="btn-del-demo" onclick="deleteDemo('${d.id}')">Delete</button></div></div>`;
+  document.getElementById('dmo').classList.add('on');
+}
+
+async function sendReply(id){
+  const reply=document.getElementById('reply-txt')?.value.trim();if(!reply){toast('Please type a reply first.');return;}
+  const btn=document.getElementById('btn-reply');btn.disabled=true;btn.textContent='Sending...';
+  try{await db.collection('tickets').doc(id).update({reply,status:'resolved',repliedAt:new Date().toISOString()});const t=tickets.find(x=>x.id===id);if(t){t.reply=reply;t.status='resolved';}toast('Reply sent ✓');closeMo('tmo');await loadTickets();}
+  catch(e){toast('Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Send Reply';
+}
+
+async function saveDemoNotes(id){
+  const notes=document.getElementById('modal-notes')?.value.trim()||'';
+  const btn=document.getElementById('save-notes-btn');btn.disabled=true;btn.textContent='Saving...';
+  try{await db.collection('demos').doc(id).update({notes});const d=demos.find(x=>x.id===id);if(d)d.notes=notes;toast('Notes saved ✓');}
+  catch(e){toast('Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Save Notes';
+}
+
+async function deleteDemo(id){
+  if(!confirm('Permanently delete this demo?'))return;
+  try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();renderDemoTable('demo-all-list',demos);closeMo('dmo');toast('Deleted ✓');}
+  catch(e){toast('Error: '+e.message);}
+}
+
+// ── FILTERS ──
+function setRelSt(s,btn){relFilter=s;document.querySelectorAll('#page-all .fb:not(.demo-fb)').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyRelFilter();}
+function applyRelFilter(){
+  const q=(document.getElementById('rel-search')?.value||'').toLowerCase();
+  let list=releases;
+  if(relFilter!=='all')list=list.filter(r=>r.status===relFilter);
+  if(q)list=list.filter(r=>(r.title||'').toLowerCase().includes(q)||(r.artistName||'').toLowerCase().includes(q));
+  renderRelTable('all-list',list);
+}
+function setTF(s,btn){tktFilter=s;document.querySelectorAll('#page-tickets .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');let list=tickets;if(s!=='all')list=list.filter(t=>t.status===s);renderTickets(list);}
+function setDF(s,btn){demoFilter=s;document.querySelectorAll('#page-demo-all .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyDemoFilter();}
+function applyDemoFilter(){
+  const q=(document.getElementById('demo-search')?.value||'').toLowerCase();
+  let list=demos;
+  if(demoFilter!=='all')list=list.filter(d=>d.status===demoFilter);
+  if(q)list=list.filter(d=>(d.name||'').toLowerCase().includes(q)||(d.email||'').toLowerCase().includes(q)||(d.genre||'').toLowerCase().includes(q));
+  renderDemoTable('demo-all-list',list);
+  document.getElementById('demo-all-count').textContent=list.length+' result'+(list.length!==1?'s':'');
+}
+
+// ── NAV ──
+function goPage(name,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+name)?.classList.add('on');
+  if(el)el.classList.add('on');
+  const isDemo=name.startsWith('demo-');
+  const pill=document.getElementById('section-pill');
+  if(pill){pill.textContent=isDemo?'Demos':'Label';pill.className='section-pill '+(isDemo?'pill-demo':'pill-label');}
+  const m={
+    overview:['Overview','Label + Demo summary'],all:['All Submissions','Every release'],pending:['Pending Review','Awaiting action'],live:['Live Releases','On platforms'],
+    royalties:['Manage Royalties','Update artist earnings'],blog:['Music Blog','Publish posts for artists'],artists:['All Artists','Registered accounts'],tickets:['Support Tickets','Artist support requests'],
+    'demo-inbox':['Demo Inbox','New & in-review submissions'],'demo-all':['All Demos','Every demo received'],'demo-shortlisted':['Shortlisted','Strong potential'],'demo-signed':['Signed','From demo pipeline'],'demo-rejected':['Rejected','Not moving forward']
+  };
+  const [t,s]=m[name]||['Admin',''];
+  document.getElementById('pgt').textContent=t;
+  document.getElementById('pgs').textContent=s;
+  if(name==='blog')loadBlogPosts();
+  if(name==='royalties'){loadRoyaltyHistory();loadArtists();}
+  window.scrollTo(0,0);
+}
+
+function closeMo(id){document.getElementById(id)?.classList.remove('on');}
+function showAl(id,m){const e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('on');}}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
 </script>
-
-
-<!-- STEP 5: ADD TO goPage() function "m" object: -->
-<!-- Add: 'portal-settings':['Portal Settings','Customize artist dashboard'], -->
+</body>
+</html>
