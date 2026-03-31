@@ -4,22 +4,26 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TIR Unified Admin</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308080a'/%3E%3Cpath d='M18 42V22l28-5v20' fill='none' stroke='%23c9a84c' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='18' cy='42' r='6' fill='%23c9a84c'/%3E%3Ccircle cx='46' cy='37' r='6' fill='%23c9a84c'/%3E%3C/svg%3E"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-firebase.initializeApp({
+const firebaseConfig={
   apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
   authDomain:"tir-portal.firebaseapp.com",
   projectId:"tir-portal",
   storageBucket:"tir-portal.firebasestorage.app",
   messagingSenderId:"941411383328",
   appId:"1:941411383328:web:4b7b0aa63e2c7e44d82a445"
-});
+};
+firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
 const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
+let creatorAuth=null;
+try{creatorAuth=firebase.initializeApp(firebaseConfig,'artistCreatorApp').auth();}catch(e){creatorAuth=firebase.app('artistCreatorApp').auth();}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -275,6 +279,18 @@ tr:last-child td{border-bottom:none}
 .blog-form textarea{resize:vertical;min-height:200px}
 .blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
 .blog-admin-card:last-child{border-bottom:none}
+.artist-create-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-bottom:18px}
+.artist-create-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.artist-create-grid .full{grid-column:1/-1}
+.release-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.release-edit-grid .full{grid-column:1/-1}
+.release-edit-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:16px}
+.release-edit-box label{display:block;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.release-edit-box input,.release-edit-box select,.release-edit-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.release-edit-box input:focus,.release-edit-box select:focus,.release-edit-box textarea:focus{border-color:var(--gold)}
+.release-edit-box textarea{resize:vertical;min-height:84px}
+.release-edit-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+@media(max-width:768px){.artist-create-grid,.release-edit-grid{grid-template-columns:1fr}.artist-create-grid .full,.release-edit-grid .full{grid-column:1}}
 .blog-admin-info{flex:1;min-width:0}
 .blog-admin-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .blog-admin-meta{font-size:12px;color:var(--txt3);margin-top:2px}
@@ -445,7 +461,27 @@ tr:last-child td{border-bottom:none}
       <div class="section"><div class="sh"><h3>Published Posts</h3><p id="blog-count">0 posts</p></div><div class="sb2" id="blog-list"></div></div>
     </div>
 
-    <div class="pg" id="page-artists"><div class="section"><div class="sh"><h3>Registered Artists</h3><p id="art-count">0 artists</p></div><div class="tw" id="art-list"></div></div></div>
+    <div class="pg" id="page-artists">
+      <div class="section" style="margin-bottom:18px">
+        <div class="sh"><h3>Create Artist Account</h3><p>Generate login + profile without opening Firebase</p></div>
+        <div class="sb2">
+          <div class="al al-e" id="artist-create-e"></div><div class="al al-s" id="artist-create-s"></div>
+          <div class="artist-create-card">
+            <div class="artist-create-grid">
+              <div class="fg"><label>Artist Name *</label><input type="text" id="ca-name" placeholder="Artist / stage name"/></div>
+              <div class="fg"><label>Email *</label><input type="email" id="ca-email" placeholder="artist@email.com"/></div>
+              <div class="fg"><label>Password *</label><input type="password" id="ca-password" placeholder="Minimum 6 characters"/></div>
+              <div class="fg"><label>Genre</label><input type="text" id="ca-genre" placeholder="Hip Hop / Trap"/></div>
+              <div class="fg"><label>Country</label><input type="text" id="ca-country" placeholder="India"/></div>
+              <div class="fg"><label>PayPal Email</label><input type="email" id="ca-paypal" placeholder="paypal@email.com"/></div>
+              <div class="fg full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio..."></textarea></div>
+              <div class="fg full"><button class="btn-gold" id="artist-create-btn" onclick="createArtistAccount()">Create Artist Account</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="sh"><h3>Registered Artists</h3><p id="art-count">0 artists</p></div><div class="tw" id="art-list"></div></div>
+    </div>
 
     <div class="pg" id="page-tickets">
       <div class="section"><div class="sh"><h3>Support Tickets</h3></div>
@@ -597,6 +633,8 @@ async function loadDemos(){
 }
 
 function renderLabelStats(){document.getElementById('s0').textContent=releases.length;document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;document.getElementById('s2').textContent=releases.filter(r=>r.status==='live').length;document.getElementById('s3').textContent=artists.length;document.getElementById('s4').textContent=tickets.filter(t=>t.status==='open').length;document.getElementById('art-count').textContent=artists.length+' artist'+(artists.length!==1?'s':'');}
+function escapeHtml(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escapeHtmlAttr(v){return escapeHtml(v).replace(/"/g,'&quot;');}
 function renderDemoStats(){const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length,sh=demos.filter(d=>d.status==='shortlisted').length,sg=demos.filter(d=>d.status==='signed').length;['d0','ds0'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=total;});['d1','ds1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nw;});['d2','ds2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=rv;});['d3','ds3'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sh;});['d4','ds4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sg;});}
 
 // ── Artwork thumbnail in release table ──
@@ -629,7 +667,7 @@ function renderRelTable(id,list){
         <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
         <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
       </select></td>
-      <td><button class="vb" onclick="openRelease('${r.id}')">View</button></td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="openRelease('${r.id}')">View</button><button class="rb" onclick="openRelease('${r.id}',true)">Edit</button><button class="db" onclick="deleteRelease('${r.id}')">Delete</button></div></td>
     </tr>`).join('')}
   </tbody></table>`;
 }
@@ -637,7 +675,7 @@ function renderRelTable(id,list){
 // ══════════════════════════════════════════
 // RELEASE MODAL — with file preview
 // ══════════════════════════════════════════
-function openRelease(id){
+function openRelease(id, openEdit){
   const r=releases.find(x=>x.id===id);if(!r)return;
   document.getElementById('rmo-title').textContent=r.title||'Release';
 
@@ -720,7 +758,10 @@ function openRelease(id){
     ${rows.map(([k,v])=>`<div class="dr"><div class="dk">${k}</div><div class="dv">${v||'—'}</div></div>`).join('')}
   `;
 
+
+  document.getElementById('rmo-body').innerHTML += `<div class="release-edit-box"><label>Edit Release Content</label><div class="release-edit-grid"><div><label style="margin-bottom:6px">Title</label><input id="edit-release-title" type="text" value="${escapeHtmlAttr(r.title||'')}"/></div><div><label style="margin-bottom:6px">Primary Artist</label><input id="edit-release-artist" type="text" value="${escapeHtmlAttr(r.primaryArtist||r.artistName||'')}"/></div><div><label style="margin-bottom:6px">Type</label><select id="edit-release-type"><option value="Single" ${(r.type||'')==='Single'?'selected':''}>Single</option><option value="EP" ${(r.type||'')==='EP'?'selected':''}>EP</option><option value="Album" ${(r.type||'')==='Album'?'selected':''}>Album</option><option value="Mixtape" ${(r.type||'')==='Mixtape'?'selected':''}>Mixtape</option></select></div><div><label style="margin-bottom:6px">Genre</label><input id="edit-release-genre" type="text" value="${escapeHtmlAttr(r.genre||'')}"/></div><div><label style="margin-bottom:6px">Language</label><input id="edit-release-language" type="text" value="${escapeHtmlAttr(r.language||'')}"/></div><div><label style="margin-bottom:6px">Release Date</label><input id="edit-release-date" type="date" value="${escapeHtmlAttr(r.releaseDate||'')}"/></div><div><label style="margin-bottom:6px">Label</label><input id="edit-release-label" type="text" value="${escapeHtmlAttr(r.label||'The Imaginary Records')}"/></div><div><label style="margin-bottom:6px">UPC / ISRC</label><input id="edit-release-upc" type="text" value="${escapeHtmlAttr(r.upc||'')}"/></div><div class="full"><label style="margin-bottom:6px">Writers</label><input id="edit-release-writers" type="text" value="${escapeHtmlAttr(r.writers||'')}"/></div><div class="full"><label style="margin-bottom:6px">Notes</label><textarea id="edit-release-notes">${escapeHtml(r.notes||'')}</textarea></div></div><div class="release-edit-actions"><button class="btn-gold" id="save-release-btn" onclick="saveReleaseEdits('${r.id}')">Save Release Changes</button><button class="db" onclick="deleteRelease('${r.id}')">Delete Release</button></div></div>`;
   document.getElementById('rmo').classList.add('on');
+  if(openEdit){setTimeout(function(){var el=document.getElementById('edit-release-title'); if(el) el.focus();},10);} 
 }
 
 // ── Demo, Ticket, Artist tables (unchanged from original) ──
@@ -791,6 +832,9 @@ async function updateRelStatus(id,status){try{await db.collection('releases').do
 async function updateDemoStatus(id,status){try{await db.collection('demos').doc(id).update({status});const d=demos.find(x=>x.id===id);if(d)d.status=status;renderDemoStats();toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
 async function updateTicketStatus(id,status){try{await db.collection('tickets').doc(id).update({status});const t=tickets.find(x=>x.id===id);if(t)t.status=status;toast('Ticket → '+status);await loadTickets();}catch(e){toast('Error: '+e.message);}}
 
+async function createArtistAccount(){const name=document.getElementById('ca-name').value.trim(),email=document.getElementById('ca-email').value.trim(),password=document.getElementById('ca-password').value,genre=document.getElementById('ca-genre').value.trim(),country=document.getElementById('ca-country').value.trim(),paypal=document.getElementById('ca-paypal').value.trim(),bio=document.getElementById('ca-bio').value.trim();document.getElementById('artist-create-e').classList.remove('on');document.getElementById('artist-create-s').classList.remove('on');if(!name)return showAl('artist-create-e','Please enter artist name.');if(!email)return showAl('artist-create-e','Please enter artist email.');if(!password||password.length<6)return showAl('artist-create-e','Password must be at least 6 characters.');const btn=document.getElementById('artist-create-btn');btn.disabled=true;btn.textContent='Creating...';try{const cred=await creatorAuth.createUserWithEmailAndPassword(email,password);await db.collection('users').doc(cred.user.uid).set({name,email,genre,country,bio,paypal,createdAt:new Date().toISOString(),createdBy:'admin-panel',role:'artist'},{merge:true});await creatorAuth.signOut();['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-paypal','ca-bio'].forEach(id=>document.getElementById(id).value='');showAl('artist-create-s','✓ Artist account created successfully.');await loadArtists();toast('Artist account created ✓');}catch(e){showAl('artist-create-e','Error: '+e.message);}btn.disabled=false;btn.textContent='Create Artist Account';}
+async function saveReleaseEdits(id){const payload={title:document.getElementById('edit-release-title').value.trim(),primaryArtist:document.getElementById('edit-release-artist').value.trim(),artistName:document.getElementById('edit-release-artist').value.trim(),type:document.getElementById('edit-release-type').value,genre:document.getElementById('edit-release-genre').value.trim(),language:document.getElementById('edit-release-language').value.trim(),releaseDate:document.getElementById('edit-release-date').value,label:document.getElementById('edit-release-label').value.trim(),upc:document.getElementById('edit-release-upc').value.trim(),writers:document.getElementById('edit-release-writers').value.trim(),notes:document.getElementById('edit-release-notes').value.trim(),updatedAt:new Date().toISOString(),updatedBy:'admin-panel'};const btn=document.getElementById('save-release-btn');if(btn){btn.disabled=true;btn.textContent='Saving...';}try{await db.collection('releases').doc(id).set(payload,{merge:true});toast('Release updated ✓');await loadReleases();closeMo('rmo');}catch(e){toast('Error: '+e.message);}if(btn){btn.disabled=false;btn.textContent='Save Release Changes';}}
+async function deleteRelease(id){if(!confirm('Delete this release permanently?'))return;try{await db.collection('releases').doc(id).delete();releases=releases.filter(r=>r.id!==id);renderLabelStats();applyRelFilter();renderRelTable('ov-list',releases.slice(0,8));renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review'));renderRelTable('live-list',releases.filter(r=>r.status==='live'));closeMo('rmo');toast('Release deleted ✓');}catch(e){toast('Error: '+e.message);}}
 async function saveRoyalty(){
   const artistId=document.getElementById('r-artist').value,period=document.getElementById('r-period').value,total=document.getElementById('r-total').value;
   document.getElementById('roy-e').classList.remove('on');document.getElementById('roy-s').classList.remove('on');
