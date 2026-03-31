@@ -4,26 +4,23 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TIR Unified Admin</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308080a'/%3E%3Cpath d='M18 42V22l28-5v20' fill='none' stroke='%23c9a84c' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='18' cy='42' r='6' fill='%23c9a84c'/%3E%3Ccircle cx='46' cy='37' r='6' fill='%23c9a84c'/%3E%3C/svg%3E"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2308080a%22/%3E%3Cpath d=%22M16 42V18l24-4v24%22 stroke=%22%23c9a84c%22 stroke-width=%224%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Ccircle cx=%2218%22 cy=%2244%22 r=%226%22 fill=%22%23c9a84c%22/%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%226%22 fill=%22%23c9a84c%22/%3E%3C/svg%3E"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig={
+firebase.initializeApp({
   apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
   authDomain:"tir-portal.firebaseapp.com",
   projectId:"tir-portal",
   storageBucket:"tir-portal.firebasestorage.app",
   messagingSenderId:"941411383328",
   appId:"1:941411383328:web:4b7b0aa63e2c7e44d82a445"
-};
-firebase.initializeApp(firebaseConfig);
+});
 const auth=firebase.auth();
 const db=firebase.firestore();
 const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
-let creatorAuth=null;
-try{creatorAuth=firebase.initializeApp(firebaseConfig,'artistCreatorApp').auth();}catch(e){creatorAuth=firebase.app('artistCreatorApp').auth();}
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -277,20 +274,17 @@ tr:last-child td{border-bottom:none}
 .blog-form input,.blog-form select,.blog-form textarea{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
 .blog-form input:focus,.blog-form select:focus,.blog-form textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
 .blog-form textarea{resize:vertical;min-height:200px}
-.blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
-.blog-admin-card:last-child{border-bottom:none}
-.artist-create-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-bottom:18px}
+
 .artist-create-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .artist-create-grid .full{grid-column:1/-1}
-.release-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.release-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
 .release-edit-grid .full{grid-column:1/-1}
-.release-edit-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:16px}
-.release-edit-box label{display:block;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.release-edit-box input,.release-edit-box select,.release-edit-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
-.release-edit-box input:focus,.release-edit-box select:focus,.release-edit-box textarea:focus{border-color:var(--gold)}
-.release-edit-box textarea{resize:vertical;min-height:84px}
-.release-edit-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-@media(max-width:768px){.artist-create-grid,.release-edit-grid{grid-template-columns:1fr}.artist-create-grid .full,.release-edit-grid .full{grid-column:1}}
+.edit-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:18px}
+.edit-card h4{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--gold)}
+.file-pill{background:var(--card);border:1px solid var(--brd);padding:2px 7px;border-radius:4px;font-size:10px}
+
+.blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
+.blog-admin-card:last-child{border-bottom:none}
 .blog-admin-info{flex:1;min-width:0}
 .blog-admin-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .blog-admin-meta{font-size:12px;color:var(--txt3);margin-top:2px}
@@ -463,20 +457,18 @@ tr:last-child td{border-bottom:none}
 
     <div class="pg" id="page-artists">
       <div class="section" style="margin-bottom:18px">
-        <div class="sh"><h3>Create Artist Account</h3><p>Generate login + profile without opening Firebase</p></div>
+        <div class="sh"><h3>Create Artist Account</h3><p>No Firebase Console needed</p></div>
         <div class="sb2">
-          <div class="al al-e" id="artist-create-e"></div><div class="al al-s" id="artist-create-s"></div>
-          <div class="artist-create-card">
-            <div class="artist-create-grid">
-              <div class="fg"><label>Artist Name *</label><input type="text" id="ca-name" placeholder="Artist / stage name"/></div>
-              <div class="fg"><label>Email *</label><input type="email" id="ca-email" placeholder="artist@email.com"/></div>
-              <div class="fg"><label>Password *</label><input type="password" id="ca-password" placeholder="Minimum 6 characters"/></div>
-              <div class="fg"><label>Genre</label><input type="text" id="ca-genre" placeholder="Hip Hop / Trap"/></div>
-              <div class="fg"><label>Country</label><input type="text" id="ca-country" placeholder="India"/></div>
-              <div class="fg"><label>PayPal Email</label><input type="email" id="ca-paypal" placeholder="paypal@email.com"/></div>
-              <div class="fg full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio..."></textarea></div>
-              <div class="fg full"><button class="btn-gold" id="artist-create-btn" onclick="createArtistAccount()">Create Artist Account</button></div>
-            </div>
+          <div class="al al-e" id="artist-e"></div><div class="al al-s" id="artist-s"></div>
+          <div class="artist-create-grid">
+            <div class="fg"><label>Artist / Stage Name *</label><input type="text" id="ca-name" placeholder="Artist name"/></div>
+            <div class="fg"><label>Email *</label><input type="email" id="ca-email" placeholder="artist@email.com"/></div>
+            <div class="fg"><label>Password *</label><input type="password" id="ca-password" placeholder="Minimum 6 characters"/></div>
+            <div class="fg"><label>Genre</label><input type="text" id="ca-genre" placeholder="Hip Hop / Trap"/></div>
+            <div class="fg"><label>Country</label><input type="text" id="ca-country" placeholder="India"/></div>
+            <div class="fg"><label>Instagram</label><input type="text" id="ca-instagram" placeholder="@handle"/></div>
+            <div class="fg full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio"></textarea></div>
+            <div class="fg full"><button class="btn-gold" id="ca-btn" onclick="createArtistAccount()">Create Artist Account</button></div>
           </div>
         </div>
       </div>
@@ -593,6 +585,16 @@ tr:last-child td{border-bottom:none}
 let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[],demos=[];
 let relFilter='all',tktFilter='all',demoFilter='all';
 
+function escapeAttr(str){return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function secondaryAuth(){
+  try { return firebase.app('ArtistCreator').auth(); }
+  catch(e){
+    const cfg = firebase.app().options;
+    return firebase.initializeApp(cfg,'ArtistCreator').auth();
+  }
+}
+
+
 function openDrawer(){document.getElementById('mob-drawer').classList.add('on');document.getElementById('mob-overlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDrawer(){document.getElementById('mob-drawer').classList.remove('on');document.getElementById('mob-overlay').classList.remove('on');document.body.style.overflow='';}
 function setMN(name,isDemo=false){document.querySelectorAll('.mob-ni').forEach(n=>{n.classList.remove('on');n.classList.remove('on-demo');});const el=document.getElementById('mni-'+name);if(el)el.classList.add(isDemo?'on-demo':'on');}
@@ -633,8 +635,6 @@ async function loadDemos(){
 }
 
 function renderLabelStats(){document.getElementById('s0').textContent=releases.length;document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;document.getElementById('s2').textContent=releases.filter(r=>r.status==='live').length;document.getElementById('s3').textContent=artists.length;document.getElementById('s4').textContent=tickets.filter(t=>t.status==='open').length;document.getElementById('art-count').textContent=artists.length+' artist'+(artists.length!==1?'s':'');}
-function escapeHtml(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function escapeHtmlAttr(v){return escapeHtml(v).replace(/"/g,'&quot;');}
 function renderDemoStats(){const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length,sh=demos.filter(d=>d.status==='shortlisted').length,sg=demos.filter(d=>d.status==='signed').length;['d0','ds0'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=total;});['d1','ds1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nw;});['d2','ds2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=rv;});['d3','ds3'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sh;});['d4','ds4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sg;});}
 
 // ── Artwork thumbnail in release table ──
@@ -646,18 +646,20 @@ function artThumb(r){
 function renderRelTable(id,list){
   const el=document.getElementById(id);if(!el)return;
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No releases found</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Art</th><th>Title</th><th>Artist</th><th>Type</th><th>Genre</th><th>Date</th><th>Files</th><th>Status</th><th>Action</th></tr></thead><tbody>
+  el.innerHTML=`<table><thead><tr><th>Art</th><th>Title</th><th>Artist</th><th>Format</th><th>Genre</th><th>Date</th><th>Files</th><th>Status</th><th>Action</th></tr></thead><tbody>
     ${list.map(r=>`<tr>
       <td>${artThumb(r)}</td>
       <td style="font-weight:600">${r.title||'—'}</td>
       <td style="color:var(--txt2)">${r.artistName||r.primaryArtist||'—'}</td>
-      <td style="font-size:12px;color:var(--txt3)">${r.type||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.releaseMedium==='video'?'Music Video':(r.type||'—')}</td>
       <td style="font-size:12px;color:var(--txt3)">${r.genre||'—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.releaseDate||'—'}</td>
       <td>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
-          ${r.audioUrl?`<span style="background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}
-          ${r.artworkUrl?`<span style="background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">ART</span>`:''}
+          ${r.releaseMedium==='video'
+            ? `<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
+            : `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`
+          }
         </div>
       </td>
       <td><select class="ss" onchange="updateRelStatus('${r.id}',this.value)">
@@ -667,7 +669,7 @@ function renderRelTable(id,list){
         <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
         <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
       </select></td>
-      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="openRelease('${r.id}')">View</button><button class="rb" onclick="openRelease('${r.id}',true)">Edit</button><button class="db" onclick="deleteRelease('${r.id}')">Delete</button></div></td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="openRelease('${r.id}')">Manage</button><button class="db" onclick="deleteRelease('${r.id}')">Delete</button></div></td>
     </tr>`).join('')}
   </tbody></table>`;
 }
@@ -675,58 +677,23 @@ function renderRelTable(id,list){
 // ══════════════════════════════════════════
 // RELEASE MODAL — with file preview
 // ══════════════════════════════════════════
-function openRelease(id, openEdit){
+function openRelease(id){
   const r=releases.find(x=>x.id===id);if(!r)return;
   document.getElementById('rmo-title').textContent=r.title||'Release';
-
-  // Artwork preview HTML
+  const isVideo = r.releaseMedium==='video';
   const artworkHTML = r.artworkUrl
     ? `<img class="artwork-thumb" src="${r.artworkUrl}" alt="Cover Artwork"/>`
     : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>No artwork uploaded</span></div>`;
-
-  // Dimension badge
-  let dimBadge = '';
-  if(r.artworkDimensions) {
-    const parts = r.artworkDimensions.split('×');
-    const w = parseInt(parts[0]), h = parseInt(parts[1]);
-    const cls = (w>=3000&&h>=3000)?'dims-ok':'dims-warn';
-    dimBadge = `<span class="dims-badge ${cls}">${r.artworkDimensions}px</span>`;
-  }
-
-  // Audio player HTML
+  const thumbHTML = r.thumbnailUrl
+    ? `<img class="artwork-thumb" src="${r.thumbnailUrl}" alt="Thumbnail"/>`
+    : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>No thumbnail uploaded</span></div>`;
   const audioHTML = r.audioUrl
-    ? `<div class="audio-player-admin">
-        <div class="audio-filename">${r.audioFilename||'Audio File'}</div>
-        <div class="audio-filemeta">
-          <span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>
-          ${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}
-        </div>
-        <audio class="admin-audio" controls src="${r.audioUrl}"></audio>
-        <div class="audio-actions">
-          <a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Audio
-          </a>
-        </div>
-      </div>`
-    : `<div class="no-file-msg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>No audio file uploaded</div>`;
-
-  const rows=[
-    ['Artist',r.artistName||r.primaryArtist],
-    ['Featured',r.featuredArtists||'—'],
-    ['Type',r.type],['Genre',r.genre],['Sub Genre',r.subGenre||'—'],
-    ['Language',r.language],['Release Date',r.releaseDate],
-    ['Explicit',r.explicit==='yes'?'⚠ Yes':'No'],
-    ['Label',r.label],['Copyright Year',r.copyrightYear],
-    ['Songwriters',r.writers],['Producers',r.producers||'—'],
-    ['Platforms',r.platforms],['Territories',r.territories],
-    ['UPC/ISRC',r.upc||'To be assigned'],
-    ['Submitted',r.submittedAt?r.submittedAt.substring(0,10):'—'],
-    ['Notes',r.notes||'—']
-  ];
-  if(r.lyrics) rows.push(['Lyrics',`<div style="white-space:pre-wrap;font-size:12px;color:var(--txt2);max-height:100px;overflow-y:auto;background:var(--card);padding:10px;border-radius:6px;margin-top:4px">${r.lyrics}</div>`]);
-
+    ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
+    : `<div class="no-file-msg">No audio file uploaded</div>`;
+  const videoHTML = r.videoUrl
+    ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${r.videoDirector}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${r.videoUrl}</div><div class="audio-actions"><a class="audio-dl-btn" href="${r.videoUrl}" target="_blank">Open Video URL</a></div></div>`
+    : `<div class="no-file-msg">No video URL added</div>`;
   document.getElementById('rmo-body').innerHTML=`
-    <!-- STATUS CHANGE -->
     <div style="margin-bottom:18px">
       <label style="display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Change Status</label>
       <select class="ss" style="width:100%;padding:10px;font-size:13px" onchange="updateRelStatus('${r.id}',this.value)">
@@ -738,30 +705,38 @@ function openRelease(id, openEdit){
       </select>
     </div>
 
-    <!-- FILE PREVIEW PANEL -->
     <div class="file-preview-panel">
-      <div class="fp-card">
-        <div class="fp-label">🖼 Cover Artwork ${dimBadge}</div>
-        <div class="fp-content">
-          ${artworkHTML}
-          ${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.artworkUrl}" target="_blank" download>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Artwork</a></div>`:''}
-        </div>
-      </div>
-      <div class="fp-card">
-        <div class="fp-label">🎵 Audio File</div>
-        <div class="fp-content">${audioHTML}</div>
-      </div>
+      <div class="fp-card"><div class="fp-label">🖼 Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.artworkUrl}" target="_blank">Open Artwork</a></div>`:''}</div></div>
+      <div class="fp-card"><div class="fp-label">${isVideo?'🎬 Video / Thumbnail':'🎵 Audio File'}</div><div class="fp-content">${isVideo?videoHTML:audioHTML}</div></div>
+      ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
     </div>
 
-    <!-- RELEASE DETAILS -->
-    ${rows.map(([k,v])=>`<div class="dr"><div class="dk">${k}</div><div class="dv">${v||'—'}</div></div>`).join('')}
+    <div class="edit-card">
+      <h4>Edit Submission</h4>
+      <div class="release-edit-grid">
+        <div class="fg"><label>Title</label><input id="er-title" value="${escapeAttr(r.title||'')}"/></div>
+        <div class="fg"><label>Artist</label><input id="er-artist" value="${escapeAttr(r.primaryArtist||r.artistName||'')}"/></div>
+        <div class="fg"><label>Type</label><input id="er-type" value="${escapeAttr(r.type||'')}"/></div>
+        <div class="fg"><label>Genre</label><input id="er-genre" value="${escapeAttr(r.genre||'')}"/></div>
+        <div class="fg"><label>Release Date</label><input id="er-date" type="date" value="${escapeAttr(r.releaseDate||'')}"/></div>
+        <div class="fg"><label>Label</label><input id="er-label" value="${escapeAttr(r.label||'')}"/></div>
+        <div class="fg full"><label>Featured Artists</label><input id="er-featured" value="${escapeAttr(r.featuredArtists||'')}"/></div>
+        <div class="fg full"><label>Writers</label><input id="er-writers" value="${escapeAttr(r.writers||'')}"/></div>
+        <div class="fg full"><label>Producers</label><input id="er-producers" value="${escapeAttr(r.producers||'')}"/></div>
+        ${isVideo?`<div class="fg full"><label>Video URL</label><input id="er-video-url" value="${escapeAttr(r.videoUrl||'')}"/></div>
+          <div class="fg"><label>Director</label><input id="er-video-director" value="${escapeAttr(r.videoDirector||'')}"/></div>
+          <div class="fg"><label>Channel</label><input id="er-video-channel" value="${escapeAttr(r.videoChannel||'')}"/></div>
+          <div class="fg full"><label>Thumbnail URL</label><input id="er-thumb-url" value="${escapeAttr(r.thumbnailUrl||'')}"/></div>` : ``}
+        <div class="fg full"><label>Artwork URL</label><input id="er-art-url" value="${escapeAttr(r.artworkUrl||'')}"/></div>
+        <div class="fg full"><label>Notes</label><textarea id="er-notes">${escapeAttr(r.notes||'')}</textarea></div>
+      </div>
+      <div class="update-acts">
+        <button class="btn-save-demo" onclick="saveReleaseEdits('${r.id}')">Save Changes</button>
+        <button class="btn-del-demo" onclick="deleteRelease('${r.id}')">Delete Submission</button>
+      </div>
+    </div>
   `;
-
-
-  document.getElementById('rmo-body').innerHTML += `<div class="release-edit-box"><label>Edit Release Content</label><div class="release-edit-grid"><div><label style="margin-bottom:6px">Title</label><input id="edit-release-title" type="text" value="${escapeHtmlAttr(r.title||'')}"/></div><div><label style="margin-bottom:6px">Primary Artist</label><input id="edit-release-artist" type="text" value="${escapeHtmlAttr(r.primaryArtist||r.artistName||'')}"/></div><div><label style="margin-bottom:6px">Type</label><select id="edit-release-type"><option value="Single" ${(r.type||'')==='Single'?'selected':''}>Single</option><option value="EP" ${(r.type||'')==='EP'?'selected':''}>EP</option><option value="Album" ${(r.type||'')==='Album'?'selected':''}>Album</option><option value="Mixtape" ${(r.type||'')==='Mixtape'?'selected':''}>Mixtape</option></select></div><div><label style="margin-bottom:6px">Genre</label><input id="edit-release-genre" type="text" value="${escapeHtmlAttr(r.genre||'')}"/></div><div><label style="margin-bottom:6px">Language</label><input id="edit-release-language" type="text" value="${escapeHtmlAttr(r.language||'')}"/></div><div><label style="margin-bottom:6px">Release Date</label><input id="edit-release-date" type="date" value="${escapeHtmlAttr(r.releaseDate||'')}"/></div><div><label style="margin-bottom:6px">Label</label><input id="edit-release-label" type="text" value="${escapeHtmlAttr(r.label||'The Imaginary Records')}"/></div><div><label style="margin-bottom:6px">UPC / ISRC</label><input id="edit-release-upc" type="text" value="${escapeHtmlAttr(r.upc||'')}"/></div><div class="full"><label style="margin-bottom:6px">Writers</label><input id="edit-release-writers" type="text" value="${escapeHtmlAttr(r.writers||'')}"/></div><div class="full"><label style="margin-bottom:6px">Notes</label><textarea id="edit-release-notes">${escapeHtml(r.notes||'')}</textarea></div></div><div class="release-edit-actions"><button class="btn-gold" id="save-release-btn" onclick="saveReleaseEdits('${r.id}')">Save Release Changes</button><button class="db" onclick="deleteRelease('${r.id}')">Delete Release</button></div></div>`;
   document.getElementById('rmo').classList.add('on');
-  if(openEdit){setTimeout(function(){var el=document.getElementById('edit-release-title'); if(el) el.focus();},10);} 
 }
 
 // ── Demo, Ticket, Artist tables (unchanged from original) ──
@@ -791,8 +766,8 @@ function renderDemoTable(id,list){
 function renderArtists(){
   const el=document.getElementById('art-list');if(!el)return;
   if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th></tr></thead><tbody>
-    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td></tr>`;}).join('')}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
+    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
   </tbody></table>`;
 }
 
@@ -832,9 +807,6 @@ async function updateRelStatus(id,status){try{await db.collection('releases').do
 async function updateDemoStatus(id,status){try{await db.collection('demos').doc(id).update({status});const d=demos.find(x=>x.id===id);if(d)d.status=status;renderDemoStats();toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
 async function updateTicketStatus(id,status){try{await db.collection('tickets').doc(id).update({status});const t=tickets.find(x=>x.id===id);if(t)t.status=status;toast('Ticket → '+status);await loadTickets();}catch(e){toast('Error: '+e.message);}}
 
-async function createArtistAccount(){const name=document.getElementById('ca-name').value.trim(),email=document.getElementById('ca-email').value.trim(),password=document.getElementById('ca-password').value,genre=document.getElementById('ca-genre').value.trim(),country=document.getElementById('ca-country').value.trim(),paypal=document.getElementById('ca-paypal').value.trim(),bio=document.getElementById('ca-bio').value.trim();document.getElementById('artist-create-e').classList.remove('on');document.getElementById('artist-create-s').classList.remove('on');if(!name)return showAl('artist-create-e','Please enter artist name.');if(!email)return showAl('artist-create-e','Please enter artist email.');if(!password||password.length<6)return showAl('artist-create-e','Password must be at least 6 characters.');const btn=document.getElementById('artist-create-btn');btn.disabled=true;btn.textContent='Creating...';try{const cred=await creatorAuth.createUserWithEmailAndPassword(email,password);await db.collection('users').doc(cred.user.uid).set({name,email,genre,country,bio,paypal,createdAt:new Date().toISOString(),createdBy:'admin-panel',role:'artist'},{merge:true});await creatorAuth.signOut();['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-paypal','ca-bio'].forEach(id=>document.getElementById(id).value='');showAl('artist-create-s','✓ Artist account created successfully.');await loadArtists();toast('Artist account created ✓');}catch(e){showAl('artist-create-e','Error: '+e.message);}btn.disabled=false;btn.textContent='Create Artist Account';}
-async function saveReleaseEdits(id){const payload={title:document.getElementById('edit-release-title').value.trim(),primaryArtist:document.getElementById('edit-release-artist').value.trim(),artistName:document.getElementById('edit-release-artist').value.trim(),type:document.getElementById('edit-release-type').value,genre:document.getElementById('edit-release-genre').value.trim(),language:document.getElementById('edit-release-language').value.trim(),releaseDate:document.getElementById('edit-release-date').value,label:document.getElementById('edit-release-label').value.trim(),upc:document.getElementById('edit-release-upc').value.trim(),writers:document.getElementById('edit-release-writers').value.trim(),notes:document.getElementById('edit-release-notes').value.trim(),updatedAt:new Date().toISOString(),updatedBy:'admin-panel'};const btn=document.getElementById('save-release-btn');if(btn){btn.disabled=true;btn.textContent='Saving...';}try{await db.collection('releases').doc(id).set(payload,{merge:true});toast('Release updated ✓');await loadReleases();closeMo('rmo');}catch(e){toast('Error: '+e.message);}if(btn){btn.disabled=false;btn.textContent='Save Release Changes';}}
-async function deleteRelease(id){if(!confirm('Delete this release permanently?'))return;try{await db.collection('releases').doc(id).delete();releases=releases.filter(r=>r.id!==id);renderLabelStats();applyRelFilter();renderRelTable('ov-list',releases.slice(0,8));renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review'));renderRelTable('live-list',releases.filter(r=>r.status==='live'));closeMo('rmo');toast('Release deleted ✓');}catch(e){toast('Error: '+e.message);}}
 async function saveRoyalty(){
   const artistId=document.getElementById('r-artist').value,period=document.getElementById('r-period').value,total=document.getElementById('r-total').value;
   document.getElementById('roy-e').classList.remove('on');document.getElementById('roy-s').classList.remove('on');
@@ -864,6 +836,74 @@ async function saveBlog(){
   btn.disabled=false;btn.textContent='Publish Post';
 }
 async function deleteBlog(id){if(!confirm('Delete this blog post?'))return;try{await db.collection('blog').doc(id).delete();await loadBlogPosts();toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+
+async function createArtistAccount(){
+  const name=document.getElementById('ca-name').value.trim();
+  const email=document.getElementById('ca-email').value.trim();
+  const password=document.getElementById('ca-password').value;
+  document.getElementById('artist-e').classList.remove('on');
+  document.getElementById('artist-s').classList.remove('on');
+  if(!name)return showAl('artist-e','Please enter artist name.');
+  if(!email)return showAl('artist-e','Please enter email.');
+  if(password.length<6)return showAl('artist-e','Password must be at least 6 characters.');
+  const btn=document.getElementById('ca-btn'); btn.disabled=true; btn.textContent='Creating...';
+  try{
+    const secAuth=secondaryAuth();
+    const cred=await secAuth.createUserWithEmailAndPassword(email,password);
+    const uid=cred.user.uid;
+    await db.collection('users').doc(uid).set({
+      name,email,
+      genre:document.getElementById('ca-genre').value.trim(),
+      country:document.getElementById('ca-country').value.trim(),
+      instagram:document.getElementById('ca-instagram').value.trim(),
+      bio:document.getElementById('ca-bio').value.trim(),
+      createdAt:new Date().toISOString(),
+      createdBy:'admin-panel'
+    },{merge:true});
+    await secAuth.signOut();
+    ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value='');
+    showAl('artist-s','✓ Artist account created successfully.');
+    await loadArtists();
+    toast('Artist account created ✓');
+  }catch(e){showAl('artist-e','Error: '+e.message);}
+  btn.disabled=false; btn.textContent='Create Artist Account';
+}
+
+async function deleteArtistProfile(id){
+  if(!confirm('Delete this artist profile document from Firestore? Auth account will remain unless removed manually or via backend.'))return;
+  try{await db.collection('users').doc(id).delete(); await loadArtists(); toast('Artist profile deleted ✓');}catch(e){toast('Error: '+e.message);}
+}
+
+async function saveReleaseEdits(id){
+  const payload={
+    title:document.getElementById('er-title').value.trim(),
+    primaryArtist:document.getElementById('er-artist').value.trim(),
+    artistName:document.getElementById('er-artist').value.trim(),
+    type:document.getElementById('er-type').value.trim(),
+    genre:document.getElementById('er-genre').value.trim(),
+    releaseDate:document.getElementById('er-date').value.trim(),
+    label:document.getElementById('er-label').value.trim(),
+    featuredArtists:document.getElementById('er-featured').value.trim(),
+    writers:document.getElementById('er-writers').value.trim(),
+    producers:document.getElementById('er-producers').value.trim(),
+    artworkUrl:document.getElementById('er-art-url').value.trim(),
+    notes:document.getElementById('er-notes').value.trim()
+  };
+  const videoUrl=document.getElementById('er-video-url');
+  if(videoUrl){
+    payload.videoUrl=videoUrl.value.trim();
+    payload.videoDirector=document.getElementById('er-video-director').value.trim();
+    payload.videoChannel=document.getElementById('er-video-channel').value.trim();
+    payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim();
+  }
+  try{await db.collection('releases').doc(id).update(payload); await loadReleases(); openRelease(id); toast('Release updated ✓');}catch(e){toast('Error: '+e.message);}
+}
+
+async function deleteRelease(id){
+  if(!confirm('Delete this release submission?'))return;
+  try{await db.collection('releases').doc(id).delete(); releases=releases.filter(r=>r.id!==id); renderLabelStats(); applyRelFilter(); renderRelTable('ov-list',releases.slice(0,8)); renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review')); renderRelTable('live-list',releases.filter(r=>r.status==='live')); closeMo('rmo'); toast('Release deleted ✓');}catch(e){toast('Error: '+e.message);}
+}
+
 
 function openTicket(id){
   const t=tickets.find(x=>x.id===id);if(!t)return;
