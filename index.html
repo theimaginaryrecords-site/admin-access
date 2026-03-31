@@ -657,7 +657,7 @@ function renderRelTable(id,list){
       <td>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
           ${r.releaseMedium==='video'
-            ? `<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
+            ? `${r.videoUrl?`<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>`:''}${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
             : `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`
           }
         </div>
@@ -707,7 +707,8 @@ function openRelease(id){
 
     <div class="file-preview-panel">
       <div class="fp-card"><div class="fp-label">🖼 Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.artworkUrl}" target="_blank">Open Artwork</a></div>`:''}</div></div>
-      <div class="fp-card"><div class="fp-label">${isVideo?'🎬 Video / Thumbnail':'🎵 Audio File'}</div><div class="fp-content">${isVideo?videoHTML:audioHTML}</div></div>
+      <div class="fp-card"><div class="fp-label">🎵 Audio File</div><div class="fp-content">${audioHTML}</div></div>
+      ${isVideo?`<div class="fp-card"><div class="fp-label">🎬 Video URL</div><div class="fp-content">${videoHTML}</div></div>`:''}
       ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
     </div>
 
@@ -727,6 +728,7 @@ function openRelease(id){
           <div class="fg"><label>Director</label><input id="er-video-director" value="${escapeAttr(r.videoDirector||'')}"/></div>
           <div class="fg"><label>Channel</label><input id="er-video-channel" value="${escapeAttr(r.videoChannel||'')}"/></div>
           <div class="fg full"><label>Thumbnail URL</label><input id="er-thumb-url" value="${escapeAttr(r.thumbnailUrl||'')}"/></div>` : ``}
+        <div class="fg full"><label>Audio URL</label><input id="er-audio-url" value="${escapeAttr(r.audioUrl||'')}"/></div>
         <div class="fg full"><label>Artwork URL</label><input id="er-art-url" value="${escapeAttr(r.artworkUrl||'')}"/></div>
         <div class="fg full"><label>Notes</label><textarea id="er-notes">${escapeAttr(r.notes||'')}</textarea></div>
       </div>
@@ -886,6 +888,7 @@ async function saveReleaseEdits(id){
     featuredArtists:document.getElementById('er-featured').value.trim(),
     writers:document.getElementById('er-writers').value.trim(),
     producers:document.getElementById('er-producers').value.trim(),
+    audioUrl:document.getElementById('er-audio-url').value.trim(),
     artworkUrl:document.getElementById('er-art-url').value.trim(),
     notes:document.getElementById('er-notes').value.trim()
   };
