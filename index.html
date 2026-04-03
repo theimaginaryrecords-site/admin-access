@@ -283,12 +283,6 @@ tr:last-child td{border-bottom:none}
 .edit-card h4{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--gold)}
 .file-pill{background:var(--card);border:1px solid var(--brd);padding:2px 7px;border-radius:4px;font-size:10px}
 
-
-.track-admin-list{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-.track-admin-item{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:12px 14px}
-.track-admin-item h5{font-size:13px;font-weight:700;margin-bottom:4px}
-.track-admin-item p{font-size:12px;color:var(--txt3);line-height:1.7}
-
 .blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
 .blog-admin-card:last-child{border-bottom:none}
 .blog-admin-info{flex:1;min-width:0}
@@ -699,7 +693,6 @@ function openRelease(id){
   const videoHTML = r.videoUrl
     ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${r.videoDirector}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${r.videoUrl}</div><div class="audio-actions"><a class="audio-dl-btn" href="${r.videoUrl}" target="_blank">Open Video URL</a></div></div>`
     : `<div class="no-file-msg">No video URL added</div>`;
-  const tracksHTML = Array.isArray(r.tracks) && r.tracks.length ? `<div class="edit-card"><h4>Track List</h4><div class="track-admin-list">${r.tracks.map((t, i)=>`<div class="track-admin-item"><h5>${escapeHtml(t.title||('Track '+(i+1)))}</h5><p>${escapeHtml(t.artist||'Artist not set')}${t.featuredArtists?` · ft. ${escapeHtml(t.featuredArtists)}`:''}</p><p>Writers: ${escapeHtml(t.writers||'—')} · Composers: ${escapeHtml(t.composers||'—')}</p><p>${t.audioFilename?`Audio: ${escapeHtml(t.audioFilename)}`:'No audio uploaded'}${t.previewStart?` · Preview start: ${escapeHtml(String(t.previewStart))} sec`:''}</p></div>`).join('')}</div></div>` : ''; 
   document.getElementById('rmo-body').innerHTML=`
     <div style="margin-bottom:18px">
       <label style="display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Change Status</label>
@@ -719,7 +712,6 @@ function openRelease(id){
       ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
     </div>
 
-    ${tracksHTML}
     <div class="edit-card">
       <h4>Edit Submission</h4>
       <div class="release-edit-grid">
@@ -739,7 +731,6 @@ function openRelease(id){
         <div class="fg full"><label>Audio URL</label><input id="er-audio-url" value="${escapeAttr(r.audioUrl||'')}"/></div>
         <div class="fg full"><label>Artwork URL</label><input id="er-art-url" value="${escapeAttr(r.artworkUrl||'')}"/></div>
         <div class="fg full"><label>Notes</label><textarea id="er-notes">${escapeAttr(r.notes||'')}</textarea></div>
-        <div class="fg full"><label>Tracks JSON</label><textarea id="er-tracks-json" style="min-height:160px;font-family:'DM Mono',monospace">${escapeAttr(JSON.stringify(r.tracks||[], null, 2))}</textarea></div>
       </div>
       <div class="update-acts">
         <button class="btn-save-demo" onclick="saveReleaseEdits('${r.id}')">Save Changes</button>
@@ -901,10 +892,6 @@ async function saveReleaseEdits(id){
     artworkUrl:document.getElementById('er-art-url').value.trim(),
     notes:document.getElementById('er-notes').value.trim()
   };
-  const tracksField=document.getElementById('er-tracks-json');
-  if (tracksField) {
-    try { payload.tracks = JSON.parse(tracksField.value || '[]'); payload.trackCount = Array.isArray(payload.tracks) ? payload.tracks.length : 0; } catch(e) { toast('Tracks JSON is invalid.'); return; }
-  }
   const videoUrl=document.getElementById('er-video-url');
   if(videoUrl){
     payload.videoUrl=videoUrl.value.trim();
@@ -963,5 +950,81 @@ function closeMo(id){document.getElementById(id)?.classList.remove('on');}
 function showAl(id,m){const e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('on');}}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
 </script>
+
+<script>
+(function(){
+function ensureArtistAccessControls(){
+  if(document.getElementById('ca-audio-access')) return;
+  var grid=document.querySelector('.artist-create-grid'); if(!grid) return;
+  var ig=document.getElementById('ca-instagram'); if(!ig) return; var igWrap=ig.closest('.fg');
+  var wrap1=document.createElement('div'); wrap1.className='fg'; wrap1.innerHTML='<label>Audio Release Access</label><select id="ca-audio-access"><option value="true" selected>Enabled</option><option value="false">Disabled</option></select>';
+  var wrap2=document.createElement('div'); wrap2.className='fg'; wrap2.innerHTML='<label>Music Video Access</label><select id="ca-video-access"><option value="false" selected>Disabled</option><option value="true">Enabled</option></select>';
+  igWrap.insertAdjacentElement('afterend',wrap1); wrap1.insertAdjacentElement('afterend',wrap2);
+}
+var oldLoadArtists=window.loadArtists;
+window.loadArtists=async function(){ await oldLoadArtists(); ensureArtistAccessControls(); };
+window.renderArtists=function(){
+  const el=document.getElementById('art-list');if(!el)return;
+  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>Audio</th><th>Video</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
+    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0); const access=a.releaseServices||{}; return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td><select class="ss" id="art-audio-${a.id}"><option value="true" ${(access.audio!==false)?'selected':''}>Enabled</option><option value="false" ${(access.audio===false)?'selected':''}>Disabled</option></select></td><td><select class="ss" id="art-video-${a.id}"><option value="true" ${(access.video===true)?'selected':''}>Enabled</option><option value="false" ${(access.video!==true)?'selected':''}>Disabled</option></select></td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">INR ${tr.toFixed(2)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="saveArtistServices('${a.id}')">Save Access</button><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></div></td></tr>`;}).join('')}
+  </tbody></table>`;
+};
+window.saveArtistServices=async function(id){ try{ await db.collection('users').doc(id).set({releaseServices:{audio:document.getElementById('art-audio-'+id).value==='true', video:document.getElementById('art-video-'+id).value==='true'}},{merge:true}); toast('Artist access updated ✓'); await oldLoadArtists(); }catch(e){toast('Error: '+e.message);} };
+window.createArtistAccount=async function(){
+  const name=document.getElementById('ca-name').value.trim(), email=document.getElementById('ca-email').value.trim(), password=document.getElementById('ca-password').value;
+  document.getElementById('artist-e').classList.remove('on'); document.getElementById('artist-s').classList.remove('on');
+  if(!name) return showAl('artist-e','Please enter artist name.'); if(!email) return showAl('artist-e','Please enter email.'); if(password.length<6) return showAl('artist-e','Password must be at least 6 characters.');
+  const btn=document.getElementById('ca-btn'); btn.disabled=true; btn.textContent='Creating...';
+  try{ const secAuth=secondaryAuth(); const cred=await secAuth.createUserWithEmailAndPassword(email,password); const uid=cred.user.uid; await db.collection('users').doc(uid).set({name,email,genre:document.getElementById('ca-genre').value.trim(),country:document.getElementById('ca-country').value.trim(),instagram:document.getElementById('ca-instagram').value.trim(),bio:document.getElementById('ca-bio').value.trim(),releaseServices:{audio:document.getElementById('ca-audio-access').value==='true',video:document.getElementById('ca-video-access').value==='true'},createdAt:new Date().toISOString(),createdBy:'admin-panel'},{merge:true}); await secAuth.signOut(); ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value=''); document.getElementById('ca-audio-access').value='true'; document.getElementById('ca-video-access').value='false'; showAl('artist-s','✓ Artist account created successfully.'); await oldLoadArtists(); toast('Artist account created ✓'); }catch(e){ showAl('artist-e','Error: '+e.message); }
+  btn.disabled=false; btn.textContent='Create Artist Account';
+};
+var oldOpenRelease=window.openRelease;
+window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div><div class="fg full"><label>Track Summary</label><textarea id="er-tracks">'+(((r.trackItems||[]).map(function(t){return ((t.trackNumber||'')+'. '+(t.title||'')+' - '+(t.artist||'')).trim();}).join('\n')).replace(/</g,'&lt;'))+'</textarea></div>'); }
+};
+var oldSaveReleaseEdits=window.saveReleaseEdits;
+window.saveReleaseEdits=async function(id){
+  const payload={ title:document.getElementById('er-title').value.trim(), primaryArtist:document.getElementById('er-artist').value.trim(), artistName:document.getElementById('er-artist').value.trim(), type:document.getElementById('er-type').value.trim(), genre:document.getElementById('er-genre').value.trim(), releaseDate:document.getElementById('er-date').value.trim(), label:document.getElementById('er-label').value.trim(), featuredArtists:document.getElementById('er-featured').value.trim(), writers:document.getElementById('er-writers').value.trim(), producers:document.getElementById('er-producers').value.trim(), audioUrl:document.getElementById('er-audio-url').value.trim(), artworkUrl:document.getElementById('er-art-url').value.trim(), notes:document.getElementById('er-notes').value.trim(), selectedPlatforms:(document.getElementById('er-platforms')&&document.getElementById('er-platforms').value.trim()?document.getElementById('er-platforms').value.split(',').map(function(x){return x.trim();}).filter(Boolean):[]), previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null), trackItems:(document.getElementById('er-tracks')&&document.getElementById('er-tracks').value.trim()?document.getElementById('er-tracks').value.split('\n').map(function(line,idx){return {trackNumber:idx+1,title:line.trim()};}):[]) };
+  var videoUrl=document.getElementById('er-video-url'); if(videoUrl){ payload.videoUrl=videoUrl.value.trim(); payload.videoDirector=document.getElementById('er-video-director').value.trim(); payload.videoChannel=document.getElementById('er-video-channel').value.trim(); payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim(); }
+  try{ await db.collection('releases').doc(id).update(payload); await loadReleases(); window.openRelease(id); toast('Release updated ✓'); }catch(e){ toast('Error: '+e.message); }
+};
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureArtistAccessControls,100); });
+})();
+</script>
+
+<script>
+(function(){
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var prevOpen = window.openRelease;
+  window.openRelease = function(id){
+    prevOpen(id);
+    var r=(window.releases||[]).find(function(x){return x.id===id;});
+    if(!r) return;
+    var body=document.getElementById('rmo-body');
+    if(!body) return;
+    if(document.getElementById('admin-track-detail-box')) document.getElementById('admin-track-detail-box').remove();
+    var tracks=r.trackItems||[];
+    var wrap=document.createElement('div');
+    wrap.id='admin-track-detail-box';
+    wrap.className='edit-card';
+    wrap.innerHTML='<h4>Track Details</h4>' + (tracks.length ? tracks.map(function(t){ return '<div style="padding:12px 0;border-top:1px solid rgba(255,255,255,.05)"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+esc((t.trackNumber||'')+'. '+(t.title||'Untitled'))+'</div><div style="font-size:11px;color:var(--txt3);line-height:1.8;margin-top:4px">Artist: '+esc(t.artist||'—')+' · Writers: '+esc(t.writers||'—')+' · Composers: '+esc(t.composers||'—')+' · Contributors: '+esc(t.contributors||'—')+(t.audioFilename?' · Audio: '+esc(t.audioFilename):'')+'</div>'+(t.lyrics?'<div style="font-size:12px;color:var(--txt2);margin-top:6px;white-space:pre-wrap">Lyrics: '+esc(t.lyrics)+'</div>':'')+'</div>'; }).join('') : '<div style="font-size:12px;color:var(--txt3)">No detailed tracks saved for this release.</div>');
+    body.appendChild(wrap);
+    var tracksField=document.getElementById('er-tracks');
+    if(tracksField && tracks.length){ tracksField.value = JSON.stringify(tracks, null, 2); }
+  };
+  var prevSave = window.saveReleaseEdits;
+  window.saveReleaseEdits = async function(id){
+    var tf=document.getElementById('er-tracks');
+    if(tf && tf.value.trim()){
+      try{
+        var parsed = tf.value.trim().startsWith('[') ? JSON.parse(tf.value) : tf.value.split('\n').map(function(line,idx){ return {trackNumber:idx+1,title:line.trim()}; });
+        tf.value = JSON.stringify(parsed, null, 2);
+      }catch(e){ toast('Track JSON is invalid: '+e.message); return; }
+    }
+    return prevSave(id);
+  };
+})();
+</script>
+
 </body>
 </html>
