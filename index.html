@@ -991,40 +991,5 @@ window.saveReleaseEdits=async function(id){
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureArtistAccessControls,100); });
 })();
 </script>
-
-<script>
-(function(){
-  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  var prevOpen = window.openRelease;
-  window.openRelease = function(id){
-    prevOpen(id);
-    var r=(window.releases||[]).find(function(x){return x.id===id;});
-    if(!r) return;
-    var body=document.getElementById('rmo-body');
-    if(!body) return;
-    if(document.getElementById('admin-track-detail-box')) document.getElementById('admin-track-detail-box').remove();
-    var tracks=r.trackItems||[];
-    var wrap=document.createElement('div');
-    wrap.id='admin-track-detail-box';
-    wrap.className='edit-card';
-    wrap.innerHTML='<h4>Track Details</h4>' + (tracks.length ? tracks.map(function(t){ return '<div style="padding:12px 0;border-top:1px solid rgba(255,255,255,.05)"><div style="font-size:13px;font-weight:700;color:var(--txt)">'+esc((t.trackNumber||'')+'. '+(t.title||'Untitled'))+'</div><div style="font-size:11px;color:var(--txt3);line-height:1.8;margin-top:4px">Artist: '+esc(t.artist||'—')+' · Writers: '+esc(t.writers||'—')+' · Composers: '+esc(t.composers||'—')+' · Contributors: '+esc(t.contributors||'—')+(t.audioFilename?' · Audio: '+esc(t.audioFilename):'')+'</div>'+(t.lyrics?'<div style="font-size:12px;color:var(--txt2);margin-top:6px;white-space:pre-wrap">Lyrics: '+esc(t.lyrics)+'</div>':'')+'</div>'; }).join('') : '<div style="font-size:12px;color:var(--txt3)">No detailed tracks saved for this release.</div>');
-    body.appendChild(wrap);
-    var tracksField=document.getElementById('er-tracks');
-    if(tracksField && tracks.length){ tracksField.value = JSON.stringify(tracks, null, 2); }
-  };
-  var prevSave = window.saveReleaseEdits;
-  window.saveReleaseEdits = async function(id){
-    var tf=document.getElementById('er-tracks');
-    if(tf && tf.value.trim()){
-      try{
-        var parsed = tf.value.trim().startsWith('[') ? JSON.parse(tf.value) : tf.value.split('\n').map(function(line,idx){ return {trackNumber:idx+1,title:line.trim()}; });
-        tf.value = JSON.stringify(parsed, null, 2);
-      }catch(e){ toast('Track JSON is invalid: '+e.message); return; }
-    }
-    return prevSave(id);
-  };
-})();
-</script>
-
 </body>
 </html>
