@@ -3,1087 +3,993 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TIR Admin — Website Control Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<title>TIR Unified Admin</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2308080a%22/%3E%3Cpath d=%22M16 42V18l24-4v24%22 stroke=%22%23c9a84c%22 stroke-width=%224%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Ccircle cx=%2218%22 cy=%2244%22 r=%226%22 fill=%22%23c9a84c%22/%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%226%22 fill=%22%23c9a84c%22/%3E%3C/svg%3E"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-firebase.initializeApp({apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",authDomain:"tir-portal.firebaseapp.com",projectId:"tir-portal",storageBucket:"tir-portal.firebasestorage.app",messagingSenderId:"941411383328",appId:"1:941411383328:web:4b7b0aa63e2c7e44d82a445"});
+firebase.initializeApp({
+  apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
+  authDomain:"tir-portal.firebaseapp.com",
+  projectId:"tir-portal",
+  storageBucket:"tir-portal.firebasestorage.app",
+  messagingSenderId:"941411383328",
+  appId:"1:941411383328:web:4b7b0aa63e2c7e44d82a445"
+});
 const auth=firebase.auth();
 const db=firebase.firestore();
-const ADMIN='theimaginaryrecords@gmail.com';
+const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#06080f;--bg2:#0a0d18;--surface:#0f1220;--card:#141828;--card2:#1a1f30;
-  --brd:rgba(255,255,255,.08);--brd2:rgba(255,255,255,.12);
-  --red:#CC0000;--red2:#E60000;--blue:#1e8aff;--blue2:#3d9fff;
-  --white:#fff;--txt2:rgba(255,255,255,.55);--txt3:rgba(255,255,255,.3);
-  --grn:#22c55e;--amber:#f59e0b;
-  --font-h:'Syne',sans-serif;--font-b:'Outfit',sans-serif;--font-m:'DM Mono',monospace;
+  --bg:#08080a;--surface:#0f0f12;--card:#16161a;--brd:#222228;
+  --gold:#c9a84c;--gold2:#e8c97a;--gold3:rgba(201,168,76,.1);
+  --txt:#f4f4f5;--txt2:#a1a1aa;--txt3:#52525b;
+  --grn:#22c55e;--red:#ef4444;--blu:#3b82f6;--org:#f97316;
+  --demo:#e8000d;--demo-bg:rgba(232,0,13,.08);--demo-brd:rgba(232,0,13,.2);
 }
-html,body{height:100%;font-family:var(--font-b);font-size:14px;background:var(--bg);color:var(--white);overflow:hidden}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── LOADER ── */
-#ld{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .4s}
-#ld.out{opacity:0;pointer-events:none}
-.ld-logo{font-family:var(--font-h);font-size:1.3rem;font-weight:800;letter-spacing:4px;color:var(--white)}
-.ld-logo span{color:var(--red)}
-.ld-sub{font-size:.7rem;color:var(--txt3);letter-spacing:.2em;text-transform:uppercase}
-.ld-bar{width:120px;height:2px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:8px}
-.ld-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--blue));animation:ld 1.4s ease infinite;background-size:200%;background-position:-100% 0}
-@keyframes ld{to{background-position:200% 0}}
+#ld{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px}
+.ld-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:7px;color:var(--gold);animation:pulse 1.5s ease infinite}
+.ld-bar{width:120px;height:2px;background:var(--brd);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:200% 100%;animation:shimmer 1.2s ease infinite}
 
-/* ── AUTH ── */
-#auth-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;background-image:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(30,138,255,.06),transparent)}
-#auth-screen.show{display:flex}
-.auth-box{width:360px;background:var(--surface);border:1px solid var(--brd);border-radius:16px;padding:40px;animation:fadeUp .4s ease}
-.ab-logo{text-align:center;margin-bottom:24px}
-.ab-logo .logo-mark{width:52px;height:52px;background:var(--red);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:.8rem;font-weight:800;color:#fff;margin:0 auto 12px}
-.ab-logo h2{font-family:var(--font-h);font-size:1.1rem;font-weight:800;letter-spacing:.05em}
-.ab-logo p{font-size:.78rem;color:var(--txt3);margin-top:4px}
-.fld{margin-bottom:14px}
-.fld label{display:block;font-size:.72rem;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
-.fld input{width:100%;background:var(--card);border:1.5px solid var(--brd);border-radius:9px;color:var(--white);padding:11px 13px;font-family:var(--font-b);font-size:.9rem;outline:none;transition:all .2s}
-.fld input:focus{border-color:rgba(30,138,255,.4);box-shadow:0 0 0 3px rgba(30,138,255,.08)}
-.auth-btn{width:100%;padding:12px;background:var(--white);border:none;border-radius:9px;color:var(--bg);font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font-b);margin-top:4px}
-.auth-btn:hover{background:#e8eeff;transform:translateY(-1px)}
-.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.auth-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#fca5a5;margin-bottom:12px;display:none}
-.auth-err.show{display:block}
+#auth{min-height:100vh;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse 50% 40% at 50% 0%,rgba(201,168,76,.06) 0%,transparent 70%)}
+.abox{width:400px;max-width:95vw;background:var(--surface);border:1px solid var(--brd);border-radius:16px;padding:44px 40px;box-shadow:0 32px 100px rgba(0,0,0,.6);animation:fadeUp .5s ease}
+.abox-top{text-align:center;margin-bottom:30px}
+.abox-brand{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:6px;color:var(--gold);text-shadow:0 0 20px rgba(201,168,76,.3)}
+.abox-sub{font-size:11px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.abox-tag{font-size:13px;color:var(--txt2);margin-top:10px}
+.iw{margin-bottom:14px}
+.iw label{display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.iw input{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
+.iw input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.btn-gold{width:100%;padding:13px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-gold:disabled{background:#4a3d1c;color:#666;cursor:not-allowed;transform:none}
+.err-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#fca5a5;font-size:12px;padding:10px 12px;margin-bottom:14px;display:none}
+.err-box.on{display:block;animation:fadeIn .3s ease}
 
-/* ── LAYOUT ── */
-#panel{display:none;height:100vh;flex-direction:row}
-#panel.show{display:flex}
-.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow-y:auto}
-.sb-head{padding:18px 16px 12px;border-bottom:1px solid var(--brd)}
-.sb-brand{font-family:var(--font-h);font-size:.95rem;font-weight:800;letter-spacing:1px}
-.sb-brand span{color:var(--red)}
-.sb-tag{font-size:.65rem;color:var(--txt3);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
-.sb-user{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--brd);background:rgba(30,138,255,.03)}
-.sb-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px rgba(34,197,94,.5);animation:pulse 2s ease infinite;flex-shrink:0}
-.sb-user-email{font-size:.72rem;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sb-nav{flex:1;padding:8px}
-.nav-section{font-size:.65rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.15em;padding:10px 10px 4px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt2);cursor:pointer;font-size:.82rem;font-weight:500;transition:all .15s;margin-bottom:1px;position:relative}
-.nav-item:hover{background:var(--card);color:var(--white)}
-.nav-item.active{background:rgba(30,138,255,.1);color:var(--blue2);font-weight:600}
-.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--blue);border-radius:0 2px 2px 0}
-.nav-item .ni-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
-.nav-item.active .ni-icon{opacity:1}
-.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:100px;min-width:18px;text-align:center}
-.nav-badge.blue{background:var(--blue)}
-.sb-bot{padding:8px;border-top:1px solid var(--brd)}
-.signout-btn{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;color:var(--txt3);cursor:pointer;font-size:.82rem;font-weight:500;transition:all .15s;width:100%;background:none;border:none}
-.signout-btn:hover{background:rgba(239,68,68,.08);color:#f87171}
+#panel{display:none}
+.layout{display:flex;min-height:100vh}
+.sb{width:230px;min-width:230px;background:var(--surface);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-top{padding:20px 16px 14px;border-bottom:1px solid var(--brd)}
+.sb-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold)}
+.sb-sub{font-size:10px;color:var(--txt3);letter-spacing:1px}
+.sb-admin{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--brd);background:rgba(201,168,76,.04)}
+.admin-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.5);animation:pulse 2s ease infinite}
+.admin-lbl{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+nav{flex:1;padding:8px}
+.ns{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:2px;padding:10px 10px 4px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt2);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;margin-bottom:1px;position:relative}
+.ni:hover{background:var(--card);color:var(--txt)}
+.ni.on{background:var(--gold3);color:var(--gold);font-weight:600}
+.ni.on::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:0 2px 2px 0}
+.ni.demo-ni.on{background:var(--demo-bg);color:var(--demo)}
+.ni.demo-ni.on::before{background:var(--demo)}
+.ni svg{width:15px;height:15px;flex-shrink:0}
+.ni .cnt{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;animation:pulse 2s ease infinite}
+.ni .cnt-demo{margin-left:auto;background:var(--demo);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;animation:pulse 2s ease infinite}
+.demo-sep{height:1px;background:var(--demo-brd);margin:6px 10px 2px}
+.ns-demo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;padding:6px 10px 4px;color:var(--demo);opacity:.9}
+.sb-bot{padding:10px 8px;border-top:1px solid var(--brd)}
+.so-btn{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--txt3);cursor:pointer;font-size:13px;width:100%;background:none;border:none;transition:all .15s}
+.so-btn:hover{background:rgba(239,68,68,.1);color:var(--red)}
 
-/* ── MAIN ── */
-.main{flex:1;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column}
-.top-bar{background:var(--surface);border-bottom:1px solid var(--brd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0}
-.top-title{font-family:var(--font-h);font-size:1rem;font-weight:700;letter-spacing:.02em}
-.top-actions{display:flex;gap:8px}
-.top-link{font-size:.78rem;font-weight:600;padding:7px 16px;border-radius:7px;cursor:pointer;transition:all .2s;text-decoration:none;letter-spacing:.02em}
-.top-link.outline{background:transparent;border:1.5px solid var(--brd2);color:var(--white)}
-.top-link.outline:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.04)}
-.content{padding:28px;flex:1;animation:fadeUp .3s ease}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;backdrop-filter:blur(2px)}
+.mob-overlay.on{display:block;animation:fadeIn .2s ease}
+.mob-drawer{display:none;position:fixed;left:0;top:0;bottom:0;width:270px;background:var(--surface);border-right:1px solid var(--brd);z-index:1001;flex-direction:column;overflow-y:auto;transform:translateX(-100%);transition:transform .3s ease}
+.mob-drawer.on{transform:translateX(0)}
+.mob-topbar{display:none;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:100}
+.mob-topbar-brand{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:4px;color:var(--gold)}
+.mob-menu-btn{background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.mob-menu-btn:hover{border-color:var(--gold);color:var(--gold)}
+.mob-ref-btn{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:600;padding:7px 11px;cursor:pointer}
+.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--brd);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.mob-nav-items{display:flex;justify-content:space-around;align-items:stretch}
+.mob-ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 5px;cursor:pointer;color:var(--txt3);transition:color .2s;position:relative;gap:3px;min-width:0}
+.mob-ni.on{color:var(--gold)}
+.mob-ni svg{width:19px;height:19px;flex-shrink:0}
+.mob-ni-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.mob-ni .m-cnt{position:absolute;top:5px;right:50%;transform:translateX(10px);background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:8px;animation:pulse 2s ease infinite}
+.mob-ni.on::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
 
-/* ── TABS ── */
-.tab-pane{display:none}
-.tab-pane.active{display:block}
+.main{flex:1;overflow-y:auto}
+.topbar{padding:15px 26px;border-bottom:1px solid var(--brd);background:var(--surface);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px)}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar p{font-size:12px;color:var(--txt3);margin-top:1px}
+.section-pill{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:1px}
+.pill-label{background:var(--gold3);color:var(--gold)}
+.pill-demo{background:var(--demo-bg);color:var(--demo)}
+.btn-ref{padding:8px 16px;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-ref:hover{border-color:var(--gold);color:var(--gold)}
+.content{padding:22px 26px}
+.pg{display:none}
+.pg.on{display:block;animation:fadeUp .4s ease}
 
-/* ── CARDS ── */
-.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-@media(max-width:1100px){.stat-cards{grid-template-columns:repeat(2,1fr)}}
-.stat-card{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:20px}
-.sc-label{font-size:.72rem;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
-.sc-val{font-family:var(--font-h);font-size:2rem;font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
-.sc-sub{font-size:.78rem;color:var(--txt2)}
-.sc-trend{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:600;padding:3px 8px;border-radius:100px;margin-top:8px}
-.sc-trend.up{background:rgba(34,197,94,.1);color:var(--grn)}
-.sc-trend.neutral{background:rgba(255,255,255,.05);color:var(--txt3)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.sc{background:var(--surface);border:1px solid var(--brd);border-radius:10px;padding:16px;position:relative;overflow:hidden;transition:all .2s;cursor:default}
+.sc:hover{border-color:rgba(201,168,76,.2);transform:translateY(-1px)}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s}
+.sc:hover::before{opacity:1}
+.sc.demo-sc:hover{border-color:var(--demo-brd)}
+.sc.demo-sc::before{background:linear-gradient(90deg,transparent,var(--demo),transparent)}
+.sc-l{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.sc-v{font-size:26px;font-weight:800;color:var(--txt)}
+.sc-v.g{color:var(--gold)}
+.sc-v.r{color:var(--demo)}
+.sc-v.gr{color:var(--grn)}
 
-/* ── SECTION VISIBILITY ── */
-.visibility-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:900px){.visibility-grid{grid-template-columns:1fr 1fr}}
-.vis-card{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:20px;display:flex;align-items:center;justify-content:space-between;transition:border .2s}
-.vis-card.on{border-color:rgba(30,138,255,.2);background:rgba(30,138,255,.03)}
-.vis-info .vis-name{font-family:var(--font-h);font-size:.9rem;font-weight:700;margin-bottom:3px}
-.vis-info .vis-desc{font-size:.75rem;color:var(--txt3)}
-/* Toggle switch */
-.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:100px;cursor:pointer;transition:all .25s;border:1px solid var(--brd)}
-.toggle input:checked+.toggle-slider{background:var(--blue);border-color:var(--blue)}
-.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:2px;background:#fff;border-radius:50%;transition:all .25s}
-.toggle input:checked+.toggle-slider::before{left:19px}
+.section{background:var(--surface);border:1px solid var(--brd);border-radius:10px;margin-bottom:18px;overflow:hidden}
+.section.demo-section .sh{border-left:3px solid var(--demo)}
+.sh{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.sh h3{font-size:14px;font-weight:700}
+.sh p{font-size:12px;color:var(--txt3)}
+.sb2{padding:18px}
 
-/* ── BLOG ── */
-.blog-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
-.blog-toolbar input[type=text]{flex:1;min-width:200px;background:var(--card);border:1.5px solid var(--brd);border-radius:9px;color:var(--white);padding:10px 14px;font-size:.85rem;font-family:var(--font-b);outline:none;transition:border .2s}
-.blog-toolbar input:focus{border-color:rgba(30,138,255,.4)}
-.btn{font-size:.82rem;font-weight:600;padding:9px 18px;border-radius:8px;cursor:pointer;transition:all .2s;border:none;font-family:var(--font-b);display:inline-flex;align-items:center;gap:6px}
-.btn.primary{background:var(--white);color:var(--bg)}
-.btn.primary:hover{background:#e8eeff}
-.btn.danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171}
-.btn.danger:hover{background:rgba(239,68,68,.2)}
-.btn.ghost{background:transparent;border:1.5px solid var(--brd2);color:var(--white)}
-.btn.ghost:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.04)}
-.btn.blue{background:rgba(30,138,255,.15);border:1px solid rgba(30,138,255,.25);color:var(--blue2)}
-.btn.blue:hover{background:rgba(30,138,255,.25)}
-.btn.sm{padding:6px 12px;font-size:.75rem}
-.posts-list{display:flex;flex-direction:column;gap:10px}
-.post-row{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:16px;transition:border .2s}
-.post-row:hover{border-color:var(--brd2)}
-.post-row-thumb{width:52px;height:52px;border-radius:8px;background:var(--surface);flex-shrink:0;overflow:hidden}
-.post-row-thumb img{width:100%;height:100%;object-fit:cover}
-.post-row-thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:linear-gradient(135deg,rgba(204,0,0,.15),rgba(30,138,255,.1))}
-.post-meta{flex:1;min-width:0}
-.post-title-row{font-family:var(--font-h);font-size:.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
-.post-info{font-size:.75rem;color:var(--txt3);display:flex;gap:10px;align-items:center}
-.status-badge{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.05em}
-.status-badge.published{background:rgba(34,197,94,.1);color:var(--grn)}
-.status-badge.draft{background:rgba(255,255,255,.05);color:var(--txt3)}
-.post-actions{display:flex;gap:6px;flex-shrink:0}
+.frow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.fb{padding:5px 12px;background:none;border:1px solid var(--brd);border-radius:20px;color:var(--txt2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:var(--gold3)}
+.fb.demo-fb:hover,.fb.demo-fb.on{border-color:var(--demo);color:var(--demo);background:var(--demo-bg)}
+.si{background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;width:220px;transition:border-color .2s}
+.si:focus{border-color:var(--gold)}
 
-/* ── EDITOR MODAL ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(6,8,15,.9);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal-box{background:var(--surface);border:1px solid var(--brd);border-radius:16px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;animation:fadeUp .3s ease}
-.modal-head{padding:20px 24px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
-.modal-head h3{font-family:var(--font-h);font-size:1rem;font-weight:700}
-.modal-close-btn{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:1.1rem;padding:4px;transition:color .2s}
-.modal-close-btn:hover{color:var(--white)}
-.modal-body{padding:24px}
-.form-field{margin-bottom:16px}
-.form-field label{display:block;font-size:.72rem;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
-.form-field input,.form-field textarea,.form-field select{width:100%;background:var(--card);border:1.5px solid var(--brd);border-radius:9px;color:var(--white);padding:11px 13px;font-family:var(--font-b);font-size:.88rem;outline:none;transition:border .2s;resize:vertical}
-.form-field textarea{height:130px}
-.form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:rgba(30,138,255,.4);box-shadow:0 0 0 3px rgba(30,138,255,.08)}
-.form-field select option{background:var(--card)}
-.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.modal-footer{padding:16px 24px;border-top:1px solid var(--brd);display:flex;justify-content:flex-end;gap:8px}
-.char-count{font-size:.7rem;color:var(--txt3);text-align:right;margin-top:4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--brd);white-space:nowrap}
+td{padding:12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.01)}
+tr:last-child td{border-bottom:none}
 
-/* ── TABLE ── */
-.data-table{width:100%;border-collapse:collapse}
-.data-table th{background:var(--card);padding:10px 14px;text-align:left;font-size:.7rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--brd)}
-.data-table td{padding:12px 14px;font-size:.82rem;color:var(--txt2);border-bottom:1px solid var(--brd)}
-.data-table tr:hover td{background:rgba(255,255,255,.02)}
-.data-table td:first-child{color:var(--white);font-weight:500}
-.table-wrap{background:var(--card);border:1px solid var(--brd);border-radius:12px;overflow:hidden;overflow-x:auto}
+.badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.bp{background:rgba(249,115,22,.12);color:#fb923c}
+.br{background:rgba(59,130,246,.12);color:#60a5fa}
+.ba{background:rgba(34,197,94,.12);color:#4ade80}
+.bl{background:rgba(201,168,76,.15);color:var(--gold)}
+.bx{background:rgba(239,68,68,.12);color:#f87171}
+.b-new{background:rgba(59,130,246,.12);color:#60a5fa}
+.b-reviewing{background:rgba(249,115,22,.12);color:#fb923c}
+.b-shortlisted{background:rgba(232,0,13,.12);color:var(--demo)}
+.b-signed{background:rgba(34,197,94,.12);color:#4ade80}
+.b-rejected{background:rgba(82,82,91,.2);color:#71717a}
 
-/* ── MESSAGES ── */
-.msg-list{display:flex;flex-direction:column;gap:10px}
-.msg-card{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:18px 20px;transition:border .2s;position:relative;cursor:pointer}
-.msg-card:hover{border-color:var(--brd2)}
-.msg-card.unread{border-left:3px solid var(--blue)}
-.msg-card.unread::before{content:'NEW';position:absolute;top:12px;right:16px;font-family:var(--font-m);font-size:.6rem;font-weight:700;color:var(--blue2);background:rgba(30,138,255,.1);padding:2px 8px;border-radius:100px;letter-spacing:.05em}
-.msg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:12px}
-.msg-from{font-family:var(--font-h);font-size:.9rem;font-weight:700}
-.msg-time{font-size:.72rem;color:var(--txt3);flex-shrink:0;margin-top:2px}
-.msg-subject{font-size:.78rem;color:var(--blue2);margin-bottom:6px;font-weight:600}
-.msg-preview{font-size:.82rem;color:var(--txt2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.msg-email{font-size:.75rem;color:var(--txt3);margin-top:6px}
+.ss{background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 8px;cursor:pointer;outline:none;transition:border-color .2s}
+.ss:focus{border-color:var(--gold)}
+.ss option{background:#1a1a1e}
+.vb{padding:5px 12px;background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt2);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.vb:hover{border-color:var(--gold);color:var(--gold)}
+.rb{padding:5px 12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:#4ade80;font-size:12px;cursor:pointer;transition:all .15s}
+.rb:hover{background:rgba(34,197,94,.2)}
+.db{padding:5px 12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:#f87171;font-size:12px;cursor:pointer;transition:all .15s}
+.db:hover{background:rgba(239,68,68,.2)}
+.ref-badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);background:var(--card);border:1px solid var(--brd);padding:2px 8px;border-radius:4px;letter-spacing:1px}
 
-/* ── ALERTS / TOAST ── */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:14px 18px;font-size:.85rem;display:flex;align-items:center;gap:10px;z-index:9000;transform:translateY(10px);opacity:0;transition:all .3s;max-width:320px}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.success{border-color:rgba(34,197,94,.3)}
-.toast.error{border-color:rgba(239,68,68,.3)}
-.toast-icon{font-size:1rem}
+/* ═══════════════════════════════════
+   RELEASE MODAL — File Preview Area
+═══════════════════════════════════ */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:2000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 20px}
+.mo.on{display:flex;animation:fadeIn .3s ease}
+.mbox{background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:720px;max-width:95vw;box-shadow:0 32px 100px rgba(0,0,0,.6);animation:fadeUp .35s ease}
+.mbox.demo-mbox{border-top:3px solid var(--demo)}
+.mh{padding:18px 22px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.mt2{font-size:16px;font-weight:700}
+.mc{background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mc:hover{border-color:var(--red);color:var(--red)}
+.mb{padding:22px}
+.dr{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.dr:last-child{border-bottom:none}
+.dk{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;min-width:110px;padding-top:1px;flex-shrink:0}
+.dv{color:var(--txt);flex:1;word-break:break-all;line-height:1.5}
+.dv a{color:var(--gold);text-decoration:none}
+.dv a:hover{text-decoration:underline}
 
-/* ── ROSTER ADMIN ── */
-.roster-admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:900px){.roster-admin-grid{grid-template-columns:1fr 1fr}}
-.ra-card{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;transition:border .2s}
-.ra-card:hover{border-color:var(--brd2)}
-.ra-art{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,rgba(204,0,0,.2),rgba(30,138,255,.15));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;overflow:hidden}
-.ra-art img{width:100%;height:100%;object-fit:cover}
-.ra-info{flex:1;min-width:0}
-.ra-name{font-family:var(--font-h);font-size:.88rem;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ra-genre{font-size:.72rem;color:var(--txt3)}
-.ra-actions{display:flex;gap:4px;flex-shrink:0}
+/* File preview panel in modal */
+.file-preview-panel{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--brd)}
+.fp-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;overflow:hidden}
+.fp-label{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:2px;padding:10px 14px;border-bottom:1px solid var(--brd)}
+.fp-content{padding:12px 14px}
 
-/* ── SECTION HEADING ── */
-.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.section-head h2{font-family:var(--font-h);font-size:1.1rem;font-weight:700;letter-spacing:-.01em}
-.section-desc{font-size:.82rem;color:var(--txt3);margin-top:3px}
+/* Artwork preview */
+.artwork-thumb{width:100%;aspect-ratio:1;object-fit:cover;display:block;border-radius:6px;background:var(--bg)}
+.artwork-thumb-placeholder{width:100%;aspect-ratio:1;background:var(--bg);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:11px;flex-direction:column;gap:8px}
+.artwork-thumb-placeholder svg{opacity:.3}
 
-/* ── TESTI ADMIN ── */
-.testi-admin-list{display:flex;flex-direction:column;gap:10px}
-.testi-row{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px}
-.testi-row:hover{border-color:var(--brd2)}
-.testi-avatar-sm{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--blue));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
-.testi-row-info{flex:1;min-width:0}
-.testi-row-name{font-family:var(--font-h);font-size:.88rem;font-weight:700;margin-bottom:2px}
-.testi-row-quote{font-size:.75rem;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Audio player */
+.audio-player-admin{width:100%}
+.audio-filename{font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.audio-filemeta{font-size:11px;color:var(--txt3);margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap}
+.audio-format-pill{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace}
 
-/* spinner */
-.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--white);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+/* Native audio element styled */
+.admin-audio{width:100%;height:36px;border-radius:6px;accent-color:var(--gold)}
+.admin-audio::-webkit-media-controls-panel{background:var(--bg)}
+.audio-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.audio-dl-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--gold3);border:1px solid rgba(201,168,76,.2);border-radius:6px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.audio-dl-btn:hover{background:rgba(201,168,76,.2)}
+.artwork-dl-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s}
+.artwork-dl-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+.no-file-msg{font-size:12px;color:var(--txt3);display:flex;align-items:center;gap:6px;padding:8px 0}
+
+/* Dims badge */
+.dims-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace}
+.dims-ok{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.dims-warn{background:rgba(249,115,22,.1);color:#fb923c;border:1px solid rgba(249,115,22,.2)}
+
+/* ─── Forms ─── */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.demo-field{background:var(--card);border:1px solid var(--brd);border-radius:8px;padding:12px 14px}
+.demo-field.full{grid-column:1/-1}
+.df-label{font-size:10px;font-weight:700;color:var(--demo);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.df-val{font-size:13px;color:var(--txt);line-height:1.5;word-break:break-all}
+.df-val a{color:var(--demo);text-decoration:none}
+.df-val.bio{white-space:pre-wrap;color:var(--txt2);max-height:140px;overflow-y:auto;font-size:13px;line-height:1.7}
+
+.roy-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.rf-full{grid-column:1/-1}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:all .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+.fg select option{background:#1a1a1e}
+.fg textarea{resize:vertical;min-height:80px}
+.reply-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:14px}
+.reply-box label{display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.reply-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:100px;transition:border-color .2s}
+.reply-box textarea:focus{border-color:var(--gold)}
+.reply-acts{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.btn-reply{padding:9px 20px;background:var(--gold);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-reply:hover{background:var(--gold2)}
+.btn-reply:disabled{background:#4a3d1c;color:#666;cursor:not-allowed}
+.btn-close-t{padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt2);font-size:13px;cursor:pointer;transition:all .2s}
+.btn-close-t:hover{border-color:var(--red);color:var(--red)}
+.existing-reply{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:12px 16px;margin-bottom:14px}
+.er-label{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.er-text{font-size:13px;color:var(--txt2);line-height:1.6}
+.update-box{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:16px;border-left:3px solid var(--demo)}
+.update-box label{display:block;font-size:11px;font-weight:700;color:var(--demo);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.update-box select,.update-box textarea{width:100%;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-size:13px;outline:none;cursor:pointer;transition:border-color .2s;font-family:'Inter',sans-serif;line-height:1.5}
+.update-box select{margin-bottom:10px}
+.update-box textarea{resize:vertical;min-height:80px}
+.update-box select:focus,.update-box textarea:focus{border-color:var(--demo)}
+.update-box select option{background:#1a1a1e}
+.update-acts{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.btn-save-demo{padding:9px 24px;background:var(--demo);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-save-demo:hover{background:#b50009}
+.btn-save-demo:disabled{background:#4a0004;color:#666;cursor:not-allowed}
+.btn-del-demo{padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;color:var(--txt3);font-size:13px;cursor:pointer;transition:all .2s}
+.btn-del-demo:hover{border-color:var(--red);color:var(--red)}
+.blog-form{display:flex;flex-direction:column;gap:14px}
+.blog-form label{display:block;font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.blog-form input,.blog-form select,.blog-form textarea{width:100%;background:var(--card);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:10px 13px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
+.blog-form input:focus,.blog-form select:focus,.blog-form textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+.blog-form textarea{resize:vertical;min-height:200px}
+
+.artist-create-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.artist-create-grid .full{grid-column:1/-1}
+.release-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.release-edit-grid .full{grid-column:1/-1}
+.edit-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:18px}
+.edit-card h4{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--gold)}
+.file-pill{background:var(--card);border:1px solid var(--brd);padding:2px 7px;border-radius:4px;font-size:10px}
+
+.blog-admin-card{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--brd)}
+.blog-admin-card:last-child{border-bottom:none}
+.blog-admin-info{flex:1;min-width:0}
+.blog-admin-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blog-admin-meta{font-size:12px;color:var(--txt3);margin-top:2px}
+.empty{text-align:center;padding:40px;color:var(--txt3)}
+.empty-icon{font-size:32px;opacity:.25;margin-bottom:8px}
+.empty-text{font-size:14px;font-weight:600;color:var(--txt2)}
+.al{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none}
+.al.on{display:block;animation:fadeIn .3s ease}
+.al-e{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+.al-s{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86efac}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-size:13px;padding:12px 18px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(8px)}
+.toast.on{opacity:1;transform:translateY(0)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px}
+
+@media(max-width:768px){
+  .sb{display:none}.topbar{display:none}.mob-topbar{display:flex}.mob-bottom-nav{display:block}.mob-drawer{display:flex}
+  .content{padding:14px 12px 90px}.stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.sc{padding:12px}.sc-v{font-size:22px}
+  .roy-form{grid-template-columns:1fr}.rf-full{grid-column:1}.blog-form textarea{min-height:140px}
+  .frow{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.si{width:100%;min-width:160px}
+  .sh{padding:12px 14px}.sb2{padding:14px}.toast{bottom:72px;right:12px;left:12px;text-align:center}
+  .mo{padding:16px 10px}.mb{padding:16px}.mh{padding:14px 16px}.dr{gap:8px}.dk{min-width:80px;font-size:10px}
+  .demo-grid{grid-template-columns:1fr}.demo-field.full{grid-column:1}
+  .file-preview-panel{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- LOADER -->
-<div id="ld">
-  <div class="ld-logo">T<span>IR</span></div>
-  <div class="ld-sub">Admin Panel</div>
-  <div class="ld-bar"><div class="ld-fill"></div></div>
-</div>
+<div id="ld"><div class="ld-logo">T · I · R</div><div class="ld-bar"><div class="ld-fill"></div></div></div>
 
-<!-- AUTH -->
-<div id="auth-screen">
-  <div class="auth-box">
-    <div class="ab-logo">
-      <div class="logo-mark">TIR</div>
-      <h2>Website Admin</h2>
-      <p>Sign in to manage your website</p>
-    </div>
-    <div class="auth-err" id="auth-err"></div>
-    <div class="fld">
-      <label>Email</label>
-      <input type="email" id="a-email" placeholder="your@email.com"/>
-    </div>
-    <div class="fld">
-      <label>Password</label>
-      <input type="password" id="a-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
-    </div>
-    <button class="auth-btn" onclick="doLogin()" id="a-btn">Sign In</button>
+<div id="auth">
+  <div class="abox">
+    <div class="abox-top"><div class="abox-brand">T·I·R</div><div class="abox-sub">Unified Admin Panel</div><div class="abox-tag">Label owner access only</div></div>
+    <div class="err-box" id="ae"></div>
+    <div class="iw"><label>Email</label><input type="email" id="em" value="theimaginaryrecords@gmail.com"/></div>
+    <div class="iw"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn-gold" id="blg" onclick="doLogin()">Access Admin Panel</button>
   </div>
 </div>
 
-<!-- PANEL -->
 <div id="panel">
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sb-head">
-      <div class="sb-brand">The Imaginary <span>Records</span></div>
-      <div class="sb-tag">Website Admin Panel</div>
-    </div>
-    <div class="sb-user">
-      <div class="sb-dot"></div>
-      <div class="sb-user-email" id="sb-email">admin</div>
-    </div>
-    <div class="sb-nav">
-      <div class="nav-section">Overview</div>
-      <div class="nav-item active" onclick="showTab('dashboard')">
-        <span class="ni-icon">📊</span> Dashboard
-      </div>
-      <div class="nav-section">Content</div>
-      <div class="nav-item" onclick="showTab('sections')">
-        <span class="ni-icon">🔀</span> Section Visibility
-      </div>
-      <div class="nav-item" onclick="showTab('blog')">
-        <span class="ni-icon">📝</span> Blog Posts
-        <span class="nav-badge blue" id="badge-posts">0</span>
-      </div>
-      <div class="nav-item" onclick="showTab('testimonials')">
-        <span class="ni-icon">💬</span> Testimonials
-      </div>
-      <div class="nav-item" onclick="showTab('roster')">
-        <span class="ni-icon">🎤</span> Artist Roster
-      </div>
-      <div class="nav-section">Inbox</div>
-      <div class="nav-item" onclick="showTab('messages')">
-        <span class="ni-icon">✉️</span> Contact Messages
-        <span class="nav-badge" id="badge-msgs">0</span>
-      </div>
-      <div class="nav-section">Settings</div>
-      <div class="nav-item" onclick="showTab('settings')">
-        <span class="ni-icon">⚙️</span> Website Settings
-      </div>
-    </div>
-    <div class="sb-bot">
-      <button class="signout-btn" onclick="doSignout()">🚪 Sign Out</button>
-    </div>
-  </div>
+<div class="layout">
 
-  <!-- MAIN -->
-  <div class="main">
-    <div class="top-bar">
-      <div class="top-title" id="top-title">Dashboard</div>
-      <div class="top-actions">
-        <a href="index.html" target="_blank" class="top-link outline">↗ View Website</a>
-      </div>
-    </div>
-
-    <div class="content">
-
-      <!-- DASHBOARD -->
-      <div class="tab-pane active" id="tab-dashboard">
-        <div class="stat-cards">
-          <div class="stat-card">
-            <div class="sc-label">Total Posts</div>
-            <div class="sc-val" id="d-posts">—</div>
-            <div class="sc-sub">Published blog articles</div>
-            <div class="sc-trend up" id="d-posts-pub">— published</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-label">Contact Messages</div>
-            <div class="sc-val" id="d-msgs">—</div>
-            <div class="sc-sub">Total enquiries received</div>
-            <div class="sc-trend neutral" id="d-msgs-new">— unread</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-label">Artist Roster</div>
-            <div class="sc-val" id="d-roster">—</div>
-            <div class="sc-sub">Artists on roster</div>
-            <div class="sc-trend up">Active</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-label">Testimonials</div>
-            <div class="sc-val" id="d-testi">—</div>
-            <div class="sc-sub">Visible on website</div>
-            <div class="sc-trend neutral">Published</div>
-          </div>
-        </div>
-        <div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:20px">
-          <div class="section-head" style="margin-bottom:16px">
-            <div>
-              <h2>Recent Contact Messages</h2>
-              <div class="section-desc">Latest enquiries from your website</div>
-            </div>
-            <button class="btn ghost sm" onclick="showTab('messages')">View All</button>
-          </div>
-          <div id="dash-msgs-list"></div>
-        </div>
-        <div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:24px">
-          <div class="section-head" style="margin-bottom:16px">
-            <div>
-              <h2>Recent Blog Posts</h2>
-              <div class="section-desc">Latest posts on your website</div>
-            </div>
-            <button class="btn primary sm" onclick="showTab('blog');openPostEditor()">+ New Post</button>
-          </div>
-          <div id="dash-posts-list"></div>
-        </div>
-      </div>
-
-      <!-- SECTION VISIBILITY -->
-      <div class="tab-pane" id="tab-sections">
-        <div class="section-head">
-          <div>
-            <h2>Section Visibility</h2>
-            <div class="section-desc">Toggle which sections appear on your website. Changes take effect immediately.</div>
-          </div>
-          <button class="btn primary" onclick="saveVisibility()">Save Changes</button>
-        </div>
-        <div class="visibility-grid" id="visibility-grid">
-          <!-- rendered by JS -->
-        </div>
-      </div>
-
-      <!-- BLOG -->
-      <div class="tab-pane" id="tab-blog">
-        <div class="section-head">
-          <div>
-            <h2>Blog Posts</h2>
-            <div class="section-desc">Create and manage blog articles for your website</div>
-          </div>
-          <button class="btn primary" onclick="openPostEditor()">+ New Post</button>
-        </div>
-        <div class="blog-toolbar">
-          <input type="text" id="post-search" placeholder="Search posts…" oninput="filterPosts()"/>
-          <select id="post-filter" style="background:var(--card);border:1.5px solid var(--brd);border-radius:9px;color:var(--white);padding:10px 14px;font-family:var(--font-b);font-size:.85rem;outline:none" onchange="filterPosts()">
-            <option value="">All Status</option>
-            <option value="published">Published</option>
-            <option value="draft">Drafts</option>
-          </select>
-        </div>
-        <div class="posts-list" id="posts-list"></div>
-      </div>
-
-      <!-- TESTIMONIALS -->
-      <div class="tab-pane" id="tab-testimonials">
-        <div class="section-head">
-          <div>
-            <h2>Testimonials</h2>
-            <div class="section-desc">Artist reviews shown on your homepage</div>
-          </div>
-          <button class="btn primary" onclick="openTestiEditor()">+ Add Testimonial</button>
-        </div>
-        <div class="testi-admin-list" id="testi-list"></div>
-      </div>
-
-      <!-- ROSTER -->
-      <div class="tab-pane" id="tab-roster">
-        <div class="section-head">
-          <div>
-            <h2>Artist Roster</h2>
-            <div class="section-desc">Artists displayed on your website</div>
-          </div>
-          <button class="btn primary" onclick="openRosterEditor()">+ Add Artist</button>
-        </div>
-        <div class="roster-admin-grid" id="roster-list"></div>
-      </div>
-
-      <!-- MESSAGES -->
-      <div class="tab-pane" id="tab-messages">
-        <div class="section-head">
-          <div>
-            <h2>Contact Messages</h2>
-            <div class="section-desc">Enquiries received from your website contact form</div>
-          </div>
-          <button class="btn ghost sm" onclick="markAllRead()">Mark All Read</button>
-        </div>
-        <div class="msg-list" id="msg-list"></div>
-      </div>
-
-      <!-- SETTINGS -->
-      <div class="tab-pane" id="tab-settings">
-        <div class="section-head">
-          <div>
-            <h2>Website Settings</h2>
-            <div class="section-desc">General configuration for theimaginaryrecords.in</div>
-          </div>
-        </div>
-        <div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:16px">
-          <h3 style="font-family:var(--font-h);font-size:.95rem;font-weight:700;margin-bottom:16px">Site Information</h3>
-          <div class="form-field">
-            <label>Label Name</label>
-            <input type="text" id="s-name" value="The Imaginary Records"/>
-          </div>
-          <div class="form-field">
-            <label>Tagline</label>
-            <input type="text" id="s-tagline" value="Independent Music Label · Kashmir, India"/>
-          </div>
-          <div class="form-field">
-            <label>Support Email</label>
-            <input type="email" id="s-email" value="support@theimaginaryrecords.in"/>
-          </div>
-          <div class="form-field">
-            <label>Instagram Handle</label>
-            <input type="text" id="s-insta" value="@aabyd_khan"/>
-          </div>
-          <button class="btn primary" onclick="saveSettings()">Save Settings</button>
-        </div>
-        <div style="background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:24px">
-          <h3 style="font-family:var(--font-h);font-size:.95rem;font-weight:700;margin-bottom:4px">Quick Links</h3>
-          <p style="font-size:.8rem;color:var(--txt3);margin-bottom:16px">Useful links for managing TIR</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <a href="https://forms.gle/p9g1vRK9DRWwTotj9" target="_blank" class="btn ghost">Artist Registration Form</a>
-            <a href="https://forms.gle/DDh59DjoThpbXSpe6" target="_blank" class="btn ghost">Release Submission Form</a>
-            <a href="https://console.firebase.google.com/project/tir-portal" target="_blank" class="btn ghost">Firebase Console</a>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /content -->
-  </div><!-- /main -->
-</div><!-- /panel -->
-
-<!-- TOAST -->
-<div class="toast" id="toast"><span class="toast-icon"></span><span id="toast-msg"></span></div>
-
-<!-- POST EDITOR MODAL -->
-<div class="modal-overlay" id="post-modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 id="post-modal-title">New Blog Post</h3>
-      <button class="modal-close-btn" onclick="closePostModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Post Title *</label>
-          <input type="text" id="p-title" placeholder="Enter post title"/>
-        </div>
-        <div class="form-field">
-          <label>Category</label>
-          <select id="p-cat">
-            <option>Artist Advice</option>
-            <option>Music Industry</option>
-            <option>Music Promotion</option>
-            <option>Label News</option>
-            <option>Streaming Platforms</option>
-            <option>Announcement</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-field">
-        <label>Cover Image URL</label>
-        <input type="url" id="p-img" placeholder="https://..."/>
-      </div>
-      <div class="form-field">
-        <label>Excerpt (short description)</label>
-        <textarea id="p-excerpt" style="height:70px" placeholder="Brief description shown in post cards…" oninput="updateChar(this,'p-exc-count',200)"></textarea>
-        <div class="char-count"><span id="p-exc-count">0</span>/200 characters</div>
-      </div>
-      <div class="form-field">
-        <label>Full Content *</label>
-        <textarea id="p-content" style="height:200px" placeholder="Write the full article content here…"></textarea>
-      </div>
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Author Name</label>
-          <input type="text" id="p-author" placeholder="TIR Team"/>
-        </div>
-        <div class="form-field">
-          <label>Status</label>
-          <select id="p-status">
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn ghost" onclick="closePostModal()">Cancel</button>
-      <button class="btn primary" id="post-save-btn" onclick="savePost()">Publish Post</button>
-    </div>
-  </div>
+<div class="sb">
+  <div class="sb-top"><div class="sb-brand">T·I·R</div><div class="sb-sub">Unified Admin</div></div>
+  <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
+  <nav>
+    <div class="ns">Dashboard</div>
+    <div class="ni on" onclick="goPage('overview',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</div>
+    <div class="ns">Releases</div>
+    <div class="ni" onclick="goPage('all',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions</div>
+    <div class="ni" onclick="goPage('pending',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pending <span class="cnt" id="pend-cnt" style="display:none">0</span></div>
+    <div class="ni" onclick="goPage('live',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>Live</div>
+    <div class="ns">Finance</div>
+    <div class="ni" onclick="goPage('royalties',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Manage Royalties</div>
+    <div class="ns">Content</div>
+    <div class="ni" onclick="goPage('blog',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Music Blog</div>
+    <div class="ns">People</div>
+    <div class="ni" onclick="goPage('artists',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>All Artists</div>
+    <div class="ns">Support</div>
+    <div class="ni" onclick="goPage('tickets',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tickets <span class="cnt" id="tkt-cnt" style="display:none">0</span></div>
+    <div class="demo-sep"></div>
+    <div class="ns-demo">🎵 Demo Submissions</div>
+    <div class="ni demo-ni" onclick="goPage('demo-inbox',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Demo Inbox <span class="cnt-demo" id="demo-new-cnt" style="display:none">0</span></div>
+    <div class="ni demo-ni" onclick="goPage('demo-all',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>All Demos</div>
+    <div class="ni demo-ni" onclick="goPage('demo-shortlisted',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Shortlisted</div>
+    <div class="ni demo-ni" onclick="goPage('demo-signed',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Signed</div>
+    <div class="ni demo-ni" onclick="goPage('demo-rejected',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Rejected</div>
+  </nav>
+  <div class="sb-bot"><button class="so-btn" onclick="doSignOut()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button></div>
 </div>
 
-<!-- TESTIMONIAL EDITOR -->
-<div class="modal-overlay" id="testi-modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 id="testi-modal-title">Add Testimonial</h3>
-      <button class="modal-close-btn" onclick="closeTestiModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Artist Name *</label>
-          <input type="text" id="t-name" placeholder="Artist name"/>
-        </div>
-        <div class="form-field">
-          <label>Role / Genre</label>
-          <input type="text" id="t-role" placeholder="e.g. Folk Artist, Kashmir"/>
-        </div>
-      </div>
-      <div class="form-field">
-        <label>Quote *</label>
-        <textarea id="t-quote" style="height:100px" placeholder="What the artist said about TIR…"></textarea>
-      </div>
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Album Art URL</label>
-          <input type="url" id="t-img" placeholder="https://… (optional)"/>
-        </div>
-        <div class="form-field">
-          <label>Stars (1-5)</label>
-          <select id="t-stars">
-            <option value="5">★★★★★ (5)</option>
-            <option value="4">★★★★☆ (4)</option>
-            <option value="3">★★★☆☆ (3)</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Display Order</label>
-          <input type="number" id="t-order" value="0" min="0"/>
-        </div>
-        <div class="form-field">
-          <label>Visible on Website</label>
-          <select id="t-visible">
-            <option value="true">Yes — Show</option>
-            <option value="false">No — Hide</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn ghost" onclick="closeTestiModal()">Cancel</button>
-      <button class="btn primary" onclick="saveTesti()">Save Testimonial</button>
-    </div>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left"><div><h1 id="pgt">Overview</h1><p id="pgs">The Imaginary Records</p></div><span class="section-pill pill-label" id="section-pill">Label</span></div>
+    <button class="btn-ref" onclick="loadAll()">↻ Refresh</button>
   </div>
+  <div class="mob-topbar">
+    <button class="mob-menu-btn" onclick="openDrawer()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="mob-topbar-brand">T·I·R Admin</div>
+    <button class="mob-ref-btn" onclick="loadAll()">↻</button>
+  </div>
+
+  <div class="content">
+
+    <div class="pg on" id="page-overview">
+      <div class="stats">
+        <div class="sc"><div class="sc-l">Total Releases</div><div class="sc-v g" id="s0">—</div></div>
+        <div class="sc"><div class="sc-l">Pending</div><div class="sc-v" id="s1">—</div></div>
+        <div class="sc"><div class="sc-l">Live</div><div class="sc-v" id="s2">—</div></div>
+        <div class="sc"><div class="sc-l">Artists</div><div class="sc-v" id="s3">—</div></div>
+        <div class="sc"><div class="sc-l">Open Tickets</div><div class="sc-v" id="s4">—</div></div>
+      </div>
+      <div class="stats">
+        <div class="sc demo-sc"><div class="sc-l">Total Demos</div><div class="sc-v r" id="d0">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">New Demos</div><div class="sc-v" id="d1">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Reviewing</div><div class="sc-v" id="d2">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Shortlisted</div><div class="sc-v r" id="d3">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Signed</div><div class="sc-v gr" id="d4">—</div></div>
+      </div>
+      <div class="section"><div class="sh"><h3>Latest Releases</h3></div><div class="tw" id="ov-list"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading...</div></div></div></div>
+      <div class="section"><div class="sh"><h3>Open Support Tickets</h3><p>Needs your response</p></div><div class="tw" id="ov-tickets"></div></div>
+      <div class="section demo-section"><div class="sh"><h3>New Demo Submissions</h3></div><div class="tw" id="ov-demos"></div></div>
+    </div>
+
+    <div class="pg" id="page-all">
+      <div class="section"><div class="sh"><h3>All Submissions</h3></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <input class="si" type="text" id="rel-search" placeholder="Search title or artist..." oninput="applyRelFilter()"/>
+          <button class="fb on" onclick="setRelSt('all',this)">All</button>
+          <button class="fb" onclick="setRelSt('pending',this)">Pending</button>
+          <button class="fb" onclick="setRelSt('review',this)">Review</button>
+          <button class="fb" onclick="setRelSt('approved',this)">Approved</button>
+          <button class="fb" onclick="setRelSt('live',this)">Live</button>
+          <button class="fb" onclick="setRelSt('rejected',this)">Rejected</button>
+        </div></div>
+        <div class="tw" id="all-list"></div>
+      </div>
+    </div>
+
+    <div class="pg" id="page-pending"><div class="section"><div class="sh"><h3>Pending Review</h3></div><div class="tw" id="pend-list"></div></div></div>
+    <div class="pg" id="page-live"><div class="section"><div class="sh"><h3>Live Releases</h3></div><div class="tw" id="live-list"></div></div></div>
+
+    <div class="pg" id="page-royalties">
+      <div class="section" style="margin-bottom:18px">
+        <div class="sh"><h3>Add / Update Royalty Statement</h3></div>
+        <div class="sb2">
+          <div class="al al-e" id="roy-e"></div><div class="al al-s" id="roy-s"></div>
+          <div class="roy-form">
+            <div class="fg"><label>Select Artist *</label><select id="r-artist"><option value="">— Select Artist —</option></select></div>
+            <div class="fg"><label>Period *</label><select id="r-period"><option value="">— Select Quarter —</option><option>Q1 2025 (Jan–Mar)</option><option>Q2 2025 (Apr–Jun)</option><option>Q3 2025 (Jul–Sep)</option><option>Q4 2025 (Oct–Dec)</option><option>Q1 2026 (Jan–Mar)</option><option>Q2 2026 (Apr–Jun)</option><option>Q3 2026 (Jul–Sep)</option><option>Q4 2026 (Oct–Dec)</option></select></div>
+            <div class="fg"><label>Total Amount (₹) *</label><input type="number" id="r-total" placeholder="e.g. 1250.00" step="0.01"/></div>
+            <div class="fg"><label>Release Title (optional)</label><input type="text" id="r-release-title" placeholder="Song name"/></div>
+            <div class="fg rf-full"><label>Earnings by Platform (₹ each)</label></div>
+            <div class="fg"><label>Spotify</label><input type="number" id="p-spotify" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Apple Music</label><input type="number" id="p-apple" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Amazon Music</label><input type="number" id="p-amazon" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>YouTube Music</label><input type="number" id="p-youtube" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>JioSaavn</label><input type="number" id="p-jio" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Gaana</label><input type="number" id="p-gaana" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Tidal</label><input type="number" id="p-tidal" placeholder="0.00" step="0.01"/></div>
+            <div class="fg"><label>Other</label><input type="number" id="p-other" placeholder="0.00" step="0.01"/></div>
+            <div class="fg rf-full"><label>Notes (optional)</label><input type="text" id="r-notes" placeholder="e.g. Q1 2026 royalty payout"/></div>
+            <div class="fg"><label>Mark as Current Quarter?</label><select id="r-current"><option value="true">Yes</option><option value="false">No</option></select></div>
+            <div class="fg"><label>Mark as Payout?</label><select id="r-payout"><option value="false">No — Statement only</option><option value="true">Yes — Payout made</option></select></div>
+            <div class="fg rf-full"><button class="btn-gold" id="r-btn" onclick="saveRoyalty()">Save Royalty Statement</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="sh"><h3>Royalty History</h3></div><div class="tw" id="roy-history-list"></div></div>
+    </div>
+
+    <div class="pg" id="page-blog">
+      <div class="section" style="margin-bottom:18px">
+        <div class="sh"><h3>Write New Blog Post</h3></div>
+        <div class="sb2">
+          <div class="al al-e" id="blog-e"></div><div class="al al-s" id="blog-s"></div>
+          <div class="blog-form">
+            <div><label>Post Title *</label><input type="text" id="b-title" placeholder="e.g. How to Get Playlisted on Spotify"/></div>
+            <div><label>Category</label><select id="b-cat"><option>Music Tips</option><option>Distribution</option><option>Industry News</option><option>Royalties & Money</option><option>Marketing</option><option>TIR Updates</option><option>Artist Spotlight</option></select></div>
+            <div><label>Content *</label><textarea id="b-content" placeholder="Write your blog post here..."></textarea></div>
+            <div><button class="btn-gold" id="b-btn" onclick="saveBlog()">Publish Post</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="sh"><h3>Published Posts</h3><p id="blog-count">0 posts</p></div><div class="sb2" id="blog-list"></div></div>
+    </div>
+
+    <div class="pg" id="page-artists">
+      <div class="section" style="margin-bottom:18px">
+        <div class="sh"><h3>Create Artist Account</h3><p>No Firebase Console needed</p></div>
+        <div class="sb2">
+          <div class="al al-e" id="artist-e"></div><div class="al al-s" id="artist-s"></div>
+          <div class="artist-create-grid">
+            <div class="fg"><label>Artist / Stage Name *</label><input type="text" id="ca-name" placeholder="Artist name"/></div>
+            <div class="fg"><label>Email *</label><input type="email" id="ca-email" placeholder="artist@email.com"/></div>
+            <div class="fg"><label>Password *</label><input type="password" id="ca-password" placeholder="Minimum 6 characters"/></div>
+            <div class="fg"><label>Genre</label><input type="text" id="ca-genre" placeholder="Hip Hop / Trap"/></div>
+            <div class="fg"><label>Country</label><input type="text" id="ca-country" placeholder="India"/></div>
+            <div class="fg"><label>Instagram</label><input type="text" id="ca-instagram" placeholder="@handle"/></div>
+            <div class="fg full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio"></textarea></div>
+            <div class="fg full"><button class="btn-gold" id="ca-btn" onclick="createArtistAccount()">Create Artist Account</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="sh"><h3>Registered Artists</h3><p id="art-count">0 artists</p></div><div class="tw" id="art-list"></div></div>
+    </div>
+
+    <div class="pg" id="page-tickets">
+      <div class="section"><div class="sh"><h3>Support Tickets</h3></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <button class="fb on" onclick="setTF('all',this)">All</button>
+          <button class="fb" onclick="setTF('open',this)">Open</button>
+          <button class="fb" onclick="setTF('resolved',this)">Resolved</button>
+          <button class="fb" onclick="setTF('closed',this)">Closed</button>
+        </div></div>
+        <div class="tw" id="tkt-list"></div>
+      </div>
+    </div>
+
+    <div class="pg" id="page-demo-inbox">
+      <div class="stats">
+        <div class="sc demo-sc"><div class="sc-l">Total</div><div class="sc-v r" id="ds0">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">New</div><div class="sc-v" id="ds1">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Reviewing</div><div class="sc-v" id="ds2">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Shortlisted</div><div class="sc-v r" id="ds3">—</div></div>
+        <div class="sc demo-sc"><div class="sc-l">Signed</div><div class="sc-v gr" id="ds4">—</div></div>
+      </div>
+      <div class="section demo-section"><div class="sh"><h3>New Submissions</h3></div><div class="tw" id="demo-new-list"></div></div>
+      <div class="section demo-section"><div class="sh"><h3>Currently Reviewing</h3></div><div class="tw" id="demo-rev-list"></div></div>
+    </div>
+
+    <div class="pg" id="page-demo-all">
+      <div class="section demo-section">
+        <div class="sh"><h3>All Demo Submissions</h3><p id="demo-all-count"></p></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <input class="si" type="text" id="demo-search" placeholder="Search name, email, genre..." oninput="applyDemoFilter()"/>
+          <button class="fb demo-fb on" onclick="setDF('all',this)">All</button>
+          <button class="fb demo-fb" onclick="setDF('new',this)">New</button>
+          <button class="fb demo-fb" onclick="setDF('reviewing',this)">Reviewing</button>
+          <button class="fb demo-fb" onclick="setDF('shortlisted',this)">Shortlisted</button>
+          <button class="fb demo-fb" onclick="setDF('signed',this)">Signed</button>
+          <button class="fb demo-fb" onclick="setDF('rejected',this)">Rejected</button>
+        </div></div>
+        <div class="tw" id="demo-all-list"></div>
+      </div>
+    </div>
+
+    <div class="pg" id="page-demo-shortlisted"><div class="section demo-section"><div class="sh"><h3>Shortlisted Demos</h3></div><div class="tw" id="demo-short-list"></div></div></div>
+    <div class="pg" id="page-demo-signed"><div class="section demo-section"><div class="sh"><h3>Signed Artists</h3></div><div class="tw" id="demo-signed-list"></div></div></div>
+    <div class="pg" id="page-demo-rejected"><div class="section demo-section"><div class="sh"><h3>Rejected Demos</h3></div><div class="tw" id="demo-rej-list"></div></div></div>
+
+  </div>
+</div>
 </div>
 
-<!-- ROSTER EDITOR -->
-<div class="modal-overlay" id="roster-modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3 id="roster-modal-title">Add Artist</h3>
-      <button class="modal-close-btn" onclick="closeRosterModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Artist Name *</label>
-          <input type="text" id="r-name" placeholder="Artist/Band name"/>
-        </div>
-        <div class="form-field">
-          <label>Genre</label>
-          <input type="text" id="r-genre" placeholder="e.g. Hip-Hop, Folk"/>
-        </div>
-      </div>
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Location</label>
-          <input type="text" id="r-location" placeholder="Kashmir" value="Kashmir"/>
-        </div>
-        <div class="form-field">
-          <label>Emoji (if no image)</label>
-          <input type="text" id="r-emoji" placeholder="🎤" value="🎤"/>
-        </div>
-      </div>
-      <div class="form-field">
-        <label>Artist Image URL</label>
-        <input type="url" id="r-img" placeholder="https://… (optional)"/>
-      </div>
-      <div class="form-row-2">
-        <div class="form-field">
-          <label>Display Order</label>
-          <input type="number" id="r-order" value="0" min="0"/>
-        </div>
-        <div class="form-field">
-          <label>Visible on Website</label>
-          <select id="r-visible">
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn ghost" onclick="closeRosterModal()">Cancel</button>
-      <button class="btn primary" onclick="saveRoster()">Save Artist</button>
-    </div>
+<div class="mob-overlay" id="mob-overlay" onclick="closeDrawer()"></div>
+<div class="mob-drawer" id="mob-drawer">
+  <div class="sb-top" style="display:flex;align-items:center;justify-content:space-between">
+    <div><div class="sb-brand">T·I·R</div><div class="sb-sub">Unified Admin</div></div>
+    <button class="mob-menu-btn" onclick="closeDrawer()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
+  <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
+  <nav>
+    <div class="ns">Dashboard</div>
+    <div class="ni" onclick="goPage('overview',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</div>
+    <div class="ns">Releases</div>
+    <div class="ni" onclick="goPage('all',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions</div>
+    <div class="ni" onclick="goPage('pending',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pending</div>
+    <div class="ni" onclick="goPage('live',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21 5,3"/></svg>Live</div>
+    <div class="ns">Finance & Content</div>
+    <div class="ni" onclick="goPage('royalties',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Royalties</div>
+    <div class="ni" onclick="goPage('blog',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Music Blog</div>
+    <div class="ni" onclick="goPage('artists',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>All Artists</div>
+    <div class="ni" onclick="goPage('tickets',this);closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Tickets</div>
+    <div class="demo-sep"></div>
+    <div class="ns-demo">🎵 Demo Submissions</div>
+    <div class="ni demo-ni" onclick="goPage('demo-inbox',this);closeDrawer()">Demo Inbox</div>
+    <div class="ni demo-ni" onclick="goPage('demo-all',this);closeDrawer()">All Demos</div>
+    <div class="ni demo-ni" onclick="goPage('demo-shortlisted',this);closeDrawer()">Shortlisted</div>
+    <div class="ni demo-ni" onclick="goPage('demo-signed',this);closeDrawer()">Signed</div>
+  </nav>
+  <div class="sb-bot"><button class="so-btn" onclick="doSignOut()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button></div>
 </div>
 
-<!-- MESSAGE DETAIL -->
-<div class="modal-overlay" id="msg-modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3>Message Details</h3>
-      <button class="modal-close-btn" onclick="closeMsgModal()">✕</button>
-    </div>
-    <div class="modal-body" id="msg-detail-body"></div>
-    <div class="modal-footer">
-      <button class="btn danger sm" id="msg-del-btn">Delete</button>
-      <button class="btn blue sm" id="msg-reply-btn">Reply via Email</button>
-      <button class="btn ghost" onclick="closeMsgModal()">Close</button>
-    </div>
+<div class="mob-bottom-nav">
+  <div class="mob-nav-items">
+    <div class="mob-ni on" id="mni-overview" onclick="goPage('overview',null);setMN('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="mob-ni-label">Overview</span></div>
+    <div class="mob-ni" id="mni-pending" onclick="goPage('pending',null);setMN('pending')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span class="mob-ni-label">Pending</span><span class="m-cnt" id="mni-pend-cnt" style="display:none">0</span></div>
+    <div class="mob-ni" id="mni-tickets" onclick="goPage('tickets',null);setMN('tickets')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="mob-ni-label">Tickets</span><span class="m-cnt" id="mni-tkt-cnt" style="display:none">0</span></div>
+    <div class="mob-ni" id="mni-demos" onclick="goPage('demo-inbox',null);setMN('demos',true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="mob-ni-label">Demos</span><span class="m-cnt" id="mni-demo-cnt" style="display:none;background:var(--demo)">0</span></div>
+    <div class="mob-ni" id="mni-more" onclick="openDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><span class="mob-ni-label">More</span></div>
   </div>
 </div>
+</div>
+
+<!-- RELEASE MODAL -->
+<div class="mo" id="rmo" onclick="if(event.target===this)closeMo('rmo')">
+  <div class="mbox">
+    <div class="mh"><div class="mt2" id="rmo-title">Release</div><button class="mc" onclick="closeMo('rmo')">✕</button></div>
+    <div class="mb" id="rmo-body"></div>
+  </div>
+</div>
+<!-- TICKET MODAL -->
+<div class="mo" id="tmo" onclick="if(event.target===this)closeMo('tmo')">
+  <div class="mbox"><div class="mh"><div class="mt2" id="tmo-title">Ticket</div><button class="mc" onclick="closeMo('tmo')">✕</button></div><div class="mb" id="tmo-body"></div></div>
+</div>
+<!-- DEMO MODAL -->
+<div class="mo" id="dmo" onclick="if(event.target===this)closeMo('dmo')">
+  <div class="mbox demo-mbox"><div class="mh"><div><div class="mt2" id="dmo-title">Demo</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center" id="dmo-ref"></div></div><button class="mc" onclick="closeMo('dmo')">✕</button></div><div class="mb" id="dmo-body"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// ─── COLLECTIONS ───
-const BLOG_COL='tir_blog_posts';
-const TESTI_COL='tir_testimonials';
-const ROSTER_COL='tir_roster';
-const CONTACT_COL='tir_contact_messages';
-const SECTIONS_DOC={collection:'tir_settings',doc:'website_sections'};
-const SETTINGS_DOC={collection:'tir_settings',doc:'general'};
+let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[],demos=[];
+let relFilter='all',tktFilter='all',demoFilter='all';
 
-let allPosts=[], allMsgs=[], editingPostId=null, editingTestiId=null, editingRosterId=null, currentMsgId=null;
-
-// ─── AUTH ───
-auth.onAuthStateChanged(async u=>{
-  document.getElementById('ld').classList.add('out');
-  if(!u){showAuth();return;}
-  if(u.email!==ADMIN){auth.signOut();showAuth();return;}
-  document.getElementById('sb-email').textContent=u.email;
-  showPanel();
-  await Promise.all([loadDashboard(),loadVisibility(),loadPosts(),loadTestis(),loadRosters(),loadMessages()]);
-});
-function showAuth(){document.getElementById('auth-screen').classList.add('show');}
-function showPanel(){document.getElementById('panel').classList.add('show');}
-async function doLogin(){
-  const e=document.getElementById('a-email').value.trim();
-  const p=document.getElementById('a-pass').value;
-  const btn=document.getElementById('a-btn');
-  const err=document.getElementById('auth-err');
-  err.classList.remove('show');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{await auth.signInWithEmailAndPassword(e,p);}
-  catch(ex){err.textContent='Invalid email or password.';err.classList.add('show');btn.disabled=false;btn.textContent='Sign In';}
-}
-async function doSignout(){await auth.signOut();location.reload();}
-
-// ─── TABS ───
-const TAB_TITLES={dashboard:'Dashboard',sections:'Section Visibility',blog:'Blog Posts',testimonials:'Testimonials',roster:'Artist Roster',messages:'Contact Messages',settings:'Settings'};
-function showTab(name){
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  document.getElementById('top-title').textContent=TAB_TITLES[name]||name;
-  // highlight sidebar
-  document.querySelectorAll('.nav-item').forEach(i=>{if(i.getAttribute('onclick')&&i.getAttribute('onclick').includes(`'${name}'`))i.classList.add('active');});
-}
-
-// ─── DASHBOARD ───
-async function loadDashboard(){
-  try{
-    const [postsSnap,msgsSnap,rosterSnap,testiSnap]=await Promise.all([
-      db.collection(BLOG_COL).get(),
-      db.collection(CONTACT_COL).get(),
-      db.collection(ROSTER_COL).get(),
-      db.collection(TESTI_COL).get()
-    ]);
-    const posts=postsSnap.docs.map(d=>({id:d.id,...d.data()}));
-    const msgs=msgsSnap.docs.map(d=>({id:d.id,...d.data()}));
-    const unread=msgs.filter(m=>!m.read).length;
-    document.getElementById('d-posts').textContent=posts.length;
-    document.getElementById('d-posts-pub').textContent=`${posts.filter(p=>p.published).length} published`;
-    document.getElementById('d-msgs').textContent=msgs.length;
-    document.getElementById('d-msgs-new').textContent=`${unread} unread`;
-    document.getElementById('d-roster').textContent=rosterSnap.size;
-    document.getElementById('d-testi').textContent=testiSnap.size;
-    document.getElementById('badge-posts').textContent=posts.length;
-    document.getElementById('badge-msgs').textContent=unread||'';
-    // Recent msgs preview
-    const dashMsgs=document.getElementById('dash-msgs-list');
-    const recentMsgs=msgs.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,3);
-    dashMsgs.innerHTML=recentMsgs.length?recentMsgs.map(m=>`
-      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border-radius:8px;margin-bottom:8px;cursor:pointer" onclick="showTab('messages')">
-        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--blue));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0">${(m.name||'?')[0].toUpperCase()}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.85rem;font-weight:600;margin-bottom:2px">${m.name||'Unknown'} ${!m.read?'<span style="font-size:.6rem;background:rgba(30,138,255,.15);color:var(--blue2);padding:1px 6px;border-radius:4px;margin-left:4px">NEW</span>':''}</div>
-          <div style="font-size:.75rem;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.message||''}</div>
-        </div>
-      </div>`).join(''):'<div style="font-size:.85rem;color:var(--txt3);text-align:center;padding:20px">No messages yet</div>';
-    // Recent posts preview
-    const dashPosts=document.getElementById('dash-posts-list');
-    const recentPosts=posts.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,3);
-    dashPosts.innerHTML=recentPosts.length?recentPosts.map(p=>`
-      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border-radius:8px;margin-bottom:8px">
-        <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,rgba(204,0,0,.15),rgba(30,138,255,.1));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden">${p.imageUrl?`<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover">`:'📝'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.85rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.title}</div>
-          <div style="font-size:.72rem;color:var(--txt3)">${p.published?'<span style="color:var(--grn)">● Published</span>':'<span style="color:var(--txt3)">● Draft</span>'} · ${p.category||'Article'}</div>
-        </div>
-        <button class="btn ghost sm" onclick="editPost('${p.id}')">Edit</button>
-      </div>`).join(''):'<div style="font-size:.85rem;color:var(--txt3);text-align:center;padding:20px">No posts yet</div>';
-  }catch(e){console.error(e)}
-}
-
-// ─── SECTION VISIBILITY ───
-const SECTIONS=[
-  {key:'platforms',name:'Platforms Section',desc:'Streaming platform logos strip'},
-  {key:'why',name:'Why TIR Section',desc:'3-column benefits cards'},
-  {key:'earnings',name:'Earnings Section',desc:'Maximise your earnings panel'},
-  {key:'stats',name:'Stats Row',desc:'150+ countries, 80+ platforms'},
-  {key:'services',name:'Services Section',desc:'6 service cards grid'},
-  {key:'thrive',name:'Thrive Section',desc:'Artists & Labels toggle'},
-  {key:'testimonials',name:'Testimonials',desc:'Artist reviews carousel'},
-  {key:'trust',name:'Trust / Affiliations',desc:'MSME, partner badges'},
-  {key:'blog',name:'Blog Section',desc:'Latest blog posts grid'},
-  {key:'roster',name:'Artist Roster',desc:'Artist cards grid'},
-  {key:'about',name:'About Section',desc:'Mission & orbit graphic'},
-  {key:'contact',name:'Contact Section',desc:'Contact form & details'},
-];
-let visState={};
-async function loadVisibility(){
-  try{
-    const doc=await db.collection(SECTIONS_DOC.collection).doc(SECTIONS_DOC.doc).get();
-    visState=doc.exists?doc.data():{};
-  }catch(e){}
-  renderVisibility();
-}
-function renderVisibility(){
-  const grid=document.getElementById('visibility-grid');
-  grid.innerHTML=SECTIONS.map(s=>{
-    const on=visState[s.key]!==false;
-    return `<div class="vis-card ${on?'on':''}" id="visc-${s.key}">
-      <div class="vis-info">
-        <div class="vis-name">${s.name}</div>
-        <div class="vis-desc">${s.desc}</div>
-      </div>
-      <label class="toggle">
-        <input type="checkbox" ${on?'checked':''} onchange="toggleVis('${s.key}',this.checked)"/>
-        <span class="toggle-slider"></span>
-      </label>
-    </div>`;
-  }).join('');
-}
-function toggleVis(key,val){
-  visState[key]=val;
-  const card=document.getElementById('visc-'+key);
-  if(card)card.classList.toggle('on',val);
-}
-async function saveVisibility(){
-  try{
-    await db.collection(SECTIONS_DOC.collection).doc(SECTIONS_DOC.doc).set(visState,{merge:true});
-    toast('✅','Section visibility saved!','success');
-  }catch(e){toast('❌','Save failed: '+e.message,'error');}
-}
-
-// ─── BLOG ───
-async function loadPosts(){
-  try{
-    const snap=await db.collection(BLOG_COL).orderBy('createdAt','desc').get();
-    allPosts=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderPosts(allPosts);
-    document.getElementById('badge-posts').textContent=allPosts.length;
-  }catch(e){console.error(e)}
-}
-function filterPosts(){
-  const q=document.getElementById('post-search').value.toLowerCase();
-  const f=document.getElementById('post-filter').value;
-  let filtered=allPosts.filter(p=>{
-    const matchQ=!q||p.title?.toLowerCase().includes(q)||p.category?.toLowerCase().includes(q);
-    const matchF=!f||(f==='published'?p.published:!p.published);
-    return matchQ&&matchF;
-  });
-  renderPosts(filtered);
-}
-function renderPosts(posts){
-  const list=document.getElementById('posts-list');
-  if(!posts.length){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--txt3)">No posts found.</div>';return;}
-  list.innerHTML=posts.map(p=>{
-    const date=p.createdAt?new Date(p.createdAt.seconds*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
-    const statusHtml=p.published?'<span class="status-badge published">● Published</span>':'<span class="status-badge draft">○ Draft</span>';
-    const thumb=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.title}"/>`:`<div class="ph">📝</div>`;
-    return `<div class="post-row">
-      <div class="post-row-thumb">${thumb}</div>
-      <div class="post-meta">
-        <div class="post-title-row">${p.title||'Untitled'}</div>
-        <div class="post-info">${statusHtml}<span>${p.category||'Article'}</span><span>·</span><span>${date}</span><span>·</span><span>${p.author||'TIR Team'}</span></div>
-      </div>
-      <div class="post-actions">
-        <button class="btn blue sm" onclick="togglePublish('${p.id}',${!p.published})">${p.published?'Unpublish':'Publish'}</button>
-        <button class="btn ghost sm" onclick="editPost('${p.id}')">Edit</button>
-        <button class="btn danger sm" onclick="deletePost('${p.id}')">Delete</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-function openPostEditor(id){
-  editingPostId=null;
-  document.getElementById('post-modal-title').textContent='New Blog Post';
-  document.getElementById('post-save-btn').textContent='Publish Post';
-  ['p-title','p-img','p-excerpt','p-content','p-author'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('p-cat').value='Artist Advice';
-  document.getElementById('p-status').value='published';
-  document.getElementById('p-exc-count').textContent='0';
-  document.getElementById('post-modal').classList.add('open');
-}
-function editPost(id){
-  const post=allPosts.find(p=>p.id===id);
-  if(!post)return;
-  editingPostId=id;
-  document.getElementById('post-modal-title').textContent='Edit Blog Post';
-  document.getElementById('post-save-btn').textContent='Save Changes';
-  document.getElementById('p-title').value=post.title||'';
-  document.getElementById('p-img').value=post.imageUrl||'';
-  document.getElementById('p-excerpt').value=post.excerpt||'';
-  document.getElementById('p-content').value=post.content||'';
-  document.getElementById('p-author').value=post.author||'';
-  document.getElementById('p-cat').value=post.category||'Artist Advice';
-  document.getElementById('p-status').value=post.published?'published':'draft';
-  updateChar(document.getElementById('p-excerpt'),'p-exc-count',200);
-  document.getElementById('post-modal').classList.add('open');
-}
-function closePostModal(){document.getElementById('post-modal').classList.remove('open');editingPostId=null;}
-async function savePost(){
-  const title=document.getElementById('p-title').value.trim();
-  if(!title){alert('Title is required');return;}
-  const btn=document.getElementById('post-save-btn');btn.disabled=true;btn.textContent='Saving…';
-  const data={
-    title,category:document.getElementById('p-cat').value,
-    imageUrl:document.getElementById('p-img').value.trim(),
-    excerpt:document.getElementById('p-excerpt').value.trim(),
-    content:document.getElementById('p-content').value.trim(),
-    author:document.getElementById('p-author').value.trim()||'TIR Team',
-    published:document.getElementById('p-status').value==='published',
-    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-  };
-  try{
-    if(editingPostId){await db.collection(BLOG_COL).doc(editingPostId).update(data);}
-    else{data.createdAt=firebase.firestore.FieldValue.serverTimestamp();await db.collection(BLOG_COL).add(data);}
-    toast('✅',editingPostId?'Post updated!':'Post published!','success');
-    closePostModal();await loadPosts();await loadDashboard();
-  }catch(e){toast('❌','Error: '+e.message,'error');}
-  btn.disabled=false;btn.textContent='Save Changes';
-}
-async function togglePublish(id,val){
-  try{await db.collection(BLOG_COL).doc(id).update({published:val,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});toast('✅',val?'Post published!':'Post unpublished.','success');await loadPosts();}
-  catch(e){toast('❌','Error: '+e.message,'error');}
-}
-async function deletePost(id){
-  if(!confirm('Delete this post? This cannot be undone.'))return;
-  try{await db.collection(BLOG_COL).doc(id).delete();toast('✅','Post deleted.','success');await loadPosts();await loadDashboard();}
-  catch(e){toast('❌','Error: '+e.message,'error');}
-}
-
-// ─── TESTIMONIALS ───
-async function loadTestis(){
-  try{
-    const snap=await db.collection(TESTI_COL).orderBy('order','asc').get();
-    const list=document.getElementById('testi-list');
-    if(snap.empty){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--txt3)">No testimonials yet. Add your first!</div>';return;}
-    list.innerHTML=snap.docs.map(doc=>{
-      const d=doc.data();const id=doc.id;
-      const initials=(d.name||'A').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-      return `<div class="testi-row">
-        <div class="testi-avatar-sm">${initials}</div>
-        <div class="testi-row-info">
-          <div class="testi-row-name">${d.name||'Unknown'} <span style="font-size:.7rem;color:var(--txt3);font-weight:400">· ${d.role||'Artist'}</span></div>
-          <div class="testi-row-quote">"${d.quote||''}"</div>
-        </div>
-        <span class="status-badge ${d.visible!==false?'published':'draft'}">${d.visible!==false?'Visible':'Hidden'}</span>
-        <div style="display:flex;gap:6px">
-          <button class="btn ghost sm" onclick="editTesti('${id}')">Edit</button>
-          <button class="btn danger sm" onclick="deleteTesti('${id}')">Del</button>
-        </div>
-      </div>`;
-    }).join('');
-    document.getElementById('d-testi').textContent=snap.size;
-  }catch(e){console.error(e)}
-}
-let testiAll=[];
-async function editTesti(id){
-  const doc=await db.collection(TESTI_COL).doc(id).get();
-  const d=doc.data();editingTestiId=id;
-  document.getElementById('testi-modal-title').textContent='Edit Testimonial';
-  document.getElementById('t-name').value=d.name||'';
-  document.getElementById('t-role').value=d.role||'';
-  document.getElementById('t-quote').value=d.quote||'';
-  document.getElementById('t-img').value=d.albumUrl||'';
-  document.getElementById('t-stars').value=d.stars||5;
-  document.getElementById('t-order').value=d.order||0;
-  document.getElementById('t-visible').value=d.visible!==false?'true':'false';
-  document.getElementById('testi-modal').classList.add('open');
-}
-function openTestiEditor(){editingTestiId=null;document.getElementById('testi-modal-title').textContent='Add Testimonial';['t-name','t-role','t-quote','t-img'].forEach(id=>document.getElementById(id).value='');document.getElementById('t-stars').value='5';document.getElementById('t-order').value='0';document.getElementById('t-visible').value='true';document.getElementById('testi-modal').classList.add('open');}
-function closeTestiModal(){document.getElementById('testi-modal').classList.remove('open');editingTestiId=null;}
-async function saveTesti(){
-  const name=document.getElementById('t-name').value.trim();
-  if(!name){alert('Name is required');return;}
-  const data={name,role:document.getElementById('t-role').value.trim(),quote:document.getElementById('t-quote').value.trim(),albumUrl:document.getElementById('t-img').value.trim(),stars:parseInt(document.getElementById('t-stars').value),order:parseInt(document.getElementById('t-order').value)||0,visible:document.getElementById('t-visible').value==='true',updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-  try{
-    if(editingTestiId)await db.collection(TESTI_COL).doc(editingTestiId).update(data);
-    else{data.createdAt=firebase.firestore.FieldValue.serverTimestamp();await db.collection(TESTI_COL).add(data);}
-    toast('✅','Testimonial saved!','success');closeTestiModal();await loadTestis();
-  }catch(e){toast('❌','Error: '+e.message,'error');}
-}
-async function deleteTesti(id){if(!confirm('Delete this testimonial?'))return;try{await db.collection(TESTI_COL).doc(id).delete();toast('✅','Deleted.','success');await loadTestis();}catch(e){toast('❌','Error','error');}}
-
-// ─── ROSTER ───
-async function loadRosters(){
-  try{
-    const snap=await db.collection(ROSTER_COL).orderBy('order','asc').get();
-    const list=document.getElementById('roster-list');
-    document.getElementById('d-roster').textContent=snap.size;
-    if(snap.empty){list.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--txt3)">No artists yet.</div>';return;}
-    list.innerHTML=snap.docs.map(doc=>{
-      const d=doc.data();const id=doc.id;
-      const art=d.imageUrl?`<img src="${d.imageUrl}" alt="${d.name}"/>`:(d.emoji||'🎤');
-      return `<div class="ra-card">
-        <div class="ra-art">${art}</div>
-        <div class="ra-info">
-          <div class="ra-name">${d.name}</div>
-          <div class="ra-genre">${d.genre||''} · ${d.location||'Kashmir'}</div>
-          <div style="margin-top:6px"><span class="status-badge ${d.visible!==false?'published':'draft'}" style="font-size:.6rem">${d.visible!==false?'Visible':'Hidden'}</span></div>
-        </div>
-        <div class="ra-actions">
-          <button class="btn ghost sm" onclick="editRoster('${id}')">✏️</button>
-          <button class="btn danger sm" onclick="deleteRoster('${id}')">🗑</button>
-        </div>
-      </div>`;
-    }).join('');
-  }catch(e){console.error(e)}
-}
-async function editRoster(id){
-  const doc=await db.collection(ROSTER_COL).doc(id).get();
-  const d=doc.data();editingRosterId=id;
-  document.getElementById('roster-modal-title').textContent='Edit Artist';
-  document.getElementById('r-name').value=d.name||'';
-  document.getElementById('r-genre').value=d.genre||'';
-  document.getElementById('r-location').value=d.location||'Kashmir';
-  document.getElementById('r-emoji').value=d.emoji||'🎤';
-  document.getElementById('r-img').value=d.imageUrl||'';
-  document.getElementById('r-order').value=d.order||0;
-  document.getElementById('r-visible').value=d.visible!==false?'true':'false';
-  document.getElementById('roster-modal').classList.add('open');
-}
-function openRosterEditor(){editingRosterId=null;document.getElementById('roster-modal-title').textContent='Add Artist';['r-name','r-genre','r-img'].forEach(id=>document.getElementById(id).value='');document.getElementById('r-location').value='Kashmir';document.getElementById('r-emoji').value='🎤';document.getElementById('r-order').value='0';document.getElementById('r-visible').value='true';document.getElementById('roster-modal').classList.add('open');}
-function closeRosterModal(){document.getElementById('roster-modal').classList.remove('open');editingRosterId=null;}
-async function saveRoster(){
-  const name=document.getElementById('r-name').value.trim();
-  if(!name){alert('Name required');return;}
-  const data={name,genre:document.getElementById('r-genre').value.trim(),location:document.getElementById('r-location').value.trim()||'Kashmir',emoji:document.getElementById('r-emoji').value.trim()||'🎤',imageUrl:document.getElementById('r-img').value.trim(),order:parseInt(document.getElementById('r-order').value)||0,visible:document.getElementById('r-visible').value==='true',updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-  try{
-    if(editingRosterId)await db.collection(ROSTER_COL).doc(editingRosterId).update(data);
-    else{data.createdAt=firebase.firestore.FieldValue.serverTimestamp();await db.collection(ROSTER_COL).add(data);}
-    toast('✅','Artist saved!','success');closeRosterModal();await loadRosters();
-  }catch(e){toast('❌','Error: '+e.message,'error');}
-}
-async function deleteRoster(id){if(!confirm('Remove this artist?'))return;try{await db.collection(ROSTER_COL).doc(id).delete();toast('✅','Removed.','success');await loadRosters();}catch(e){toast('❌','Error','error');}}
-
-// ─── MESSAGES ───
-async function loadMessages(){
-  try{
-    const snap=await db.collection(CONTACT_COL).orderBy('createdAt','desc').get();
-    allMsgs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const unread=allMsgs.filter(m=>!m.read).length;
-    document.getElementById('badge-msgs').textContent=unread||'';
-    document.getElementById('d-msgs').textContent=allMsgs.length;
-    document.getElementById('d-msgs-new').textContent=`${unread} unread`;
-    renderMessages(allMsgs);
-  }catch(e){console.error(e)}
-}
-function renderMessages(msgs){
-  const list=document.getElementById('msg-list');
-  if(!msgs.length){list.innerHTML='<div style="text-align:center;padding:60px;color:var(--txt3)">No messages yet.</div>';return;}
-  list.innerHTML=msgs.map(m=>{
-    const date=m.createdAt?new Date(m.createdAt.seconds*1000).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-    return `<div class="msg-card ${!m.read?'unread':''}" onclick="openMsg('${m.id}')">
-      <div class="msg-head">
-        <div class="msg-from">${m.name||'Unknown'}</div>
-        <div class="msg-time">${date}</div>
-      </div>
-      ${m.subject?`<div class="msg-subject">${m.subject}</div>`:''}
-      <div class="msg-preview">${m.message||''}</div>
-      <div class="msg-email">✉ ${m.email||''}</div>
-    </div>`;
-  }).join('');
-}
-async function openMsg(id){
-  const m=allMsgs.find(x=>x.id===id);if(!m)return;
-  currentMsgId=id;
-  const date=m.createdAt?new Date(m.createdAt.seconds*1000).toLocaleString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-  document.getElementById('msg-detail-body').innerHTML=`
-    <div style="margin-bottom:16px">
-      <div style="font-family:var(--font-h);font-size:1.1rem;font-weight:700;margin-bottom:4px">${m.name||'Unknown'}</div>
-      <div style="font-size:.8rem;color:var(--txt3)">${m.email||''}</div>
-      <div style="font-size:.75rem;color:var(--txt3);margin-top:2px">${date}</div>
-    </div>
-    ${m.subject?`<div style="background:rgba(30,138,255,.08);border:1px solid rgba(30,138,255,.15);border-radius:8px;padding:8px 12px;font-size:.82rem;color:var(--blue2);margin-bottom:16px">Subject: ${m.subject}</div>`:''}
-    <div style="background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;font-size:.9rem;color:var(--txt2);line-height:1.75">${(m.message||'').replace(/\n/g,'<br>')}</div>`;
-  document.getElementById('msg-del-btn').onclick=()=>deleteMsg(id);
-  document.getElementById('msg-reply-btn').onclick=()=>window.location.href=`mailto:${m.email}?subject=Re: ${m.subject||'Your enquiry to The Imaginary Records'}`;
-  document.getElementById('msg-modal').classList.add('open');
-  // Mark read
-  if(!m.read){
-    await db.collection(CONTACT_COL).doc(id).update({read:true});
-    m.read=true;await loadMessages();
+function escapeAttr(str){return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function secondaryAuth(){
+  try { return firebase.app('ArtistCreator').auth(); }
+  catch(e){
+    const cfg = firebase.app().options;
+    return firebase.initializeApp(cfg,'ArtistCreator').auth();
   }
 }
-function closeMsgModal(){document.getElementById('msg-modal').classList.remove('open');currentMsgId=null;}
-async function deleteMsg(id){if(!confirm('Delete this message?'))return;try{await db.collection(CONTACT_COL).doc(id).delete();toast('✅','Message deleted.','success');closeMsgModal();await loadMessages();await loadDashboard();}catch(e){toast('❌','Error','error');}}
-async function markAllRead(){try{const batch=db.batch();allMsgs.filter(m=>!m.read).forEach(m=>batch.update(db.collection(CONTACT_COL).doc(m.id),{read:true}));await batch.commit();toast('✅','All marked as read.','success');await loadMessages();}catch(e){toast('❌','Error','error');}}
 
-// ─── SETTINGS ───
-async function saveSettings(){
-  const data={name:document.getElementById('s-name').value.trim(),tagline:document.getElementById('s-tagline').value.trim(),email:document.getElementById('s-email').value.trim(),instagram:document.getElementById('s-insta').value.trim(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-  try{await db.collection(SETTINGS_DOC.collection).doc(SETTINGS_DOC.doc).set(data,{merge:true});toast('✅','Settings saved!','success');}
-  catch(e){toast('❌','Error: '+e.message,'error');}
-}
 
-// ─── UTILS ───
-function toast(icon,msg,type='success'){
-  const t=document.getElementById('toast');const ti=t.querySelector('.toast-icon');const tm=document.getElementById('toast-msg');
-  ti.textContent=icon;tm.textContent=msg;t.className=`toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
-function updateChar(el,countId,max){
-  const count=el.value.length;document.getElementById(countId).textContent=count;
-  if(count>max)el.value=el.value.slice(0,max);
-}
-// Close modals on overlay click
-['post-modal','testi-modal','roster-modal','msg-modal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+function openDrawer(){document.getElementById('mob-drawer').classList.add('on');document.getElementById('mob-overlay').classList.add('on');document.body.style.overflow='hidden';}
+function closeDrawer(){document.getElementById('mob-drawer').classList.remove('on');document.getElementById('mob-overlay').classList.remove('on');document.body.style.overflow='';}
+function setMN(name,isDemo=false){document.querySelectorAll('.mob-ni').forEach(n=>{n.classList.remove('on');n.classList.remove('on-demo');});const el=document.getElementById('mni-'+name);if(el)el.classList.add(isDemo?'on-demo':'on');}
+
+auth.onAuthStateChanged(u=>{
+  document.getElementById('ld').style.display='none';
+  if(u&&u.email===ADMIN_EMAIL){document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();}
+  else if(u&&u.email!==ADMIN_EMAIL){auth.signOut();document.getElementById('auth').style.display='flex';}
+  else{document.getElementById('auth').style.display='flex';document.getElementById('panel').style.display='none';}
 });
+
+async function doLogin(){
+  const em=document.getElementById('em').value.trim(),pw=document.getElementById('pw').value,btn=document.getElementById('blg'),err=document.getElementById('ae');
+  err.classList.remove('on');
+  if(em!==ADMIN_EMAIL){err.textContent='Access denied.';err.classList.add('on');return;}
+  if(!pw){err.textContent='Please enter your password.';err.classList.add('on');return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{await auth.signInWithEmailAndPassword(em,pw);}
+  catch(e){err.textContent='Login failed: '+e.message;err.classList.add('on');btn.disabled=false;btn.textContent='Access Admin Panel';}
+}
+function doSignOut(){auth.signOut();}
+
+async function loadAll(){toast('Loading...');await Promise.all([loadReleases(),loadArtists(),loadTickets(),loadBlogPosts(),loadRoyaltyHistory(),loadDemos()]);toast('All data loaded ✓');}
+
+async function loadReleases(){
+  try{const snap=await db.collection('releases').get();releases=[];snap.forEach(d=>releases.push({id:d.id,...d.data()}));releases.sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));renderLabelStats();renderRelTable('ov-list',releases.slice(0,8));renderRelTable('all-list',releases);renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review'));renderRelTable('live-list',releases.filter(r=>r.status==='live'));const pc=releases.filter(r=>r.status==='pending').length;['pend-cnt','mni-pend-cnt'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=pc;el.style.display=pc>0?'inline':'none';}});}catch(e){console.error(e);}
+}
+async function loadArtists(){
+  try{const snap=await db.collection('users').get();artists=[];snap.forEach(d=>artists.push({id:d.id,...d.data()}));renderArtists();renderLabelStats();const sel=document.getElementById('r-artist');sel.innerHTML='<option value="">— Select Artist —</option>';artists.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.name||a.email||a.id;sel.appendChild(o);});}catch(e){console.error(e);}
+}
+async function loadTickets(){
+  try{const snap=await db.collection('tickets').get();tickets=[];snap.forEach(d=>tickets.push({id:d.id,...d.data()}));tickets.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));renderTickets(tickets);renderOvTickets();renderLabelStats();const oc=tickets.filter(t=>t.status==='open').length;['tkt-cnt','mni-tkt-cnt'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=oc;el.style.display=oc>0?'inline':'none';}});}catch(e){console.error(e);}
+}
+async function loadBlogPosts(){try{const snap=await db.collection('blog').orderBy('createdAt','desc').get();blogPosts=[];snap.forEach(d=>blogPosts.push({id:d.id,...d.data()}));renderBlogList();}catch(e){console.log(e);}}
+async function loadRoyaltyHistory(){try{const snap=await db.collection('royalties').orderBy('createdAt','desc').get();royalties=[];snap.forEach(d=>royalties.push({id:d.id,...d.data()}));renderRoyaltyHistory();}catch(e){console.log(e);}}
+async function loadDemos(){
+  try{const snap=await db.collection('demos').orderBy('submittedAt','desc').get();demos=[];snap.forEach(d=>demos.push({id:d.id,...d.data()}));renderDemoStats();renderDemoTable('ov-demos',demos.filter(d=>d.status==='new').slice(0,6));renderDemoTable('demo-new-list',demos.filter(d=>d.status==='new'));renderDemoTable('demo-rev-list',demos.filter(d=>d.status==='reviewing'));renderDemoTable('demo-all-list',demos);renderDemoTable('demo-short-list',demos.filter(d=>d.status==='shortlisted'));renderDemoTable('demo-signed-list',demos.filter(d=>d.status==='signed'));renderDemoTable('demo-rej-list',demos.filter(d=>d.status==='rejected'));const nw=demos.filter(d=>d.status==='new').length;['demo-new-cnt','mni-demo-cnt'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=nw;el.style.display=nw>0?'inline':'none';}});document.getElementById('demo-all-count').textContent=demos.length+' submission'+(demos.length!==1?'s':'');}catch(e){console.log(e);}
+}
+
+function renderLabelStats(){document.getElementById('s0').textContent=releases.length;document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;document.getElementById('s2').textContent=releases.filter(r=>r.status==='live').length;document.getElementById('s3').textContent=artists.length;document.getElementById('s4').textContent=tickets.filter(t=>t.status==='open').length;document.getElementById('art-count').textContent=artists.length+' artist'+(artists.length!==1?'s':'');}
+function renderDemoStats(){const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length,sh=demos.filter(d=>d.status==='shortlisted').length,sg=demos.filter(d=>d.status==='signed').length;['d0','ds0'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=total;});['d1','ds1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nw;});['d2','ds2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=rv;});['d3','ds3'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sh;});['d4','ds4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sg;});}
+
+// ── Artwork thumbnail in release table ──
+function artThumb(r){
+  if(r.artworkUrl)return `<img src="${r.artworkUrl}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--brd);vertical-align:middle" alt="Art"/>`;
+  return `<div style="width:36px;height:36px;border-radius:6px;background:var(--card);border:1px solid var(--brd);display:inline-flex;align-items:center;justify-content:center;font-size:14px">🎵</div>`;
+}
+
+function renderRelTable(id,list){
+  const el=document.getElementById(id);if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No releases found</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Art</th><th>Title</th><th>Artist</th><th>Format</th><th>Genre</th><th>Date</th><th>Files</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${list.map(r=>`<tr>
+      <td>${artThumb(r)}</td>
+      <td style="font-weight:600">${r.title||'—'}</td>
+      <td style="color:var(--txt2)">${r.artistName||r.primaryArtist||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.releaseMedium==='video'?'Music Video':(r.type||'—')}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.genre||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.releaseDate||'—'}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${r.releaseMedium==='video'
+            ? `${r.videoUrl?`<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>`:''}${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
+            : `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`
+          }
+        </div>
+      </td>
+      <td><select class="ss" onchange="updateRelStatus('${r.id}',this.value)">
+        <option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option>
+        <option value="review" ${r.status==='review'?'selected':''}>🔍 Review</option>
+        <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
+        <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
+        <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
+      </select></td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="openRelease('${r.id}')">Manage</button><button class="db" onclick="deleteRelease('${r.id}')">Delete</button></div></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ══════════════════════════════════════════
+// RELEASE MODAL — with file preview
+// ══════════════════════════════════════════
+function openRelease(id){
+  const r=releases.find(x=>x.id===id);if(!r)return;
+  document.getElementById('rmo-title').textContent=r.title||'Release';
+  const isVideo = r.releaseMedium==='video';
+  const artworkHTML = r.artworkUrl
+    ? `<img class="artwork-thumb" src="${r.artworkUrl}" alt="Cover Artwork"/>`
+    : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>No artwork uploaded</span></div>`;
+  const thumbHTML = r.thumbnailUrl
+    ? `<img class="artwork-thumb" src="${r.thumbnailUrl}" alt="Thumbnail"/>`
+    : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>No thumbnail uploaded</span></div>`;
+  const audioHTML = r.audioUrl
+    ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
+    : `<div class="no-file-msg">No audio file uploaded</div>`;
+  const videoHTML = r.videoUrl
+    ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${r.videoDirector}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${r.videoUrl}</div><div class="audio-actions"><a class="audio-dl-btn" href="${r.videoUrl}" target="_blank">Open Video URL</a></div></div>`
+    : `<div class="no-file-msg">No video URL added</div>`;
+  document.getElementById('rmo-body').innerHTML=`
+    <div style="margin-bottom:18px">
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Change Status</label>
+      <select class="ss" style="width:100%;padding:10px;font-size:13px" onchange="updateRelStatus('${r.id}',this.value)">
+        <option value="pending" ${r.status==='pending'?'selected':''}>⏳ Pending</option>
+        <option value="review" ${r.status==='review'?'selected':''}>🔍 In Review</option>
+        <option value="approved" ${r.status==='approved'?'selected':''}>✅ Approved</option>
+        <option value="live" ${r.status==='live'?'selected':''}>🟢 Live</option>
+        <option value="rejected" ${r.status==='rejected'?'selected':''}>❌ Rejected</option>
+      </select>
+    </div>
+
+    <div class="file-preview-panel">
+      <div class="fp-card"><div class="fp-label">🖼 Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.artworkUrl}" target="_blank">Open Artwork</a></div>`:''}</div></div>
+      <div class="fp-card"><div class="fp-label">🎵 Audio File</div><div class="fp-content">${audioHTML}</div></div>
+      ${isVideo?`<div class="fp-card"><div class="fp-label">🎬 Video URL</div><div class="fp-content">${videoHTML}</div></div>`:''}
+      ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
+    </div>
+
+    <div class="edit-card">
+      <h4>Edit Submission</h4>
+      <div class="release-edit-grid">
+        <div class="fg"><label>Title</label><input id="er-title" value="${escapeAttr(r.title||'')}"/></div>
+        <div class="fg"><label>Artist</label><input id="er-artist" value="${escapeAttr(r.primaryArtist||r.artistName||'')}"/></div>
+        <div class="fg"><label>Type</label><input id="er-type" value="${escapeAttr(r.type||'')}"/></div>
+        <div class="fg"><label>Genre</label><input id="er-genre" value="${escapeAttr(r.genre||'')}"/></div>
+        <div class="fg"><label>Release Date</label><input id="er-date" type="date" value="${escapeAttr(r.releaseDate||'')}"/></div>
+        <div class="fg"><label>Label</label><input id="er-label" value="${escapeAttr(r.label||'')}"/></div>
+        <div class="fg full"><label>Featured Artists</label><input id="er-featured" value="${escapeAttr(r.featuredArtists||'')}"/></div>
+        <div class="fg full"><label>Writers</label><input id="er-writers" value="${escapeAttr(r.writers||'')}"/></div>
+        <div class="fg full"><label>Producers</label><input id="er-producers" value="${escapeAttr(r.producers||'')}"/></div>
+        ${isVideo?`<div class="fg full"><label>Video URL</label><input id="er-video-url" value="${escapeAttr(r.videoUrl||'')}"/></div>
+          <div class="fg"><label>Director</label><input id="er-video-director" value="${escapeAttr(r.videoDirector||'')}"/></div>
+          <div class="fg"><label>Channel</label><input id="er-video-channel" value="${escapeAttr(r.videoChannel||'')}"/></div>
+          <div class="fg full"><label>Thumbnail URL</label><input id="er-thumb-url" value="${escapeAttr(r.thumbnailUrl||'')}"/></div>` : ``}
+        <div class="fg full"><label>Audio URL</label><input id="er-audio-url" value="${escapeAttr(r.audioUrl||'')}"/></div>
+        <div class="fg full"><label>Artwork URL</label><input id="er-art-url" value="${escapeAttr(r.artworkUrl||'')}"/></div>
+        <div class="fg full"><label>Notes</label><textarea id="er-notes">${escapeAttr(r.notes||'')}</textarea></div>
+      </div>
+      <div class="update-acts">
+        <button class="btn-save-demo" onclick="saveReleaseEdits('${r.id}')">Save Changes</button>
+        <button class="btn-del-demo" onclick="deleteRelease('${r.id}')">Delete Submission</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('rmo').classList.add('on');
+}
+
+// ── Demo, Ticket, Artist tables (unchanged from original) ──
+function renderDemoTable(id,list){
+  const el=document.getElementById(id);if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No demos found</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Genre</th><th>Email</th><th>Instagram</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${list.map(d=>`<tr>
+      <td><div style="font-weight:600">${d.name||'—'}</div><span class="ref-badge">${d.refId||'—'}</span></td>
+      <td style="color:var(--txt2);font-size:12px">${d.genre||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${d.email||'—'}</td>
+      <td style="font-size:12px;color:var(--txt2)">${d.instagram||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</td>
+      <td><select class="ss" onchange="updateDemoStatus('${d.id}',this.value)">
+        <option value="new" ${d.status==='new'?'selected':''}>🆕 New</option>
+        <option value="reviewing" ${d.status==='reviewing'?'selected':''}>👂 Reviewing</option>
+        <option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>⭐ Shortlisted</option>
+        <option value="signed" ${d.status==='signed'?'selected':''}>✅ Signed</option>
+        <option value="rejected" ${d.status==='rejected'?'selected':''}>❌ Rejected</option>
+        <option value="archived" ${d.status==='archived'?'selected':''}>📦 Archived</option>
+      </select></td>
+      <td><button class="vb" onclick="openDemo('${d.id}')">View</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderArtists(){
+  const el=document.getElementById('art-list');if(!el)return;
+  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
+    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
+  </tbody></table>`;
+}
+
+function renderOvTickets(){
+  const open=tickets.filter(t=>t.status==='open');const el=document.getElementById('ov-tickets');if(!el)return;
+  if(!open.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No open tickets</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${open.map(t=>`<tr><td style="font-weight:600">${t.artistName||'—'}</td><td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td><td>${t.subject||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderTickets(list){
+  const el=document.getElementById('tkt-list');if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">No tickets</div></div>';return;}
+  const bc={open:'bp',pending:'br',resolved:'ba',closed:'bx'};
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${list.map(t=>`<tr><td style="font-weight:600">${t.artistName||'—'}</td><td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td><td>${t.subject||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td><td><span class="badge ${bc[t.status]||'bp'}">${t.status||'Open'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderRoyaltyHistory(){
+  const el=document.getElementById('roy-history-list');if(!el)return;
+  if(!royalties.length){el.innerHTML='<div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No statements yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Period</th><th>Release</th><th>Total</th><th>Type</th><th>Date</th><th>Action</th></tr></thead><tbody>
+    ${royalties.map(r=>`<tr><td style="font-weight:600">${r.artistName||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px">${r.period||'—'}</td><td style="font-size:12px;color:var(--txt2)">${r.releaseTitle||'Overall'}</td><td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--gold)">₹${Number(r.totalAmount||0).toFixed(2)}</td><td><span class="badge ${r.type==='payout'?'ba':'br'}">${r.type==='payout'?'Payout':'Statement'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.createdAt?r.createdAt.substring(0,10):'—'}</td><td><button class="db" onclick="deleteRoyalty('${r.id}')">Delete</button></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderBlogList(){
+  const el=document.getElementById('blog-list');if(!el)return;
+  document.getElementById('blog-count').textContent=blogPosts.length+' post'+(blogPosts.length!==1?'s':'');
+  if(!blogPosts.length){el.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div></div>';return;}
+  el.innerHTML=blogPosts.map(p=>`<div class="blog-admin-card"><div style="width:40px;height:40px;background:var(--card);border:1px solid var(--brd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📝</div><div class="blog-admin-info"><div class="blog-admin-title">${p.title||'—'}</div><div class="blog-admin-meta">${p.category||'—'} · ${p.createdAt?p.createdAt.substring(0,10):'—'}</div></div><button class="db" onclick="deleteBlog('${p.id}')">Delete</button></div>`).join('');
+}
+
+async function updateRelStatus(id,status){try{await db.collection('releases').doc(id).update({status});const r=releases.find(x=>x.id===id);if(r)r.status=status;renderLabelStats();toast('Status → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
+async function updateDemoStatus(id,status){try{await db.collection('demos').doc(id).update({status});const d=demos.find(x=>x.id===id);if(d)d.status=status;renderDemoStats();toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
+async function updateTicketStatus(id,status){try{await db.collection('tickets').doc(id).update({status});const t=tickets.find(x=>x.id===id);if(t)t.status=status;toast('Ticket → '+status);await loadTickets();}catch(e){toast('Error: '+e.message);}}
+
+async function saveRoyalty(){
+  const artistId=document.getElementById('r-artist').value,period=document.getElementById('r-period').value,total=document.getElementById('r-total').value;
+  document.getElementById('roy-e').classList.remove('on');document.getElementById('roy-s').classList.remove('on');
+  if(!artistId)return showAl('roy-e','Please select an artist.');if(!period)return showAl('roy-e','Please select a period.');if(!total)return showAl('roy-e','Please enter the total amount.');
+  const artist=artists.find(a=>a.id===artistId);const btn=document.getElementById('r-btn');btn.disabled=true;btn.textContent='Saving...';
+  const gv=id=>{const v=document.getElementById(id)?.value;return v?Number(v):0;};
+  const platforms={};
+  if(gv('p-spotify'))platforms['Spotify']=gv('p-spotify');if(gv('p-apple'))platforms['Apple Music']=gv('p-apple');if(gv('p-amazon'))platforms['Amazon Music']=gv('p-amazon');if(gv('p-youtube'))platforms['YouTube Music']=gv('p-youtube');if(gv('p-jio'))platforms['JioSaavn']=gv('p-jio');if(gv('p-gaana'))platforms['Gaana']=gv('p-gaana');if(gv('p-tidal'))platforms['Tidal']=gv('p-tidal');if(gv('p-other'))platforms['Other']=gv('p-other');
+  try{
+    await db.collection('royalties').add({userId:artistId,artistName:artist?.name||artistId,period,totalAmount:Number(total),releaseTitle:document.getElementById('r-release-title').value.trim()||'',platforms,notes:document.getElementById('r-notes').value.trim(),isCurrent:document.getElementById('r-current').value==='true',type:document.getElementById('r-payout').value==='true'?'payout':'statement',amount:Number(total),createdAt:new Date().toISOString()});
+    showAl('roy-s','✓ Royalty statement saved!');
+    ['r-total','r-release-title','r-notes','p-spotify','p-apple','p-amazon','p-youtube','p-jio','p-gaana','p-tidal','p-other'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('r-artist').value='';document.getElementById('r-period').value='';
+    await loadRoyaltyHistory();toast('Royalty saved ✓');
+  }catch(e){showAl('roy-e','Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Save Royalty Statement';
+}
+async function deleteRoyalty(id){if(!confirm('Delete this royalty statement?'))return;try{await db.collection('royalties').doc(id).delete();await loadRoyaltyHistory();toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+
+async function saveBlog(){
+  const title=document.getElementById('b-title').value.trim(),cat=document.getElementById('b-cat').value,content=document.getElementById('b-content').value.trim();
+  document.getElementById('blog-e').classList.remove('on');document.getElementById('blog-s').classList.remove('on');
+  if(!title)return showAl('blog-e','Please enter a post title.');if(!content)return showAl('blog-e','Please write some content.');
+  const btn=document.getElementById('b-btn');btn.disabled=true;btn.textContent='Publishing...';
+  try{await db.collection('blog').add({title,category:cat,content,createdAt:new Date().toISOString()});document.getElementById('b-title').value='';document.getElementById('b-content').value='';showAl('blog-s','✓ Post published!');await loadBlogPosts();toast('Post published ✓');}
+  catch(e){showAl('blog-e','Error: '+e.message);}
+  btn.disabled=false;btn.textContent='Publish Post';
+}
+async function deleteBlog(id){if(!confirm('Delete this blog post?'))return;try{await db.collection('blog').doc(id).delete();await loadBlogPosts();toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+
+async function createArtistAccount(){
+  const name=document.getElementById('ca-name').value.trim();
+  const email=document.getElementById('ca-email').value.trim();
+  const password=document.getElementById('ca-password').value;
+  document.getElementById('artist-e').classList.remove('on');
+  document.getElementById('artist-s').classList.remove('on');
+  if(!name)return showAl('artist-e','Please enter artist name.');
+  if(!email)return showAl('artist-e','Please enter email.');
+  if(password.length<6)return showAl('artist-e','Password must be at least 6 characters.');
+  const btn=document.getElementById('ca-btn'); btn.disabled=true; btn.textContent='Creating...';
+  try{
+    const secAuth=secondaryAuth();
+    const cred=await secAuth.createUserWithEmailAndPassword(email,password);
+    const uid=cred.user.uid;
+    await db.collection('users').doc(uid).set({
+      name,email,
+      genre:document.getElementById('ca-genre').value.trim(),
+      country:document.getElementById('ca-country').value.trim(),
+      instagram:document.getElementById('ca-instagram').value.trim(),
+      bio:document.getElementById('ca-bio').value.trim(),
+      createdAt:new Date().toISOString(),
+      createdBy:'admin-panel'
+    },{merge:true});
+    await secAuth.signOut();
+    ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value='');
+    showAl('artist-s','✓ Artist account created successfully.');
+    await loadArtists();
+    toast('Artist account created ✓');
+  }catch(e){showAl('artist-e','Error: '+e.message);}
+  btn.disabled=false; btn.textContent='Create Artist Account';
+}
+
+async function deleteArtistProfile(id){
+  if(!confirm('Delete this artist profile document from Firestore? Auth account will remain unless removed manually or via backend.'))return;
+  try{await db.collection('users').doc(id).delete(); await loadArtists(); toast('Artist profile deleted ✓');}catch(e){toast('Error: '+e.message);}
+}
+
+async function saveReleaseEdits(id){
+  const payload={
+    title:document.getElementById('er-title').value.trim(),
+    primaryArtist:document.getElementById('er-artist').value.trim(),
+    artistName:document.getElementById('er-artist').value.trim(),
+    type:document.getElementById('er-type').value.trim(),
+    genre:document.getElementById('er-genre').value.trim(),
+    releaseDate:document.getElementById('er-date').value.trim(),
+    label:document.getElementById('er-label').value.trim(),
+    featuredArtists:document.getElementById('er-featured').value.trim(),
+    writers:document.getElementById('er-writers').value.trim(),
+    producers:document.getElementById('er-producers').value.trim(),
+    audioUrl:document.getElementById('er-audio-url').value.trim(),
+    artworkUrl:document.getElementById('er-art-url').value.trim(),
+    notes:document.getElementById('er-notes').value.trim()
+  };
+  const videoUrl=document.getElementById('er-video-url');
+  if(videoUrl){
+    payload.videoUrl=videoUrl.value.trim();
+    payload.videoDirector=document.getElementById('er-video-director').value.trim();
+    payload.videoChannel=document.getElementById('er-video-channel').value.trim();
+    payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim();
+  }
+  try{await db.collection('releases').doc(id).update(payload); await loadReleases(); openRelease(id); toast('Release updated ✓');}catch(e){toast('Error: '+e.message);}
+}
+
+async function deleteRelease(id){
+  if(!confirm('Delete this release submission?'))return;
+  try{await db.collection('releases').doc(id).delete(); releases=releases.filter(r=>r.id!==id); renderLabelStats(); applyRelFilter(); renderRelTable('ov-list',releases.slice(0,8)); renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review')); renderRelTable('live-list',releases.filter(r=>r.status==='live')); closeMo('rmo'); toast('Release deleted ✓');}catch(e){toast('Error: '+e.message);}
+}
+
+
+function openTicket(id){
+  const t=tickets.find(x=>x.id===id);if(!t)return;
+  document.getElementById('tmo-title').textContent=t.subject||'Ticket';
+  document.getElementById('tmo-body').innerHTML=`<div class="dr"><div class="dk">Artist</div><div class="dv">${t.artistName||'—'}</div></div><div class="dr"><div class="dk">Email</div><div class="dv">${t.artistEmail||'—'}</div></div><div class="dr"><div class="dk">Category</div><div class="dv">${t.category||'—'}</div></div><div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></div></div><div class="dr"><div class="dk">Status</div><div class="dv"><select class="ss" onchange="updateTicketStatus('${t.id}',this.value)"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option></select></div></div><div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--card);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${t.message||'—'}</div></div>${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${t.reply}</div></div>`:''}<div class="reply-box"><label>Reply to Artist</label><textarea id="reply-txt">${t.reply||''}</textarea><div class="reply-acts"><button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button><button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMo('tmo')">Close Ticket</button></div></div>`;
+  document.getElementById('tmo').classList.add('on');
+}
+
+function openDemo(id){
+  const d=demos.find(x=>x.id===id);if(!d)return;
+  const bc={new:'b-new',reviewing:'b-reviewing',shortlisted:'b-shortlisted',signed:'b-signed',rejected:'b-rejected',archived:'b-archived'};
+  document.getElementById('dmo-title').textContent=d.name||'Demo';
+  document.getElementById('dmo-ref').innerHTML=`<span class="ref-badge">${d.refId||'—'}</span><span class="badge ${bc[d.status]||'b-new'}" style="margin-left:6px">${(d.status||'new').toUpperCase()}</span>`;
+  const links=[];if(d.demoLink)links.push(`<a href="${d.demoLink}" target="_blank">🎵 Demo Link</a>`);if(d.youtubeLink)links.push(`<a href="${d.youtubeLink}" target="_blank">▶️ YouTube/SC</a>`);
+  document.getElementById('dmo-body').innerHTML=`<div class="demo-grid"><div class="demo-field"><div class="df-label">Artist</div><div class="df-val" style="font-weight:700;font-size:15px">${d.name||'—'}</div></div><div class="demo-field"><div class="df-label">Genre</div><div class="df-val">${d.genre||'—'}</div></div><div class="demo-field"><div class="df-label">Email</div><div class="df-val"><a href="mailto:${d.email}">${d.email||'—'}</a></div></div><div class="demo-field"><div class="df-label">Phone</div><div class="df-val">${d.phone||'—'}</div></div><div class="demo-field"><div class="df-label">Instagram</div><div class="df-val"><a href="https://instagram.com/${(d.instagram||'').replace('@','')}" target="_blank">${d.instagram||'—'}</a></div></div><div class="demo-field"><div class="df-label">Submitted</div><div class="df-val">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</div></div><div class="demo-field full"><div class="df-label">Music Links</div><div class="df-val" style="display:flex;gap:16px;flex-wrap:wrap">${links.length?links.join(''):'No links provided'}</div></div><div class="demo-field full"><div class="df-label">Bio</div><div class="df-val bio">${d.bio||'—'}</div></div></div><div class="update-box"><label>Update Status</label><select onchange="updateDemoStatus('${d.id}',this.value)"><option value="new" ${d.status==='new'?'selected':''}>🆕 New</option><option value="reviewing" ${d.status==='reviewing'?'selected':''}>👂 Reviewing</option><option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>⭐ Shortlisted</option><option value="signed" ${d.status==='signed'?'selected':''}>✅ Signed</option><option value="rejected" ${d.status==='rejected'?'selected':''}>❌ Rejected</option><option value="archived" ${d.status==='archived'?'selected':''}>📦 Archived</option></select><label>Internal Notes</label><textarea id="modal-notes">${d.notes||''}</textarea><div class="update-acts"><button class="btn-save-demo" id="save-notes-btn" onclick="saveDemoNotes('${d.id}')">Save Notes</button><button class="btn-del-demo" onclick="deleteDemo('${d.id}')">Delete</button></div></div>`;
+  document.getElementById('dmo').classList.add('on');
+}
+
+async function sendReply(id){const reply=document.getElementById('reply-txt')?.value.trim();if(!reply){toast('Please type a reply first.');return;}const btn=document.getElementById('btn-reply');btn.disabled=true;btn.textContent='Sending...';try{await db.collection('tickets').doc(id).update({reply,status:'resolved',repliedAt:new Date().toISOString()});const t=tickets.find(x=>x.id===id);if(t){t.reply=reply;t.status='resolved';}toast('Reply sent ✓');closeMo('tmo');await loadTickets();}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Send Reply';}
+async function saveDemoNotes(id){const notes=document.getElementById('modal-notes')?.value.trim()||'';const btn=document.getElementById('save-notes-btn');btn.disabled=true;btn.textContent='Saving...';try{await db.collection('demos').doc(id).update({notes});const d=demos.find(x=>x.id===id);if(d)d.notes=notes;toast('Notes saved ✓');}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Save Notes';}
+async function deleteDemo(id){if(!confirm('Delete this demo?'))return;try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();renderDemoTable('demo-all-list',demos);closeMo('dmo');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+
+function setRelSt(s,btn){relFilter=s;document.querySelectorAll('#page-all .fb:not(.demo-fb)').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyRelFilter();}
+function applyRelFilter(){const q=(document.getElementById('rel-search')?.value||'').toLowerCase();let list=releases;if(relFilter!=='all')list=list.filter(r=>r.status===relFilter);if(q)list=list.filter(r=>(r.title||'').toLowerCase().includes(q)||(r.artistName||'').toLowerCase().includes(q));renderRelTable('all-list',list);}
+function setTF(s,btn){tktFilter=s;document.querySelectorAll('#page-tickets .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');let list=tickets;if(s!=='all')list=list.filter(t=>t.status===s);renderTickets(list);}
+function setDF(s,btn){demoFilter=s;document.querySelectorAll('#page-demo-all .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyDemoFilter();}
+function applyDemoFilter(){const q=(document.getElementById('demo-search')?.value||'').toLowerCase();let list=demos;if(demoFilter!=='all')list=list.filter(d=>d.status===demoFilter);if(q)list=list.filter(d=>(d.name||'').toLowerCase().includes(q)||(d.email||'').toLowerCase().includes(q)||(d.genre||'').toLowerCase().includes(q));renderDemoTable('demo-all-list',list);document.getElementById('demo-all-count').textContent=list.length+' result'+(list.length!==1?'s':'');}
+
+function goPage(name,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('page-'+name)?.classList.add('on');if(el)el.classList.add('on');
+  const isDemo=name.startsWith('demo-');const pill=document.getElementById('section-pill');
+  if(pill){pill.textContent=isDemo?'Demos':'Label';pill.className='section-pill '+(isDemo?'pill-demo':'pill-label');}
+  const m={overview:['Overview','Label + Demo summary'],all:['All Submissions','Every release'],pending:['Pending Review','Awaiting action'],live:['Live Releases','On platforms'],royalties:['Manage Royalties','Update artist earnings'],blog:['Music Blog','Publish posts'],artists:['All Artists','Registered accounts'],tickets:['Support Tickets','Artist support'],'demo-inbox':['Demo Inbox','New & in-review'],'demo-all':['All Demos','Every demo'],'demo-shortlisted':['Shortlisted','Strong potential'],'demo-signed':['Signed','From demo pipeline'],'demo-rejected':['Rejected','Not moving forward']};
+  const[t,s]=m[name]||['Admin',''];document.getElementById('pgt').textContent=t;document.getElementById('pgs').textContent=s;
+  if(name==='blog')loadBlogPosts();if(name==='royalties'){loadRoyaltyHistory();loadArtists();}
+  window.scrollTo(0,0);
+}
+
+function closeMo(id){document.getElementById(id)?.classList.remove('on');}
+function showAl(id,m){const e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('on');}}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
+</script>
+
+<script>
+(function(){
+function ensureArtistAccessControls(){
+  if(document.getElementById('ca-audio-access')) return;
+  var grid=document.querySelector('.artist-create-grid'); if(!grid) return;
+  var ig=document.getElementById('ca-instagram'); if(!ig) return; var igWrap=ig.closest('.fg');
+  var wrap1=document.createElement('div'); wrap1.className='fg'; wrap1.innerHTML='<label>Audio Release Access</label><select id="ca-audio-access"><option value="true" selected>Enabled</option><option value="false">Disabled</option></select>';
+  var wrap2=document.createElement('div'); wrap2.className='fg'; wrap2.innerHTML='<label>Music Video Access</label><select id="ca-video-access"><option value="false" selected>Disabled</option><option value="true">Enabled</option></select>';
+  igWrap.insertAdjacentElement('afterend',wrap1); wrap1.insertAdjacentElement('afterend',wrap2);
+}
+var oldLoadArtists=window.loadArtists;
+window.loadArtists=async function(){ await oldLoadArtists(); ensureArtistAccessControls(); };
+window.renderArtists=function(){
+  const el=document.getElementById('art-list');if(!el)return;
+  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>Audio</th><th>Video</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
+    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0); const access=a.releaseServices||{}; return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td><select class="ss" id="art-audio-${a.id}"><option value="true" ${(access.audio!==false)?'selected':''}>Enabled</option><option value="false" ${(access.audio===false)?'selected':''}>Disabled</option></select></td><td><select class="ss" id="art-video-${a.id}"><option value="true" ${(access.video===true)?'selected':''}>Enabled</option><option value="false" ${(access.video!==true)?'selected':''}>Disabled</option></select></td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">INR ${tr.toFixed(2)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="saveArtistServices('${a.id}')">Save Access</button><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></div></td></tr>`;}).join('')}
+  </tbody></table>`;
+};
+window.saveArtistServices=async function(id){ try{ await db.collection('users').doc(id).set({releaseServices:{audio:document.getElementById('art-audio-'+id).value==='true', video:document.getElementById('art-video-'+id).value==='true'}},{merge:true}); toast('Artist access updated ✓'); await oldLoadArtists(); }catch(e){toast('Error: '+e.message);} };
+window.createArtistAccount=async function(){
+  const name=document.getElementById('ca-name').value.trim(), email=document.getElementById('ca-email').value.trim(), password=document.getElementById('ca-password').value;
+  document.getElementById('artist-e').classList.remove('on'); document.getElementById('artist-s').classList.remove('on');
+  if(!name) return showAl('artist-e','Please enter artist name.'); if(!email) return showAl('artist-e','Please enter email.'); if(password.length<6) return showAl('artist-e','Password must be at least 6 characters.');
+  const btn=document.getElementById('ca-btn'); btn.disabled=true; btn.textContent='Creating...';
+  try{ const secAuth=secondaryAuth(); const cred=await secAuth.createUserWithEmailAndPassword(email,password); const uid=cred.user.uid; await db.collection('users').doc(uid).set({name,email,genre:document.getElementById('ca-genre').value.trim(),country:document.getElementById('ca-country').value.trim(),instagram:document.getElementById('ca-instagram').value.trim(),bio:document.getElementById('ca-bio').value.trim(),releaseServices:{audio:document.getElementById('ca-audio-access').value==='true',video:document.getElementById('ca-video-access').value==='true'},createdAt:new Date().toISOString(),createdBy:'admin-panel'},{merge:true}); await secAuth.signOut(); ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value=''); document.getElementById('ca-audio-access').value='true'; document.getElementById('ca-video-access').value='false'; showAl('artist-s','✓ Artist account created successfully.'); await oldLoadArtists(); toast('Artist account created ✓'); }catch(e){ showAl('artist-e','Error: '+e.message); }
+  btn.disabled=false; btn.textContent='Create Artist Account';
+};
+var oldOpenRelease=window.openRelease;
+window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div><div class="fg full"><label>Track Summary</label><textarea id="er-tracks">'+(((r.trackItems||[]).map(function(t){return ((t.trackNumber||'')+'. '+(t.title||'')+' - '+(t.artist||'')).trim();}).join('\n')).replace(/</g,'&lt;'))+'</textarea></div>'); }
+};
+var oldSaveReleaseEdits=window.saveReleaseEdits;
+window.saveReleaseEdits=async function(id){
+  const payload={ title:document.getElementById('er-title').value.trim(), primaryArtist:document.getElementById('er-artist').value.trim(), artistName:document.getElementById('er-artist').value.trim(), type:document.getElementById('er-type').value.trim(), genre:document.getElementById('er-genre').value.trim(), releaseDate:document.getElementById('er-date').value.trim(), label:document.getElementById('er-label').value.trim(), featuredArtists:document.getElementById('er-featured').value.trim(), writers:document.getElementById('er-writers').value.trim(), producers:document.getElementById('er-producers').value.trim(), audioUrl:document.getElementById('er-audio-url').value.trim(), artworkUrl:document.getElementById('er-art-url').value.trim(), notes:document.getElementById('er-notes').value.trim(), selectedPlatforms:(document.getElementById('er-platforms')&&document.getElementById('er-platforms').value.trim()?document.getElementById('er-platforms').value.split(',').map(function(x){return x.trim();}).filter(Boolean):[]), previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null), trackItems:(document.getElementById('er-tracks')&&document.getElementById('er-tracks').value.trim()?document.getElementById('er-tracks').value.split('\n').map(function(line,idx){return {trackNumber:idx+1,title:line.trim()};}):[]) };
+  var videoUrl=document.getElementById('er-video-url'); if(videoUrl){ payload.videoUrl=videoUrl.value.trim(); payload.videoDirector=document.getElementById('er-video-director').value.trim(); payload.videoChannel=document.getElementById('er-video-channel').value.trim(); payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim(); }
+  try{ await db.collection('releases').doc(id).update(payload); await loadReleases(); window.openRelease(id); toast('Release updated ✓'); }catch(e){ toast('Error: '+e.message); }
+};
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureArtistAccessControls,100); });
+})();
 </script>
 </body>
 </html>
