@@ -163,6 +163,34 @@ tr:last-child td{border-bottom:none}
 .b-shortlisted{background:rgba(232,0,13,.12);color:var(--demo)}
 .b-signed{background:rgba(34,197,94,.12);color:#4ade80}
 .b-rejected{background:rgba(82,82,91,.2);color:#71717a}
+/* ── LABEL ACCOUNT STYLES ── */
+.acct-type-toggle{display:flex;gap:0;background:var(--card);border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:18px}
+.att-btn{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--txt2);transition:all .2s;border:none;background:none}
+.att-btn.on{background:var(--gold);color:#000}
+.att-btn.on.type-label{background:var(--blu);color:#fff}
+.type-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.tb-artist{background:rgba(57,231,95,.12);color:#39e75f}
+.tb-label{background:rgba(59,130,246,.15);color:#60a5fa}
+.label-artists-section{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px;margin-top:14px}
+.la-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.la-head h4{font-size:13px;font-weight:700;color:var(--gold)}
+.la-list{display:flex;flex-direction:column;gap:8px}
+.la-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--brd);border-radius:8px}
+.la-avatar{width:34px;height:34px;border-radius:50%;background:var(--brd2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--gold);flex-shrink:0}
+.la-info{flex:1;min-width:0}
+.la-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.la-meta{font-size:11px;color:var(--txt3);margin-top:1px}
+.la-remove{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:#f87171;font-size:11px;font-weight:600;padding:4px 10px;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.la-remove:hover{background:rgba(239,68,68,.2)}
+.btn-add-la{display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:8px;color:#60a5fa;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-add-la:hover{background:rgba(59,130,246,.2)}
+.add-la-form{display:none;margin-top:10px;padding:12px;background:var(--surface);border:1px solid var(--brd);border-radius:8px}
+.add-la-form.on{display:block}
+.add-la-form .fg{margin-bottom:10px}
+.label-row-artists{font-size:11px;color:var(--txt3)}
+.label-row-artists span{color:var(--blu);font-weight:600}
+.acct-section-label{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--brd)}
+
 
 .ss{background:var(--card);border:1px solid var(--brd);border-radius:6px;color:var(--txt);font-size:12px;padding:5px 8px;cursor:pointer;outline:none;transition:border-color .2s}
 .ss:focus{border-color:var(--gold)}
@@ -457,18 +485,44 @@ tr:last-child td{border-bottom:none}
 
     <div class="pg" id="page-artists">
       <div class="section" style="margin-bottom:18px">
-        <div class="sh"><h3>Create Artist Account</h3><p>No Firebase Console needed</p></div>
+        <div class="sh"><h3>Create Account</h3><p>Artist or Label — no Firebase Console needed</p></div>
         <div class="sb2">
           <div class="al al-e" id="artist-e"></div><div class="al al-s" id="artist-s"></div>
-          <div class="artist-create-grid">
-            <div class="fg"><label>Artist / Stage Name *</label><input type="text" id="ca-name" placeholder="Artist name"/></div>
+
+          <!-- Account Type Toggle -->
+          <div class="acct-type-toggle">
+            <button class="att-btn on" id="att-artist" onclick="switchAcctType('artist')">🎤 Artist Account</button>
+            <button class="att-btn type-label" id="att-label" onclick="switchAcctType('label')">🏢 Label Account</button>
+          </div>
+
+          <div class="artist-create-grid" id="ca-form">
+            <!-- Common Fields -->
+            <div class="acct-section-label" style="grid-column:1/-1">Account Details</div>
+            <div class="fg" id="ca-name-group"><label id="ca-name-label">Artist / Stage Name *</label><input type="text" id="ca-name" placeholder="Artist name"/></div>
             <div class="fg"><label>Email *</label><input type="email" id="ca-email" placeholder="artist@email.com"/></div>
             <div class="fg"><label>Password *</label><input type="password" id="ca-password" placeholder="Minimum 6 characters"/></div>
             <div class="fg"><label>Genre</label><input type="text" id="ca-genre" placeholder="Hip Hop / Trap"/></div>
             <div class="fg"><label>Country</label><input type="text" id="ca-country" placeholder="India"/></div>
             <div class="fg"><label>Instagram</label><input type="text" id="ca-instagram" placeholder="@handle"/></div>
-            <div class="fg full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio"></textarea></div>
-            <div class="fg full"><button class="btn-gold" id="ca-btn" onclick="createArtistAccount()">Create Artist Account</button></div>
+            <div class="fg full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio or label description"></textarea></div>
+
+            <!-- Artist-only fields -->
+            <div class="acct-section-label" style="grid-column:1/-1" id="ca-streaming-label">Streaming Profiles</div>
+            <div class="fg" id="ca-spotify-group"><label>Spotify Artist URL</label><input type="url" id="ca-spotify" placeholder="https://open.spotify.com/artist/..."/></div>
+            <div class="fg" id="ca-apple-group"><label>Apple Music URL</label><input type="url" id="ca-apple-music" placeholder="https://music.apple.com/..."/></div>
+            <div class="fg" id="ca-soundcloud-group"><label>SoundCloud URL</label><input type="url" id="ca-soundcloud" placeholder="https://soundcloud.com/..."/></div>
+            <div class="fg" id="ca-youtube-group"><label>YouTube Channel URL</label><input type="url" id="ca-youtube-url" placeholder="https://youtube.com/@..."/></div>
+
+            <!-- Release Access -->
+            <div class="acct-section-label" style="grid-column:1/-1" id="ca-access-label">Release Permissions</div>
+            <div class="fg"><label>Audio Release Access</label><select id="ca-audio-access"><option value="true" selected>Enabled</option><option value="false">Disabled</option></select></div>
+            <div class="fg"><label>Music Video Access</label><select id="ca-video-access"><option value="false" selected>Disabled</option><option value="true">Enabled</option></select></div>
+
+            <!-- Plan -->
+            <div class="fg"><label>Plan</label><select id="ca-plan"><option value="free">Free</option><option value="starter">Starter (₹999/yr)</option><option value="pro">Pro (₹1599/yr)</option><option value="custom">Custom Label</option></select></div>
+            <div class="fg"><label>Royalty Split (%)</label><input type="number" id="ca-royalty" placeholder="85" value="85" min="0" max="100"/></div>
+
+            <div class="fg full"><button class="btn-gold" id="ca-btn" onclick="createAccount()">Create Artist Account</button></div>
           </div>
         </div>
       </div>
@@ -577,6 +631,37 @@ tr:last-child td{border-bottom:none}
 <!-- DEMO MODAL -->
 <div class="mo" id="dmo" onclick="if(event.target===this)closeMo('dmo')">
   <div class="mbox demo-mbox"><div class="mh"><div><div class="mt2" id="dmo-title">Demo</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center" id="dmo-ref"></div></div><button class="mc" onclick="closeMo('dmo')">✕</button></div><div class="mb" id="dmo-body"></div></div>
+</div>
+
+<!-- LABEL ARTISTS MODAL -->
+<div class="mo" id="la-modal" onclick="if(event.target===this)document.getElementById('la-modal').classList.remove('on')">
+  <div class="mbox" style="max-width:600px">
+    <div class="mh">
+      <div class="mt2" id="la-modal-title">Label Artists</div>
+      <button class="mc" onclick="document.getElementById('la-modal').classList.remove('on')">✕</button>
+    </div>
+    <div class="mb">
+      <div class="la-list" id="la-modal-list" style="margin-bottom:16px"></div>
+      <button class="btn-add-la" onclick="toggleAddLabelArtistForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Artist
+      </button>
+      <div class="add-la-form" id="la-add-form">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="fg"><label>Artist Name *</label><input id="la-artist-name" placeholder="Stage name"/></div>
+          <div class="fg"><label>Genre</label><input id="la-artist-genre" placeholder="Hip Hop, R&B..."/></div>
+          <div class="fg"><label>Spotify Artist URL</label><input type="url" id="la-artist-spotify" placeholder="https://open.spotify.com/artist/..."/></div>
+          <div class="fg"><label>Apple Music URL</label><input type="url" id="la-artist-apple" placeholder="https://music.apple.com/..."/></div>
+          <div class="fg" style="grid-column:1/-1"><label>SoundCloud URL</label><input type="url" id="la-artist-soundcloud" placeholder="https://soundcloud.com/..."/></div>
+          <div class="fg" style="grid-column:1/-1"><label>Bio</label><textarea id="la-artist-bio" style="min-height:60px" placeholder="Short artist bio"></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="btn-reply" id="la-add-btn" onclick="addLabelArtist()">Add Artist</button>
+          <button class="btn-close-t" onclick="document.getElementById('la-add-form').classList.remove('on')">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -965,19 +1050,191 @@ var oldLoadArtists=window.loadArtists;
 window.loadArtists=async function(){ await oldLoadArtists(); ensureArtistAccessControls(); };
 window.renderArtists=function(){
   const el=document.getElementById('art-list');if(!el)return;
-  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>Audio</th><th>Video</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
-    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0); const access=a.releaseServices||{}; return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td><select class="ss" id="art-audio-${a.id}"><option value="true" ${(access.audio!==false)?'selected':''}>Enabled</option><option value="false" ${(access.audio===false)?'selected':''}>Disabled</option></select></td><td><select class="ss" id="art-video-${a.id}"><option value="true" ${(access.video===true)?'selected':''}>Enabled</option><option value="false" ${(access.video!==true)?'selected':''}>Disabled</option></select></td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">INR ${tr.toFixed(2)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="saveArtistServices('${a.id}')">Save Access</button><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></div></td></tr>`;}).join('')}
+  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No accounts yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Type</th><th>Name</th><th>Email</th><th>Genre</th><th>Plan</th><th>Audio</th><th>Video</th><th>Releases</th><th>Royalties</th><th>Actions</th></tr></thead><tbody>
+    ${artists.map(a=>{
+      const rc=releases.filter(r=>r.userId===a.id).length;
+      const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);
+      const access=a.releaseServices||{};
+      const isLabel=a.accountType==='label';
+      const labelArtists=a.labelArtists||[];
+      return `<tr>
+        <td><span class="type-badge ${isLabel?'tb-label':'tb-artist'}">${isLabel?'🏢 Label':'🎤 Artist'}</span></td>
+        <td>
+          <div style="font-weight:600">${a.name||'—'}</div>
+          ${isLabel?`<div class="label-row-artists">Artists: <span>${labelArtists.length}</span></div>`:''}
+        </td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td>
+        <td style="font-size:12px;color:var(--txt3)">${isLabel?'Label':a.genre||'—'}</td>
+        <td style="font-size:12px"><span class="badge ${a.plan==='pro'?'ba':a.plan==='starter'?'br':a.plan==='custom'?'bl':'bx'}">${a.plan||'free'}</span></td>
+        <td><select class="ss" id="art-audio-${a.id}"><option value="true" ${(access.audio!==false)?'selected':''}>On</option><option value="false" ${(access.audio===false)?'selected':''}>Off</option></select></td>
+        <td><select class="ss" id="art-video-${a.id}"><option value="true" ${(access.video===true)?'selected':''}>On</option><option value="false" ${(access.video!==true)?'selected':''}>Off</option></select></td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td>
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="vb" onclick="saveArtistServices('${a.id}')">Save</button>
+          ${isLabel?`<button class="rb" onclick="manageLabelArtists('${a.id}')">Artists</button>`:''}
+          <button class="db" onclick="deleteArtistProfile('${a.id}')">Delete</button>
+        </div></td>
+      </tr>`;
+    }).join('')}
   </tbody></table>`;
 };
-window.saveArtistServices=async function(id){ try{ await db.collection('users').doc(id).set({releaseServices:{audio:document.getElementById('art-audio-'+id).value==='true', video:document.getElementById('art-video-'+id).value==='true'}},{merge:true}); toast('Artist access updated ✓'); await oldLoadArtists(); }catch(e){toast('Error: '+e.message);} };
-window.createArtistAccount=async function(){
-  const name=document.getElementById('ca-name').value.trim(), email=document.getElementById('ca-email').value.trim(), password=document.getElementById('ca-password').value;
-  document.getElementById('artist-e').classList.remove('on'); document.getElementById('artist-s').classList.remove('on');
-  if(!name) return showAl('artist-e','Please enter artist name.'); if(!email) return showAl('artist-e','Please enter email.'); if(password.length<6) return showAl('artist-e','Password must be at least 6 characters.');
-  const btn=document.getElementById('ca-btn'); btn.disabled=true; btn.textContent='Creating...';
-  try{ const secAuth=secondaryAuth(); const cred=await secAuth.createUserWithEmailAndPassword(email,password); const uid=cred.user.uid; await db.collection('users').doc(uid).set({name,email,genre:document.getElementById('ca-genre').value.trim(),country:document.getElementById('ca-country').value.trim(),instagram:document.getElementById('ca-instagram').value.trim(),bio:document.getElementById('ca-bio').value.trim(),releaseServices:{audio:document.getElementById('ca-audio-access').value==='true',video:document.getElementById('ca-video-access').value==='true'},createdAt:new Date().toISOString(),createdBy:'admin-panel'},{merge:true}); await secAuth.signOut(); ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value=''); document.getElementById('ca-audio-access').value='true'; document.getElementById('ca-video-access').value='false'; showAl('artist-s','✓ Artist account created successfully.'); await oldLoadArtists(); toast('Artist account created ✓'); }catch(e){ showAl('artist-e','Error: '+e.message); }
-  btn.disabled=false; btn.textContent='Create Artist Account';
+window.saveArtistServices=async function(id){
+  try{
+    const audio = document.getElementById('art-audio-'+id).value==='true';
+    const video = document.getElementById('art-video-'+id).value==='true';
+    const updateData = { releaseServices:{ audio, video } };
+    await db.collection('users').doc(id).set(updateData,{merge:true});
+    // update local cache
+    const a = artists.find(x=>x.id===id);
+    if(a){ a.releaseServices = { audio, video }; }
+    toast('Access saved ✓');
+  } catch(e){ toast('Error: '+e.message); }
+};
+
+/* ════════════════════════════════════════════
+   CREATE ACCOUNT (Artist OR Label)
+════════════════════════════════════════════ */
+window.createAccount = async function() {
+  const name = document.getElementById('ca-name').value.trim();
+  const email = document.getElementById('ca-email').value.trim();
+  const password = document.getElementById('ca-password').value;
+  document.getElementById('artist-e').classList.remove('on');
+  document.getElementById('artist-s').classList.remove('on');
+  if (!name) return showAl('artist-e', 'Please enter a name.');
+  if (!email) return showAl('artist-e', 'Please enter an email.');
+  if (password.length < 6) return showAl('artist-e', 'Password must be at least 6 characters.');
+  const btn = document.getElementById('ca-btn');
+  btn.disabled = true; btn.textContent = 'Creating...';
+  const isLabel = currentAcctType === 'label';
+  try {
+    const secAuth = secondaryAuth();
+    const cred = await secAuth.createUserWithEmailAndPassword(email, password);
+    const uid = cred.user.uid;
+    const userData = {
+      name, email,
+      accountType: currentAcctType,
+      genre: document.getElementById('ca-genre').value.trim(),
+      country: document.getElementById('ca-country').value.trim(),
+      instagram: document.getElementById('ca-instagram').value.trim(),
+      bio: document.getElementById('ca-bio').value.trim(),
+      plan: document.getElementById('ca-plan').value,
+      royaltySplit: Number(document.getElementById('ca-royalty').value) || 85,
+      createdAt: new Date().toISOString(),
+      createdBy: 'admin-panel'
+    };
+    if (!isLabel) {
+      userData.spotify = document.getElementById('ca-spotify').value.trim();
+      userData.appleMusicUrl = document.getElementById('ca-apple-music').value.trim();
+      userData.soundcloudUrl = document.getElementById('ca-soundcloud').value.trim();
+      userData.youtube = document.getElementById('ca-youtube-url').value.trim();
+      userData.releaseServices = {
+        audio: document.getElementById('ca-audio-access').value === 'true',
+        video: document.getElementById('ca-video-access').value === 'true'
+      };
+    } else {
+      userData.labelArtists = [];
+      userData.releaseServices = { audio: true, video: true };
+    }
+    await db.collection('users').doc(uid).set(userData, { merge: true });
+    await secAuth.signOut();
+    ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio','ca-spotify','ca-apple-music','ca-soundcloud','ca-youtube-url'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('ca-royalty').value = '85';
+    showAl('artist-s', '✓ ' + (isLabel ? 'Label' : 'Artist') + ' account created: ' + name + ' (' + email + ')');
+    await loadArtists();
+    toast((isLabel ? 'Label' : 'Artist') + ' account created ✓');
+  } catch(e) { showAl('artist-e', 'Error: ' + e.message); }
+  btn.disabled = false;
+  btn.textContent = isLabel ? 'Create Label Account' : 'Create Artist Account';
+};
+
+/* ════════════════════════════════════════════
+   MANAGE LABEL ARTISTS MODAL
+════════════════════════════════════════════ */
+var managingLabelId = null;
+window.manageLabelArtists = function(labelId) {
+  managingLabelId = labelId;
+  const label = artists.find(a => a.id === labelId);
+  if (!label) return;
+  const labelArtists = label.labelArtists || [];
+  const modal = document.getElementById('la-modal');
+  document.getElementById('la-modal-title').textContent = label.name + ' — Artists';
+  renderLabelArtistsList(labelArtists);
+  modal.classList.add('on');
+};
+
+function renderLabelArtistsList(labelArtists) {
+  const el = document.getElementById('la-modal-list');
+  if (!labelArtists.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🎤</div><div class="empty-text">No artists added yet. Add your first artist below.</div></div>';
+    return;
+  }
+  el.innerHTML = labelArtists.map((a, i) => `
+    <div class="la-item">
+      <div class="la-avatar">${(a.name||'A')[0].toUpperCase()}</div>
+      <div class="la-info">
+        <div class="la-name">${escapeAttr(a.name)}</div>
+        <div class="la-meta">
+          ${a.genre ? a.genre + ' · ' : ''}
+          ${a.spotifyUrl ? '<a href="'+escapeAttr(a.spotifyUrl)+'" target="_blank" style="color:var(--grn)">Spotify</a> · ' : ''}
+          ${a.appleMusicUrl ? '<a href="'+escapeAttr(a.appleMusicUrl)+'" target="_blank" style="color:var(--txt2)">Apple Music</a> · ' : ''}
+          ${a.soundcloudUrl ? '<a href="'+escapeAttr(a.soundcloudUrl)+'" target="_blank" style="color:#f97316">SoundCloud</a>' : ''}
+        </div>
+      </div>
+      <button class="la-remove" onclick="removeLabelArtist(${i})">Remove</button>
+    </div>`).join('');
+}
+
+window.removeLabelArtist = async function(idx) {
+  if (!confirm('Remove this artist from the label?')) return;
+  const label = artists.find(a => a.id === managingLabelId);
+  if (!label) return;
+  const labelArtists = [...(label.labelArtists || [])];
+  labelArtists.splice(idx, 1);
+  try {
+    await db.collection('users').doc(managingLabelId).update({ labelArtists });
+    label.labelArtists = labelArtists;
+    renderLabelArtistsList(labelArtists);
+    renderArtists();
+    toast('Artist removed ✓');
+  } catch(e) { toast('Error: ' + e.message); }
+};
+
+window.toggleAddLabelArtistForm = function() {
+  const f = document.getElementById('la-add-form');
+  f.classList.toggle('on');
+};
+
+window.addLabelArtist = async function() {
+  const name = document.getElementById('la-artist-name').value.trim();
+  const genre = document.getElementById('la-artist-genre').value.trim();
+  const spotifyUrl = document.getElementById('la-artist-spotify').value.trim();
+  const appleMusicUrl = document.getElementById('la-artist-apple').value.trim();
+  const soundcloudUrl = document.getElementById('la-artist-soundcloud').value.trim();
+  const bio = document.getElementById('la-artist-bio').value.trim();
+  if (!name) { toast('Artist name is required.'); return; }
+  const label = artists.find(a => a.id === managingLabelId);
+  if (!label) return;
+  const labelArtists = [...(label.labelArtists || [])];
+  const newArtist = { name, genre, spotifyUrl, appleMusicUrl, soundcloudUrl, bio, addedAt: new Date().toISOString() };
+  labelArtists.push(newArtist);
+  const btn = document.getElementById('la-add-btn');
+  btn.disabled = true; btn.textContent = 'Adding...';
+  try {
+    await db.collection('users').doc(managingLabelId).update({ labelArtists });
+    label.labelArtists = labelArtists;
+    renderLabelArtistsList(labelArtists);
+    renderArtists();
+    ['la-artist-name','la-artist-genre','la-artist-spotify','la-artist-apple','la-artist-soundcloud','la-artist-bio'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+    document.getElementById('la-add-form').classList.remove('on');
+    toast('Artist added ✓');
+  } catch(e) { toast('Error: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Add Artist';
 };
 var oldOpenRelease=window.openRelease;
 window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div><div class="fg full"><label>Track Summary</label><textarea id="er-tracks">'+(((r.trackItems||[]).map(function(t){return ((t.trackNumber||'')+'. '+(t.title||'')+' - '+(t.artist||'')).trim();}).join('\n')).replace(/</g,'&lt;'))+'</textarea></div>'); }
