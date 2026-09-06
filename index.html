@@ -494,7 +494,7 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
       </div>
-      <div class="section"><div class="sh"><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div><div class="tw" id="art-list"></div></div>
+      <div class="section"><div class="sh"><div><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div><button class="rb" onclick="grandfatherExistingArtists()">Grandfather Existing Artists (run once)</button></div><div class="tw" id="art-list"></div></div>
     </div>
 
     <div class="pg" id="page-tickets">
@@ -1043,9 +1043,41 @@ function renderDemoTable(id,list){
 function renderArtists(){
   const el=document.getElementById('art-list');if(!el)return;
   if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
-    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th><th>Agreement</th><th>ID Verification</th><th>Action</th></tr></thead><tbody>
+    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);
+      const agr=a.agreement;
+      const agreementHTML=agr&&agr.signed?`<a href="${agr.signatureUrl}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
+      const idv=a.idVerification;
+      let idHTML='<span style="color:var(--txt3);font-size:11px">Not submitted</span>';
+      if(idv&&idv.url){
+        const statusColor=idv.status==='verified'?'#4ade80':(idv.status==='rejected'?'var(--red)':'var(--gold)');
+        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${idv.url}" target="_blank" style="font-size:11px;color:${statusColor}">${idv.type||'ID'} — ${idv.status||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
+      }
+      return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td>${agreementHTML}</td><td>${idHTML}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
   </tbody></table>`;
+}
+async function setIdVerificationStatus(uid,status){
+  await db.collection('users').doc(uid).set({ idVerification: { status: status } }, { merge: true });
+  const a=artists.find(x=>x.id===uid); if(a && a.idVerification) a.idVerification.status=status;
+  renderArtists();
+  toast('ID marked as '+status);
+}
+async function grandfatherExistingArtists(){
+  if(!confirm('This will mark ALL current artists who have not yet signed the new agreement or uploaded an ID as pre-verified, so they are NOT blocked by the new onboarding gate on their next login. Only use this once, right after deploying the new verification flow. Continue?'))return;
+  let count=0;
+  for(const a of artists){
+    const needsAgreement=!a.agreement||!a.agreement.signed;
+    const needsId=!a.idVerification||!a.idVerification.url;
+    if(needsAgreement||needsId){
+      const patch={};
+      if(needsAgreement) patch.agreement={signed:true,signedAt:new Date().toISOString(),version:'legacy-grandfathered'};
+      if(needsId) patch.idVerification={status:'verified',type:'legacy-exempt',uploadedAt:new Date().toISOString()};
+      await db.collection('users').doc(a.id).set(patch,{merge:true});
+      count++;
+    }
+  }
+  toast(count+' existing artist(s) grandfathered ✓');
+  await loadArtists();
 }
 
 function renderOvTickets(){
@@ -1128,6 +1160,7 @@ async function createArtistAccount(){
     const secAuth=secondaryAuth();
     const cred=await secAuth.createUserWithEmailAndPassword(email,password);
     const uid=cred.user.uid;
+    try { await cred.user.sendEmailVerification(); } catch(e) {}
     await db.collection('users').doc(uid).set({
       name,email,
       genre:document.getElementById('ca-genre').value.trim(),
