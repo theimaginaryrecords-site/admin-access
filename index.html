@@ -315,6 +315,95 @@ tr:last-child td{border-bottom:none}
   .demo-grid{grid-template-columns:1fr}.demo-field.full{grid-column:1}
   .file-preview-panel{grid-template-columns:1fr}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SPATIAL UI — LIQUID GLASS THEME  (TIR Admin)
+   Structure, IDs, classes, JS-facing hooks and copy are untouched —
+   only surface, color, depth and motion change.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root{
+  --bg:#06070a;--surface:rgba(255,255,255,.05);--card:rgba(255,255,255,.055);
+  --brd:rgba(255,255,255,.11);
+  --gold:#c9a84c;--gold2:#e8c97a;--gold3:rgba(201,168,76,.14);
+  --txt:#f5f6f8;--txt2:#a3a8b5;--txt3:#686e7d;
+  --grn:#39e75f;--red:#ff5c5c;--blu:#5b9bff;--org:#ff9d4d;
+  --demo:#ff4d57;--demo-bg:rgba(255,77,87,.1);--demo-brd:rgba(255,77,87,.25);
+  --glass-blur:blur(26px) saturate(180%);
+  --glass-shadow:0 20px 50px -10px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
+}
+html,body{
+  background:
+    radial-gradient(55% 45% at 10% 0%,rgba(201,168,76,.10),transparent 60%),
+    radial-gradient(50% 40% at 100% 15%,rgba(91,155,255,.09),transparent 60%),
+    radial-gradient(60% 55% at 50% 100%,rgba(124,108,255,.08),transparent 60%),
+    #06070a!important;
+  background-attachment:fixed;
+}
+::selection{background:rgba(201,168,76,.35);color:#000}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2)!important}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)!important}
+
+/* glass chrome across sidebar, topbars, drawers, cards, forms, modals */
+.sb,.mob-drawer,.mob-topbar,.mob-bottom-nav,.topbar,.abox,
+.demo-field,.edit-card,.reply-box,.update-box,.existing-reply,
+.file-pill,.toast,.blog-admin-card,.al{
+  background:var(--card)!important;
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border:1px solid var(--brd)!important;
+  box-shadow:var(--glass-shadow);
+}
+.sb,.mob-drawer,.mob-topbar,.mob-bottom-nav,.topbar{border-radius:0!important}
+.abox{border-radius:24px!important}
+.demo-field,.edit-card,.reply-box,.update-box,.blog-admin-card,.al{border-radius:16px!important}
+.existing-reply{border-radius:12px!important;background:rgba(201,168,76,.08)!important}
+
+/* stat / content cards elsewhere in the admin (kept generic via var(--card)/var(--surface)) */
+[class*="-card"]:not(.demo-field):not(.edit-card):not(.blog-admin-card){
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+}
+
+/* auth screen */
+.abox{box-shadow:0 32px 100px rgba(0,0,0,.7),0 0 140px rgba(201,168,76,.1)!important}
+
+/* buttons: glass pill with gold glow */
+.btn-gold,.btn-reply{
+  background:linear-gradient(135deg,var(--gold),var(--gold2))!important;
+  box-shadow:0 8px 26px rgba(201,168,76,.3),inset 0 1px 0 rgba(255,255,255,.35)!important;
+  transition:transform .3s cubic-bezier(.19,1,.22,1),box-shadow .3s ease!important;
+}
+.btn-gold:hover,.btn-reply:hover{
+  transform:translateY(-2px);box-shadow:0 12px 34px rgba(201,168,76,.4),inset 0 1px 0 rgba(255,255,255,.45)!important;
+}
+.btn-save-demo{
+  background:linear-gradient(135deg,var(--demo),#ff2e39)!important;
+  box-shadow:0 8px 26px rgba(255,77,87,.3)!important;
+}
+.btn-close-t,.mob-menu-btn,.mob-ref-btn,.btn-del-demo{
+  background:var(--card)!important;-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border:1px solid var(--brd)!important;
+}
+
+/* inputs: recessed glass fields */
+.iw input,.fg input,.fg select,.fg textarea,.reply-box textarea,
+.update-box select,.update-box textarea,.blog-form input,.blog-form select,.blog-form textarea{
+  background:rgba(0,0,0,.25)!important;border:1px solid var(--brd)!important;
+}
+.iw input:focus{box-shadow:0 0 0 3px rgba(201,168,76,.14)}
+
+/* nav items: soft glass highlight, no layout change */
+.ni:hover{background:rgba(255,255,255,.05)!important}
+.ni.on{background:var(--gold3)!important}
+.ni.demo-ni.on{background:var(--demo-bg)!important}
+
+@media(max-width:768px){
+  .sb,.mob-drawer,.mob-topbar,.mob-bottom-nav,.topbar,.abox,
+  .demo-field,.edit-card,.reply-box,.update-box,.blog-admin-card{
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    background:#111318!important;
+  }
+}
+
 </style>
 </head>
 <body>
