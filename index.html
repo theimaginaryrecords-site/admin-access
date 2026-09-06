@@ -207,6 +207,10 @@ tr:last-child td{border-bottom:none}
 
 /* Audio player */
 .audio-player-admin{width:100%}
+.tracklist-admin{display:flex;flex-direction:column;gap:14px;width:100%}
+.track-admin-row{border:1px solid var(--brd);border-radius:10px;padding:12px;background:var(--card)}
+.track-admin-row-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font-size:13px}
+.track-admin-row .admin-audio{width:100%;margin-bottom:8px}
 .audio-filename{font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
 .audio-filemeta{font-size:11px;color:var(--txt3);margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap}
 .audio-format-pill{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace}
@@ -897,6 +901,15 @@ function renderLabelStats(){document.getElementById('s0').textContent=releases.l
 function renderDemoStats(){const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length,sh=demos.filter(d=>d.status==='shortlisted').length,sg=demos.filter(d=>d.status==='signed').length;['d0','ds0'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=total;});['d1','ds1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nw;});['d2','ds2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=rv;});['d3','ds3'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sh;});['d4','ds4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sg;});}
 
 // ── Artwork thumbnail in release table ──
+function trackPillsHTML(r){
+  const tracks=r.trackItems||[];
+  if(tracks.length){
+    const done=tracks.filter(t=>t.audioUrl).length;
+    const color = done===tracks.length ? '#4ade80' : (done>0 ? 'var(--gold)' : 'var(--txt3)');
+    return `<span class="file-pill" style="color:${color}">${done}/${tracks.length} TRACKS</span>${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`;
+  }
+  return `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`;
+}
 function artThumb(r){
   if(r.artworkUrl)return `<img src="${r.artworkUrl}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--brd);vertical-align:middle" alt="Art"/>`;
   return `<div style="width:36px;height:36px;border-radius:6px;background:var(--card);border:1px solid var(--brd);display:inline-flex;align-items:center;justify-content:center;font-size:14px">🎵</div>`;
@@ -917,7 +930,7 @@ function renderRelTable(id,list){
         <div style="display:flex;gap:4px;flex-wrap:wrap">
           ${r.releaseMedium==='video'
             ? `${r.videoUrl?`<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>`:''}${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
-            : `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`
+            : trackPillsHTML(r)
           }
         </div>
       </td>
@@ -946,9 +959,12 @@ function openRelease(id){
   const thumbHTML = r.thumbnailUrl
     ? `<img class="artwork-thumb" src="${r.thumbnailUrl}" alt="Thumbnail"/>`
     : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>No thumbnail uploaded</span></div>`;
-  const audioHTML = r.audioUrl
-    ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
-    : `<div class="no-file-msg">No audio file uploaded</div>`;
+  const hasTracks = Array.isArray(r.trackItems) && r.trackItems.length>0;
+  const audioHTML = hasTracks
+    ? `<div class="tracklist-admin">${r.trackItems.map((t,i)=>`<div class="track-admin-row"><div class="track-admin-row-head"><strong>${i+1}. ${escapeAttr(t.title||'Untitled track')}</strong><span style="color:var(--txt3);font-size:11px">${escapeAttr(t.artist||'')}</span></div>${t.audioUrl?`<audio class="admin-audio" controls src="${t.audioUrl}"></audio><div class="audio-filemeta"><span class="audio-format-pill">${t.audioFormat||'AUDIO'}</span>${t.audioSize?`<span style="color:var(--txt3)">${t.audioSize}</span>`:''}${t.audioFilename?`<span style="color:var(--txt3)">${t.audioFilename}</span>`:''}</div><div class="audio-actions"><a class="audio-dl-btn" href="${t.audioUrl}" target="_blank" download>Download Track ${i+1}</a></div>`:`<div class="no-file-msg">No audio uploaded for this track yet</div>`}</div>`).join('')}</div>`
+    : (r.audioUrl
+      ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
+      : `<div class="no-file-msg">No audio file uploaded</div>`);
   const videoHTML = r.videoUrl
     ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${r.videoDirector}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${r.videoUrl}</div><div class="audio-actions"><a class="audio-dl-btn" href="${r.videoUrl}" target="_blank">Open Video URL</a></div></div>`
     : `<div class="no-file-msg">No video URL added</div>`;
@@ -966,7 +982,7 @@ function openRelease(id){
 
     <div class="file-preview-panel">
       <div class="fp-card"><div class="fp-label">🖼 Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.artworkUrl}" target="_blank">Open Artwork</a></div>`:''}</div></div>
-      <div class="fp-card"><div class="fp-label">🎵 Audio File</div><div class="fp-content">${audioHTML}</div></div>
+      <div class="fp-card"><div class="fp-label">${hasTracks?`🎵 Tracklist (${r.trackItems.filter(t=>t.audioUrl).length}/${r.trackItems.length} uploaded)`:'🎵 Audio File'}</div><div class="fp-content">${audioHTML}</div></div>
       ${isVideo?`<div class="fp-card"><div class="fp-label">🎬 Video URL</div><div class="fp-content">${videoHTML}</div></div>`:''}
       ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
     </div>
@@ -1239,11 +1255,11 @@ window.createArtistAccount=async function(){
   btn.disabled=false; btn.textContent='Create Artist Account';
 };
 var oldOpenRelease=window.openRelease;
-window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div><div class="fg full"><label>Track Summary</label><textarea id="er-tracks">'+(((r.trackItems||[]).map(function(t){return ((t.trackNumber||'')+'. '+(t.title||'')+' - '+(t.artist||'')).trim();}).join('\n')).replace(/</g,'&lt;'))+'</textarea></div>'); }
+window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ var tracksReadOnly=(r.trackItems||[]).length ? '<div class="fg full"><label>Tracklist (read-only — edit tracks from the artist portal)</label><div style="padding:10px 13px;border:1px solid var(--brd);border-radius:8px;background:var(--card);font-size:12px;color:var(--txt2);line-height:1.8;max-height:160px;overflow:auto">'+((r.trackItems||[]).map(function(t){return (t.trackNumber||'')+'. '+escapeAttr(t.title||'Untitled')+' — '+escapeAttr(t.artist||'')+(t.audioUrl?' (audio uploaded)':' (no audio yet)');}).join('<br/>'))+'</div></div>' : ''; editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div>'+tracksReadOnly); }
 };
 var oldSaveReleaseEdits=window.saveReleaseEdits;
 window.saveReleaseEdits=async function(id){
-  const payload={ title:document.getElementById('er-title').value.trim(), primaryArtist:document.getElementById('er-artist').value.trim(), artistName:document.getElementById('er-artist').value.trim(), type:document.getElementById('er-type').value.trim(), genre:document.getElementById('er-genre').value.trim(), releaseDate:document.getElementById('er-date').value.trim(), label:document.getElementById('er-label').value.trim(), featuredArtists:document.getElementById('er-featured').value.trim(), writers:document.getElementById('er-writers').value.trim(), producers:document.getElementById('er-producers').value.trim(), audioUrl:document.getElementById('er-audio-url').value.trim(), artworkUrl:document.getElementById('er-art-url').value.trim(), notes:document.getElementById('er-notes').value.trim(), selectedPlatforms:(document.getElementById('er-platforms')&&document.getElementById('er-platforms').value.trim()?document.getElementById('er-platforms').value.split(',').map(function(x){return x.trim();}).filter(Boolean):[]), previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null), trackItems:(document.getElementById('er-tracks')&&document.getElementById('er-tracks').value.trim()?document.getElementById('er-tracks').value.split('\n').map(function(line,idx){return {trackNumber:idx+1,title:line.trim()};}):[]) };
+  const payload={ title:document.getElementById('er-title').value.trim(), primaryArtist:document.getElementById('er-artist').value.trim(), artistName:document.getElementById('er-artist').value.trim(), type:document.getElementById('er-type').value.trim(), genre:document.getElementById('er-genre').value.trim(), releaseDate:document.getElementById('er-date').value.trim(), label:document.getElementById('er-label').value.trim(), featuredArtists:document.getElementById('er-featured').value.trim(), writers:document.getElementById('er-writers').value.trim(), producers:document.getElementById('er-producers').value.trim(), audioUrl:document.getElementById('er-audio-url').value.trim(), artworkUrl:document.getElementById('er-art-url').value.trim(), notes:document.getElementById('er-notes').value.trim(), selectedPlatforms:(document.getElementById('er-platforms')&&document.getElementById('er-platforms').value.trim()?document.getElementById('er-platforms').value.split(',').map(function(x){return x.trim();}).filter(Boolean):[]), previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null) };
   var videoUrl=document.getElementById('er-video-url'); if(videoUrl){ payload.videoUrl=videoUrl.value.trim(); payload.videoDirector=document.getElementById('er-video-director').value.trim(); payload.videoChannel=document.getElementById('er-video-channel').value.trim(); payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim(); }
   try{ await db.collection('releases').doc(id).update(payload); await loadReleases(); window.openRelease(id); toast('Release updated ✓'); }catch(e){ toast('Error: '+e.message); }
 };
