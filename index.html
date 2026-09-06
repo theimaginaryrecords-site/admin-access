@@ -207,10 +207,6 @@ tr:last-child td{border-bottom:none}
 
 /* Audio player */
 .audio-player-admin{width:100%}
-.tracklist-admin{display:flex;flex-direction:column;gap:14px;width:100%}
-.track-admin-row{border:1px solid var(--brd);border-radius:10px;padding:12px;background:var(--card)}
-.track-admin-row-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font-size:13px}
-.track-admin-row .admin-audio{width:100%;margin-bottom:8px}
 .audio-filename{font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
 .audio-filemeta{font-size:11px;color:var(--txt3);margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap}
 .audio-format-pill{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2);padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace}
@@ -494,7 +490,7 @@ tr:last-child td{border-bottom:none}
           </div>
         </div>
       </div>
-      <div class="section"><div class="sh"><div><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div><button class="rb" onclick="grandfatherExistingArtists()">Grandfather Existing Artists (run once)</button></div><div class="tw" id="art-list"></div></div>
+      <div class="section"><div class="sh"><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div><div class="tw" id="art-list"></div></div>
     </div>
 
     <div class="pg" id="page-tickets">
@@ -901,15 +897,6 @@ function renderLabelStats(){document.getElementById('s0').textContent=releases.l
 function renderDemoStats(){const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length,sh=demos.filter(d=>d.status==='shortlisted').length,sg=demos.filter(d=>d.status==='signed').length;['d0','ds0'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=total;});['d1','ds1'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nw;});['d2','ds2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=rv;});['d3','ds3'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sh;});['d4','ds4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=sg;});}
 
 // ── Artwork thumbnail in release table ──
-function trackPillsHTML(r){
-  const tracks=r.trackItems||[];
-  if(tracks.length){
-    const done=tracks.filter(t=>t.audioUrl).length;
-    const color = done===tracks.length ? '#4ade80' : (done>0 ? 'var(--gold)' : 'var(--txt3)');
-    return `<span class="file-pill" style="color:${color}">${done}/${tracks.length} TRACKS</span>${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`;
-  }
-  return `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`;
-}
 function artThumb(r){
   if(r.artworkUrl)return `<img src="${r.artworkUrl}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--brd);vertical-align:middle" alt="Art"/>`;
   return `<div style="width:36px;height:36px;border-radius:6px;background:var(--card);border:1px solid var(--brd);display:inline-flex;align-items:center;justify-content:center;font-size:14px">🎵</div>`;
@@ -930,7 +917,7 @@ function renderRelTable(id,list){
         <div style="display:flex;gap:4px;flex-wrap:wrap">
           ${r.releaseMedium==='video'
             ? `${r.videoUrl?`<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>`:''}${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
-            : trackPillsHTML(r)
+            : `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`
           }
         </div>
       </td>
@@ -959,12 +946,9 @@ function openRelease(id){
   const thumbHTML = r.thumbnailUrl
     ? `<img class="artwork-thumb" src="${r.thumbnailUrl}" alt="Thumbnail"/>`
     : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>No thumbnail uploaded</span></div>`;
-  const hasTracks = Array.isArray(r.trackItems) && r.trackItems.length>0;
-  const audioHTML = hasTracks
-    ? `<div class="tracklist-admin">${r.trackItems.map((t,i)=>`<div class="track-admin-row"><div class="track-admin-row-head"><strong>${i+1}. ${escapeAttr(t.title||'Untitled track')}</strong><span style="color:var(--txt3);font-size:11px">${escapeAttr(t.artist||'')}</span></div>${t.audioUrl?`<audio class="admin-audio" controls src="${t.audioUrl}"></audio><div class="audio-filemeta"><span class="audio-format-pill">${t.audioFormat||'AUDIO'}</span>${t.audioSize?`<span style="color:var(--txt3)">${t.audioSize}</span>`:''}${t.audioFilename?`<span style="color:var(--txt3)">${t.audioFilename}</span>`:''}</div><div class="audio-actions"><a class="audio-dl-btn" href="${t.audioUrl}" target="_blank" download>Download Track ${i+1}</a></div>`:`<div class="no-file-msg">No audio uploaded for this track yet</div>`}</div>`).join('')}</div>`
-    : (r.audioUrl
-      ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
-      : `<div class="no-file-msg">No audio file uploaded</div>`);
+  const audioHTML = r.audioUrl
+    ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
+    : `<div class="no-file-msg">No audio file uploaded</div>`;
   const videoHTML = r.videoUrl
     ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${r.videoDirector}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${r.videoUrl}</div><div class="audio-actions"><a class="audio-dl-btn" href="${r.videoUrl}" target="_blank">Open Video URL</a></div></div>`
     : `<div class="no-file-msg">No video URL added</div>`;
@@ -982,7 +966,7 @@ function openRelease(id){
 
     <div class="file-preview-panel">
       <div class="fp-card"><div class="fp-label">🖼 Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.artworkUrl}" target="_blank">Open Artwork</a></div>`:''}</div></div>
-      <div class="fp-card"><div class="fp-label">${hasTracks?`🎵 Tracklist (${r.trackItems.filter(t=>t.audioUrl).length}/${r.trackItems.length} uploaded)`:'🎵 Audio File'}</div><div class="fp-content">${audioHTML}</div></div>
+      <div class="fp-card"><div class="fp-label">🎵 Audio File</div><div class="fp-content">${audioHTML}</div></div>
       ${isVideo?`<div class="fp-card"><div class="fp-label">🎬 Video URL</div><div class="fp-content">${videoHTML}</div></div>`:''}
       ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
     </div>
@@ -1043,41 +1027,9 @@ function renderDemoTable(id,list){
 function renderArtists(){
   const el=document.getElementById('art-list');if(!el)return;
   if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th><th>Agreement</th><th>ID Verification</th><th>Action</th></tr></thead><tbody>
-    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);
-      const agr=a.agreement;
-      const agreementHTML=agr&&agr.signed?`<a href="${agr.signatureUrl}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
-      const idv=a.idVerification;
-      let idHTML='<span style="color:var(--txt3);font-size:11px">Not submitted</span>';
-      if(idv&&idv.url){
-        const statusColor=idv.status==='verified'?'#4ade80':(idv.status==='rejected'?'var(--red)':'var(--gold)');
-        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${idv.url}" target="_blank" style="font-size:11px;color:${statusColor}">${idv.type||'ID'} — ${idv.status||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
-      }
-      return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td>${agreementHTML}</td><td>${idHTML}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
+    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
   </tbody></table>`;
-}
-async function setIdVerificationStatus(uid,status){
-  await db.collection('users').doc(uid).set({ idVerification: { status: status } }, { merge: true });
-  const a=artists.find(x=>x.id===uid); if(a && a.idVerification) a.idVerification.status=status;
-  renderArtists();
-  toast('ID marked as '+status);
-}
-async function grandfatherExistingArtists(){
-  if(!confirm('This will mark ALL current artists who have not yet signed the new agreement or uploaded an ID as pre-verified, so they are NOT blocked by the new onboarding gate on their next login. Only use this once, right after deploying the new verification flow. Continue?'))return;
-  let count=0;
-  for(const a of artists){
-    const needsAgreement=!a.agreement||!a.agreement.signed;
-    const needsId=!a.idVerification||!a.idVerification.url;
-    if(needsAgreement||needsId){
-      const patch={};
-      if(needsAgreement) patch.agreement={signed:true,signedAt:new Date().toISOString(),version:'legacy-grandfathered'};
-      if(needsId) patch.idVerification={status:'verified',type:'legacy-exempt',uploadedAt:new Date().toISOString()};
-      await db.collection('users').doc(a.id).set(patch,{merge:true});
-      count++;
-    }
-  }
-  toast(count+' existing artist(s) grandfathered ✓');
-  await loadArtists();
 }
 
 function renderOvTickets(){
@@ -1160,7 +1112,6 @@ async function createArtistAccount(){
     const secAuth=secondaryAuth();
     const cred=await secAuth.createUserWithEmailAndPassword(email,password);
     const uid=cred.user.uid;
-    try { await cred.user.sendEmailVerification(); } catch(e) {}
     await db.collection('users').doc(uid).set({
       name,email,
       genre:document.getElementById('ca-genre').value.trim(),
@@ -1288,11 +1239,11 @@ window.createArtistAccount=async function(){
   btn.disabled=false; btn.textContent='Create Artist Account';
 };
 var oldOpenRelease=window.openRelease;
-window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ var tracksReadOnly=(r.trackItems||[]).length ? '<div class="fg full"><label>Tracklist (read-only — edit tracks from the artist portal)</label><div style="padding:10px 13px;border:1px solid var(--brd);border-radius:8px;background:var(--card);font-size:12px;color:var(--txt2);line-height:1.8;max-height:160px;overflow:auto">'+((r.trackItems||[]).map(function(t){return (t.trackNumber||'')+'. '+escapeAttr(t.title||'Untitled')+' — '+escapeAttr(t.artist||'')+(t.audioUrl?' (audio uploaded)':' (no audio yet)');}).join('<br/>'))+'</div></div>' : ''; editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div>'+tracksReadOnly); }
+window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div><div class="fg full"><label>Track Summary</label><textarea id="er-tracks">'+(((r.trackItems||[]).map(function(t){return ((t.trackNumber||'')+'. '+(t.title||'')+' - '+(t.artist||'')).trim();}).join('\n')).replace(/</g,'&lt;'))+'</textarea></div>'); }
 };
 var oldSaveReleaseEdits=window.saveReleaseEdits;
 window.saveReleaseEdits=async function(id){
-  const payload={ title:document.getElementById('er-title').value.trim(), primaryArtist:document.getElementById('er-artist').value.trim(), artistName:document.getElementById('er-artist').value.trim(), type:document.getElementById('er-type').value.trim(), genre:document.getElementById('er-genre').value.trim(), releaseDate:document.getElementById('er-date').value.trim(), label:document.getElementById('er-label').value.trim(), featuredArtists:document.getElementById('er-featured').value.trim(), writers:document.getElementById('er-writers').value.trim(), producers:document.getElementById('er-producers').value.trim(), audioUrl:document.getElementById('er-audio-url').value.trim(), artworkUrl:document.getElementById('er-art-url').value.trim(), notes:document.getElementById('er-notes').value.trim(), selectedPlatforms:(document.getElementById('er-platforms')&&document.getElementById('er-platforms').value.trim()?document.getElementById('er-platforms').value.split(',').map(function(x){return x.trim();}).filter(Boolean):[]), previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null) };
+  const payload={ title:document.getElementById('er-title').value.trim(), primaryArtist:document.getElementById('er-artist').value.trim(), artistName:document.getElementById('er-artist').value.trim(), type:document.getElementById('er-type').value.trim(), genre:document.getElementById('er-genre').value.trim(), releaseDate:document.getElementById('er-date').value.trim(), label:document.getElementById('er-label').value.trim(), featuredArtists:document.getElementById('er-featured').value.trim(), writers:document.getElementById('er-writers').value.trim(), producers:document.getElementById('er-producers').value.trim(), audioUrl:document.getElementById('er-audio-url').value.trim(), artworkUrl:document.getElementById('er-art-url').value.trim(), notes:document.getElementById('er-notes').value.trim(), selectedPlatforms:(document.getElementById('er-platforms')&&document.getElementById('er-platforms').value.trim()?document.getElementById('er-platforms').value.split(',').map(function(x){return x.trim();}).filter(Boolean):[]), previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null), trackItems:(document.getElementById('er-tracks')&&document.getElementById('er-tracks').value.trim()?document.getElementById('er-tracks').value.split('\n').map(function(line,idx){return {trackNumber:idx+1,title:line.trim()};}):[]) };
   var videoUrl=document.getElementById('er-video-url'); if(videoUrl){ payload.videoUrl=videoUrl.value.trim(); payload.videoDirector=document.getElementById('er-video-director').value.trim(); payload.videoChannel=document.getElementById('er-video-channel').value.trim(); payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim(); }
   try{ await db.collection('releases').doc(id).update(payload); await loadReleases(); window.openRelease(id); toast('Release updated ✓'); }catch(e){ toast('Error: '+e.message); }
 };
