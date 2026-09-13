@@ -1080,6 +1080,8 @@ function openRelease(id){
     <div class="edit-card">
       <h4>Full Submitted Metadata (read-only)</h4>
       <div class="release-edit-grid" style="font-size:12px">
+        ${r.spotifyArtistUrl?`<div class="fg"><label>Spotify Artist URL</label><div style="padding:8px 10px"><a href="${r.spotifyArtistUrl}" target="_blank" style="color:#1db954">${escapeAttr(r.spotifyArtistUrl)}</a></div></div>`:''}
+        ${r.appleMusicArtistUrl?`<div class="fg"><label>Apple Music Artist URL</label><div style="padding:8px 10px"><a href="${r.appleMusicArtistUrl}" target="_blank" style="color:#fa9e9b">${escapeAttr(r.appleMusicArtistUrl)}</a></div></div>`:''}
         ${r.subGenre?`<div class="fg"><label>Sub-Genre</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.subGenre)}</div></div>`:''}
         ${r.language?`<div class="fg"><label>Language</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.language)}</div></div>`:''}
         ${r.contentRating?`<div class="fg"><label>Content Rating</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.contentRating)}</div></div>`:''}
