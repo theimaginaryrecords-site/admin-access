@@ -762,6 +762,7 @@ window.createAccount = async function() {
     var secAuth = secondaryAuth();
     var cred = await secAuth.createUserWithEmailAndPassword(email, password);
     var uid = cred.user.uid;
+    try { await cred.user.sendEmailVerification(); } catch(e) {}
     var userData = {
       name: name, email: email,
       accountType: _acctType,
@@ -1050,7 +1051,7 @@ function openRelease(id){
     : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>No thumbnail uploaded</span></div>`;
   const hasTracks = Array.isArray(r.trackItems) && r.trackItems.length>0;
   const audioHTML = hasTracks
-    ? `<div class="tracklist-admin">${r.trackItems.map((t,i)=>`<div class="track-admin-row"><div class="track-admin-row-head"><strong>${i+1}. ${escapeAttr(t.title||'Untitled track')}</strong><span style="color:var(--txt3);font-size:11px">${escapeAttr(t.artist||'')}</span></div>${t.audioUrl?`<audio class="admin-audio" controls src="${t.audioUrl}"></audio><div class="audio-filemeta"><span class="audio-format-pill">${t.audioFormat||'AUDIO'}</span>${t.audioSize?`<span style="color:var(--txt3)">${t.audioSize}</span>`:''}${t.audioFilename?`<span style="color:var(--txt3)">${t.audioFilename}</span>`:''}</div><div class="audio-actions"><a class="audio-dl-btn" href="${t.audioUrl}" target="_blank" download>Download Track ${i+1}</a></div>`:`<div class="no-file-msg">No audio uploaded for this track yet</div>`}</div>`).join('')}</div>`
+    ? `<div class="tracklist-admin">${r.trackItems.map((t,i)=>`<div class="track-admin-row"><div class="track-admin-row-head"><strong>${i+1}. ${escapeAttr(t.title||'Untitled track')}</strong><span style="color:var(--txt3);font-size:11px">${escapeAttr(t.artist||'')}</span></div><div style="font-size:11px;color:var(--txt3);margin-bottom:8px;line-height:1.6">${t.composer?`<div><strong>Composer:</strong> ${escapeAttr(t.composer)}</div>`:''}${t.lyricist?`<div><strong>Lyricist:</strong> ${escapeAttr(t.lyricist)}</div>`:''}${t.producer?`<div><strong>Producer:</strong> ${escapeAttr(t.producer)}</div>`:''}${t.featured?`<div><strong>Featuring:</strong> ${escapeAttr(t.featured)}</div>`:''}${t.otherContributors?`<div><strong>Other:</strong> ${escapeAttr(t.otherContributors)}</div>`:''}</div>${t.audioUrl?`<audio class="admin-audio" controls src="${t.audioUrl}"></audio><div class="audio-filemeta"><span class="audio-format-pill">${t.audioFormat||'AUDIO'}</span>${t.audioSize?`<span style="color:var(--txt3)">${t.audioSize}</span>`:''}${t.audioFilename?`<span style="color:var(--txt3)">${t.audioFilename}</span>`:''}</div><div class="audio-actions"><a class="audio-dl-btn" href="${t.audioUrl}" target="_blank" download>Download Track ${i+1}</a></div>`:`<div class="no-file-msg">No audio uploaded for this track yet</div>`}</div>`).join('')}</div>`
     : (r.audioUrl
       ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
       : `<div class="no-file-msg">No audio file uploaded</div>`);
@@ -1074,6 +1075,27 @@ function openRelease(id){
       <div class="fp-card"><div class="fp-label">${hasTracks?`🎵 Tracklist (${r.trackItems.filter(t=>t.audioUrl).length}/${r.trackItems.length} uploaded)`:'🎵 Audio File'}</div><div class="fp-content">${audioHTML}</div></div>
       ${isVideo?`<div class="fp-card"><div class="fp-label">🎬 Video URL</div><div class="fp-content">${videoHTML}</div></div>`:''}
       ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
+    </div>
+
+    <div class="edit-card">
+      <h4>Full Submitted Metadata (read-only)</h4>
+      <div class="release-edit-grid" style="font-size:12px">
+        ${r.subGenre?`<div class="fg"><label>Sub-Genre</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.subGenre)}</div></div>`:''}
+        ${r.language?`<div class="fg"><label>Language</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.language)}</div></div>`:''}
+        ${r.contentRating?`<div class="fg"><label>Content Rating</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.contentRating)}</div></div>`:''}
+        ${r.upc?`<div class="fg"><label>UPC</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.upc)}</div></div>`:''}
+        ${r.recordedYear?`<div class="fg"><label>Recorded Year</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.recordedYear)}</div></div>`:''}
+        ${r.originalReleaseDate?`<div class="fg"><label>Original Release Date</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.originalReleaseDate)}</div></div>`:''}
+        ${r.copyrightYear||r.copyrightText?`<div class="fg full"><label>Copyright (C Line)</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.copyrightYear||'')} ${escapeAttr(r.copyrightText||'')}</div></div>`:''}
+        ${r.phonogramYear||r.phonogramText?`<div class="fg full"><label>Phonogram (P Line)</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.phonogramYear||'')} ${escapeAttr(r.phonogramText||'')}</div></div>`:''}
+        ${r.version?`<div class="fg"><label>Version</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.version)}</div></div>`:''}
+        ${r.territories?`<div class="fg"><label>Territories</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.territories)}</div></div>`:''}
+        ${(r.selectedPlatforms&&r.selectedPlatforms.length)?`<div class="fg full"><label>Selected Platforms</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.selectedPlatforms.join(', '))}</div></div>`:''}
+        ${r.previewStartTime!=null?`<div class="fg"><label>Preview Start Time</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(String(r.previewStartTime))}s</div></div>`:''}
+        ${r.lyrics?`<div class="fg full"><label>Lyrics</label><div style="padding:8px 10px;color:var(--txt2);white-space:pre-wrap;max-height:120px;overflow:auto">${escapeAttr(r.lyrics)}</div></div>`:''}
+        ${r.videoCredits?`<div class="fg full"><label>Video Credits</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoCredits)}</div></div>`:''}
+        ${r.videoNotes?`<div class="fg full"><label>Video Notes</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoNotes)}</div></div>`:''}
+      </div>
     </div>
 
     <div class="edit-card">
@@ -1364,19 +1386,64 @@ var oldLoadArtists=window.loadArtists;
 window.loadArtists=async function(){ await oldLoadArtists(); ensureArtistAccessControls(); };
 window.renderArtists=function(){
   const el=document.getElementById('art-list');if(!el)return;
-  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>Audio</th><th>Video</th><th>Releases</th><th>Royalties</th><th>Action</th></tr></thead><tbody>
-    ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0); const access=a.releaseServices||{}; return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td><select class="ss" id="art-audio-${a.id}"><option value="true" ${(access.audio!==false)?'selected':''}>Enabled</option><option value="false" ${(access.audio===false)?'selected':''}>Disabled</option></select></td><td><select class="ss" id="art-video-${a.id}"><option value="true" ${(access.video===true)?'selected':''}>Enabled</option><option value="false" ${(access.video!==true)?'selected':''}>Disabled</option></select></td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">INR ${tr.toFixed(2)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="vb" onclick="saveArtistServices('${a.id}')">Save Access</button><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></div></td></tr>`;}).join('')}
+  const countEl=document.getElementById('art-count'); if(countEl) countEl.textContent=artists.length+' account'+(artists.length!==1?'s':'');
+  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><div class="empty-text">No accounts yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Type</th><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>Royalty %</th><th>Audio</th><th>Video</th><th>Releases</th><th>Royalties</th><th>Agreement</th><th>ID Verification</th><th>Action</th></tr></thead><tbody>
+    ${artists.map(a=>{
+      const rc=releases.filter(r=>r.userId===a.id).length;
+      const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);
+      const access=a.releaseServices||{};
+      const isLabel=a.accountType==='label';
+      const laCount=(a.labelArtists||[]).length;
+      const typeBadge=isLabel
+        ?'<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(59,130,246,.15);color:#60a5fa;border-radius:10px;font-size:11px;font-weight:700">🏢 Label</span>'
+        :'<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(57,231,95,.12);color:#39e75f;border-radius:10px;font-size:11px;font-weight:700">🎤 Artist</span>';
+      const agr=a.agreement;
+      const agreementHTML=agr&&agr.signed?`<a href="${agr.signatureUrl||'#'}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
+      const idv=a.idVerification;
+      let idHTML='<span style="color:var(--txt3);font-size:11px">Not submitted</span>';
+      if(idv&&idv.url){
+        const statusColor=idv.status==='verified'?'#4ade80':(idv.status==='rejected'?'var(--red)':'var(--gold)');
+        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${idv.url}" target="_blank" style="font-size:11px;color:${statusColor}">${idv.type||'ID'} — ${idv.status||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
+      }
+      return `<tr>
+        <td>${typeBadge}${isLabel?`<div style="font-size:10px;color:#60a5fa;margin-top:2px">${laCount} artist${laCount!==1?'s':''}</div>`:''}</td>
+        <td style="font-weight:600">${escA(a.name||'—')}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${escA(a.email||'—')}</td>
+        <td style="font-size:12px;color:var(--txt3)">${escA(isLabel?'Label':(a.genre||'—'))}</td>
+        <td style="font-size:12px">${escA(a.country||'—')}</td>
+        <td><input class="ss" style="width:60px" type="number" min="0" max="100" id="art-royalty-${a.id}" value="${a.royaltySplit!=null?a.royaltySplit:85}"/></td>
+        <td><select class="ss" id="art-audio-${a.id}"><option value="true" ${(access.audio!==false)?'selected':''}>On</option><option value="false" ${(access.audio===false)?'selected':''}>Off</option></select></td>
+        <td><select class="ss" id="art-video-${a.id}"><option value="true" ${(access.video===true)?'selected':''}>On</option><option value="false" ${(access.video!==true)?'selected':''}>Off</option></select></td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td>
+        <td>${agreementHTML}</td>
+        <td>${idHTML}</td>
+        <td><div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="vb" onclick="saveArtistServices('${a.id}')">Save</button>
+          <button class="vb" style="background:rgba(255,193,7,.15);color:#ffc107" onclick="sendArtistPasswordReset('${escA(a.email||'')}')">Reset Password</button>
+          ${isLabel?`<button class="vb" style="background:rgba(59,130,246,.15);color:#60a5fa" onclick="manageLabelArtists('${a.id}')">Artists</button>`:''}
+          <button class="db" onclick="deleteArtistProfile('${a.id}')">Delete</button>
+        </div></td>
+      </tr>`;
+    }).join('')}
   </tbody></table>`;
 };
-window.saveArtistServices=async function(id){ try{ await db.collection('users').doc(id).set({releaseServices:{audio:document.getElementById('art-audio-'+id).value==='true', video:document.getElementById('art-video-'+id).value==='true'}},{merge:true}); toast('Artist access updated ✓'); await oldLoadArtists(); }catch(e){toast('Error: '+e.message);} };
-window.createArtistAccount=async function(){
-  const name=document.getElementById('ca-name').value.trim(), email=document.getElementById('ca-email').value.trim(), password=document.getElementById('ca-password').value;
-  document.getElementById('artist-e').classList.remove('on'); document.getElementById('artist-s').classList.remove('on');
-  if(!name) return showAl('artist-e','Please enter artist name.'); if(!email) return showAl('artist-e','Please enter email.'); if(password.length<6) return showAl('artist-e','Password must be at least 6 characters.');
-  const btn=document.getElementById('ca-btn'); btn.disabled=true; btn.textContent='Creating...';
-  try{ const secAuth=secondaryAuth(); const cred=await secAuth.createUserWithEmailAndPassword(email,password); const uid=cred.user.uid; await db.collection('users').doc(uid).set({name,email,genre:document.getElementById('ca-genre').value.trim(),country:document.getElementById('ca-country').value.trim(),instagram:document.getElementById('ca-instagram').value.trim(),bio:document.getElementById('ca-bio').value.trim(),releaseServices:{audio:document.getElementById('ca-audio-access').value==='true',video:document.getElementById('ca-video-access').value==='true'},createdAt:new Date().toISOString(),createdBy:'admin-panel'},{merge:true}); await secAuth.signOut(); ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value=''); document.getElementById('ca-audio-access').value='true'; document.getElementById('ca-video-access').value='false'; showAl('artist-s','✓ Artist account created successfully.'); await oldLoadArtists(); toast('Artist account created ✓'); }catch(e){ showAl('artist-e','Error: '+e.message); }
-  btn.disabled=false; btn.textContent='Create Artist Account';
+window.saveArtistServices=async function(id){
+  try{
+    const royaltyEl=document.getElementById('art-royalty-'+id);
+    const patch={releaseServices:{audio:document.getElementById('art-audio-'+id).value==='true', video:document.getElementById('art-video-'+id).value==='true'}};
+    if(royaltyEl){ const v=Number(royaltyEl.value); if(!isNaN(v)&&v>=0&&v<=100) patch.royaltySplit=v; }
+    await db.collection('users').doc(id).set(patch,{merge:true});
+    toast('Artist account updated ✓');
+    await loadArtists();
+  }catch(e){toast('Error: '+e.message);}
+};
+window.sendArtistPasswordReset=async function(email){
+  if(!email){ toast('No email on file for this artist.'); return; }
+  if(!confirm('Send a password reset email to '+email+'? The artist will get a link to set a new password themselves.')) return;
+  try{ await auth.sendPasswordResetEmail(email); toast('Password reset email sent to '+email+' ✓'); }
+  catch(e){ toast('Error: '+e.message); }
 };
 var oldOpenRelease=window.openRelease;
 window.openRelease=function(id){ oldOpenRelease(id); var r=releases.find(x=>x.id===id); if(!r) return; var editGrid=document.querySelector('#rmo-body .release-edit-grid'); if(editGrid && !document.getElementById('er-platforms')){ var tracksReadOnly=(r.trackItems||[]).length ? '<div class="fg full"><label>Tracklist (read-only — edit tracks from the artist portal)</label><div style="padding:10px 13px;border:1px solid var(--brd);border-radius:8px;background:var(--card);font-size:12px;color:var(--txt2);line-height:1.8;max-height:160px;overflow:auto">'+((r.trackItems||[]).map(function(t){return (t.trackNumber||'')+'. '+escapeAttr(t.title||'Untitled')+' — '+escapeAttr(t.artist||'')+(t.audioUrl?' (audio uploaded)':' (no audio yet)');}).join('<br/>'))+'</div></div>' : ''; editGrid.insertAdjacentHTML('beforeend','<div class="fg full"><label>Selected Platforms</label><input id="er-platforms" value="'+((r.selectedPlatforms||[]).join(', ').replace(/"/g,'&quot;'))+'"/></div><div class="fg"><label>Preview Start Time</label><input id="er-preview" type="number" value="'+(r.previewStartTime!=null?String(r.previewStartTime):'')+'"/></div>'+tracksReadOnly); }
