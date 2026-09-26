@@ -691,6 +691,34 @@ html,body{
 </div>
 
 <!-- LABEL ARTISTS MODAL -->
+<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:900;align-items:center;justify-content:center;padding:20px" id="acct-modal" onclick="if(event.target===this)closeAcctModal()">
+  <div style="background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--brd)">
+      <div style="font-size:15px;font-weight:700;color:var(--gold)" id="acct-modal-title">Manage Account</div>
+      <button onclick="closeAcctModal()" style="background:none;border:none;color:var(--txt3);font-size:20px;cursor:pointer;padding:0 4px">✕</button>
+    </div>
+    <div style="overflow-y:auto;padding:20px;flex:1">
+      <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--txt)">Bank / Payout Details <span style="font-weight:400;color:var(--txt3);font-size:11px">(read-only, artist-managed)</span></div>
+      <div id="acct-bank-view" style="font-size:12px;color:var(--txt2);line-height:2;margin-bottom:24px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px"></div>
+
+      <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--txt);display:flex;align-items:center;gap:10px">Analytics
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:400;color:var(--txt3);cursor:pointer"><input type="checkbox" id="acct-an-enabled"/>Enabled for this account</label>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fg"><label>Total Streams</label><input type="number" id="acct-an-streams-total"/></div>
+        <div class="fg"><label>Streams This Month</label><input type="number" id="acct-an-streams-month"/></div>
+        <div class="fg"><label>Total Revenue (₹)</label><input type="number" id="acct-an-revenue-total"/></div>
+        <div class="fg"><label>Revenue This Month (₹)</label><input type="number" id="acct-an-revenue-month"/></div>
+        <div class="fg" style="grid-column:1/-1"><label>Top Tracks <span style="font-weight:400;color:var(--txt3)">(one per line: Title, streams)</span></label><textarea id="acct-an-top-tracks" style="min-height:70px" placeholder="Midnight Drive, 12500&#10;Heartbreak Road, 8900"></textarea></div>
+        <div class="fg" style="grid-column:1/-1"><label>By Platform <span style="font-weight:400;color:var(--txt3)">(one per line: platform, streams)</span></label><textarea id="acct-an-platforms" style="min-height:70px" placeholder="spotify, 45000&#10;apple music, 12000&#10;youtube music, 8000"></textarea></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button id="acct-an-save-btn" onclick="saveAccountAnalytics()" style="padding:9px 20px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Save Analytics</button>
+        <button onclick="closeAcctModal()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;font-size:12px;color:var(--txt2);cursor:pointer">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:900;align-items:center;justify-content:center;padding:20px" id="la-modal" onclick="if(event.target===this)closeLaModal()">
   <div style="background:var(--surface);border:1px solid var(--brd);border-radius:14px;width:100%;max-width:620px;max-height:88vh;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--brd)">
@@ -820,6 +848,77 @@ function closeLaModal() {
   document.getElementById('la-modal').style.display = 'none';
   document.getElementById('la-add-form').style.display = 'none';
 }
+var _acctId = null;
+window.manageAccountExtra = function(id) {
+  _acctId = id;
+  var a = artists.find(function(x){ return x.id===id; });
+  if (!a) return;
+  document.getElementById('acct-modal-title').textContent = (a.name||'Account') + ' — Manage';
+  var b = a.bankDetails || {};
+  var bankView = document.getElementById('acct-bank-view');
+  if (b.accountNumber || b.accountHolder || b.upiId) {
+    bankView.innerHTML =
+      '<div><strong>Account Holder:</strong> ' + escA(b.accountHolder||'—') + '</div>' +
+      '<div><strong>Bank Name:</strong> ' + escA(b.bankName||'—') + '</div>' +
+      '<div><strong>Account Number:</strong> ' + escA(b.accountNumber||'—') + '</div>' +
+      '<div><strong>IFSC / SWIFT:</strong> ' + escA(b.ifscSwift||'—') + '</div>' +
+      '<div><strong>Bank Country:</strong> ' + escA(b.bankCountry||'—') + '</div>' +
+      '<div><strong>UPI ID:</strong> ' + escA(b.upiId||'—') + '</div>' +
+      '<div style="color:var(--txt3);font-size:11px;margin-top:6px">Last updated: ' + (b.updatedAt?b.updatedAt.substring(0,10):'—') + '</div>';
+  } else {
+    bankView.innerHTML = '<span style="color:var(--txt3)">This account has not added bank/payout details yet.</span>';
+  }
+  var an = a.analytics || {};
+  document.getElementById('acct-an-enabled').checked = !!an.enabled;
+  document.getElementById('acct-an-streams-total').value = an.streams ? (an.streams.total!=null?an.streams.total:'') : '';
+  document.getElementById('acct-an-streams-month').value = an.streams ? (an.streams.thisMonth!=null?an.streams.thisMonth:'') : '';
+  document.getElementById('acct-an-revenue-total').value = an.revenue ? (an.revenue.total!=null?an.revenue.total:'') : '';
+  document.getElementById('acct-an-revenue-month').value = an.revenue ? (an.revenue.thisMonth!=null?an.revenue.thisMonth:'') : '';
+  document.getElementById('acct-an-top-tracks').value = (an.topTracks||[]).map(function(t){ return (t.title||'')+', '+(t.streams!=null?t.streams:''); }).join('\n');
+  document.getElementById('acct-an-platforms').value = an.platforms ? Object.keys(an.platforms).map(function(k){ return k+', '+an.platforms[k]; }).join('\n') : '';
+  document.getElementById('acct-modal').style.display = 'flex';
+};
+function closeAcctModal() { document.getElementById('acct-modal').style.display = 'none'; }
+window.saveAccountAnalytics = async function() {
+  if (!_acctId) return;
+  var parseLines = function(id, valKey) {
+    var lines = document.getElementById(id).value.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    var out = [];
+    lines.forEach(function(line) {
+      var parts = line.split(',');
+      if (parts.length >= 2) { var v = Number(parts[1].trim()); out.push([parts[0].trim(), isNaN(v)?0:v]); }
+    });
+    return out;
+  };
+  var topTracksArr = parseLines('acct-an-top-tracks').map(function(p){ return { title: p[0], streams: p[1] }; });
+  var platformsObj = {};
+  parseLines('acct-an-platforms').forEach(function(p){ platformsObj[p[0]] = p[1]; });
+  var patch = {
+    analytics: {
+      enabled: document.getElementById('acct-an-enabled').checked,
+      streams: {
+        total: document.getElementById('acct-an-streams-total').value ? Number(document.getElementById('acct-an-streams-total').value) : null,
+        thisMonth: document.getElementById('acct-an-streams-month').value ? Number(document.getElementById('acct-an-streams-month').value) : null
+      },
+      revenue: {
+        total: document.getElementById('acct-an-revenue-total').value ? Number(document.getElementById('acct-an-revenue-total').value) : null,
+        thisMonth: document.getElementById('acct-an-revenue-month').value ? Number(document.getElementById('acct-an-revenue-month').value) : null
+      },
+      topTracks: topTracksArr,
+      platforms: platformsObj,
+      lastUpdated: new Date().toISOString()
+    }
+  };
+  var btn = document.getElementById('acct-an-save-btn'); btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    await db.collection('users').doc(_acctId).set(patch, { merge: true });
+    var a = artists.find(function(x){ return x.id===_acctId; });
+    if (a) a.analytics = patch.analytics;
+    toast('Analytics updated ✓');
+    closeAcctModal();
+  } catch(e) { toast('Error: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Save Analytics';
+};
 function escA(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function renderLaList(arr) {
   var el = document.getElementById('la-modal-list');
@@ -1424,6 +1523,7 @@ window.renderArtists=function(){
         <td><div style="display:flex;gap:5px;flex-wrap:wrap">
           <button class="vb" onclick="saveArtistServices('${a.id}')">Save</button>
           <button class="vb" style="background:rgba(255,193,7,.15);color:#ffc107" onclick="sendArtistPasswordReset('${escA(a.email||'')}')">Reset Password</button>
+          <button class="vb" style="background:rgba(168,85,247,.15);color:#c084fc" onclick="manageAccountExtra('${a.id}')">Bank &amp; Analytics</button>
           ${isLabel?`<button class="vb" style="background:rgba(59,130,246,.15);color:#60a5fa" onclick="manageLabelArtists('${a.id}')">Artists</button>`:''}
           <button class="db" onclick="deleteArtistProfile('${a.id}')">Delete</button>
         </div></td>
