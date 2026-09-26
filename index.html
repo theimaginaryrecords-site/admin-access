@@ -553,6 +553,13 @@ html,body{
         <div class="sh"><h3>Create Account</h3><p>Artist or Label — no Firebase Console needed</p></div>
         <div class="sb2">
           <div class="al al-e" id="artist-e"></div><div class="al al-s" id="artist-s"></div>
+          <div id="ca-draft-banner" style="display:none;background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:10px;padding:12px 16px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="font-size:12px;color:var(--txt2)">📝 Unsaved account draft from <span id="ca-draft-banner-time" style="font-weight:700;color:var(--txt)"></span> (password not saved for security)</div>
+            <div style="display:flex;gap:8px">
+              <button onclick="restoreCreateAccountDraft()" style="padding:6px 14px;background:var(--gold);color:#000;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Restore</button>
+              <button onclick="discardCreateAccountDraft()" style="padding:6px 14px;background:none;border:1px solid var(--brd);border-radius:6px;font-size:11px;color:var(--txt2);cursor:pointer">Discard</button>
+            </div>
+          </div>
           <!-- Account Type Toggle -->
           <div style="display:flex;gap:0;background:var(--card);border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:16px">
             <button id="att-artist" onclick="switchAcctType('artist')" style="flex:1;padding:11px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:none;background:var(--gold);color:#000;transition:all .2s">🎤 Artist Account</button>
@@ -702,7 +709,8 @@ html,body{
       <div id="acct-bank-view" style="font-size:12px;color:var(--txt2);line-height:2;margin-bottom:24px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px"></div>
 
       <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--txt);display:flex;align-items:center;gap:10px">Analytics
-        <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:400;color:var(--txt3);cursor:pointer"><input type="checkbox" id="acct-an-enabled"/>Enabled for this account</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:400;color:var(--txt3);cursor:pointer"><input type="checkbox" id="acct-an-enabled" onchange="toggleAnalyticsEnabledInstant(this.checked)"/>Enabled for this account</label>
+        <span id="acct-an-toggle-status" style="font-size:11px;color:var(--txt3)"></span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="fg"><label>Total Streams</label><input type="number" id="acct-an-streams-total"/></div>
@@ -751,6 +759,48 @@ html,body{
 <script>
 /* ═══ ACCOUNT TYPE SWITCHER ═══ */
 var _acctType = 'artist';
+var CA_DRAFT_KEY = 'tir_admin_create_account_draft_v1';
+var CA_DRAFT_FIELDS = ['ca-name','ca-email','ca-genre','ca-country','ca-instagram','ca-bio','ca-spotify','ca-apple-music','ca-soundcloud','ca-youtube-url','ca-plan','ca-royalty','ca-audio-access','ca-video-access'];
+var _caAutosaveTimer = null;
+function autosaveCreateAccountDraft() {
+  try {
+    var data = { savedAt: new Date().toISOString(), acctType: _acctType, fields: {} };
+    var hasContent = false;
+    CA_DRAFT_FIELDS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { data.fields[id] = el.value; if (el.value && id !== 'ca-plan' && id !== 'ca-royalty' && id !== 'ca-audio-access' && id !== 'ca-video-access') hasContent = true; }
+    });
+    if (!hasContent) return;
+    localStorage.setItem(CA_DRAFT_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+function checkForCreateAccountDraft() {
+  var raw;
+  try { raw = localStorage.getItem(CA_DRAFT_KEY); } catch(e) { return; }
+  if (!raw) return;
+  try {
+    var data = JSON.parse(raw);
+    var banner = document.getElementById('ca-draft-banner');
+    var timeEl = document.getElementById('ca-draft-banner-time');
+    if (banner && timeEl) { timeEl.textContent = new Date(data.savedAt).toLocaleString(); banner.style.display = 'flex'; }
+  } catch(e) {}
+}
+window.restoreCreateAccountDraft = function() {
+  var raw;
+  try { raw = localStorage.getItem(CA_DRAFT_KEY); } catch(e) { return; }
+  if (!raw) return;
+  try {
+    var data = JSON.parse(raw);
+    if (data.acctType) switchAcctType(data.acctType);
+    Object.keys(data.fields||{}).forEach(function(id) { var el = document.getElementById(id); if (el && data.fields[id]) el.value = data.fields[id]; });
+    document.getElementById('ca-draft-banner').style.display = 'none';
+    toast('Draft restored — remember to re-enter the password ✓');
+  } catch(e) {}
+};
+window.discardCreateAccountDraft = function() {
+  try { localStorage.removeItem(CA_DRAFT_KEY); } catch(e) {}
+  document.getElementById('ca-draft-banner').style.display = 'none';
+};
 function switchAcctType(type) {
   _acctType = type;
   var isLabel = type === 'label';
@@ -879,6 +929,21 @@ window.manageAccountExtra = function(id) {
   document.getElementById('acct-modal').style.display = 'flex';
 };
 function closeAcctModal() { document.getElementById('acct-modal').style.display = 'none'; }
+window.toggleAnalyticsEnabledInstant = async function(val) {
+  if (!_acctId) return;
+  var status = document.getElementById('acct-an-toggle-status');
+  status.textContent = 'Saving...';
+  try {
+    await db.collection('users').doc(_acctId).update({ 'analytics.enabled': val });
+    var a = artists.find(function(x){ return x.id===_acctId; });
+    if (a) { a.analytics = a.analytics || {}; a.analytics.enabled = val; }
+    status.textContent = val ? '✓ Enabled — saved instantly' : '✓ Disabled — saved instantly';
+    setTimeout(function(){ status.textContent=''; }, 2500);
+  } catch(e) {
+    status.textContent = 'Error saving';
+    toast('Error: ' + e.message);
+  }
+};
 window.saveAccountAnalytics = async function() {
   if (!_acctId) return;
   var parseLines = function(id, valKey) {
@@ -1386,6 +1451,7 @@ async function createArtistAccount(){
     },{merge:true});
     await secAuth.signOut();
     ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value='');
+    try{ localStorage.removeItem(CA_DRAFT_KEY); }catch(e){} var _cadb=document.getElementById('ca-draft-banner'); if(_cadb) _cadb.style.display='none';
     showAl('artist-s','✓ Artist account created successfully.');
     await loadArtists();
     toast('Artist account created ✓');
@@ -1496,9 +1562,7 @@ window.renderArtists=function(){
       const access=a.releaseServices||{};
       const isLabel=a.accountType==='label';
       const laCount=(a.labelArtists||[]).length;
-      const typeBadge=isLabel
-        ?'<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(59,130,246,.15);color:#60a5fa;border-radius:10px;font-size:11px;font-weight:700">🏢 Label</span>'
-        :'<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(57,231,95,.12);color:#39e75f;border-radius:10px;font-size:11px;font-weight:700">🎤 Artist</span>';
+      const typeSelect=`<select class="ss" id="art-type-${a.id}" style="font-size:11px;font-weight:700;padding:3px 6px"><option value="artist" ${!isLabel?'selected':''}>🎤 Artist</option><option value="label" ${isLabel?'selected':''}>🏢 Label</option></select>`;
       const agr=a.agreement;
       const agreementHTML=agr&&agr.signed?`<a href="${agr.signatureUrl||'#'}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
       const idv=a.idVerification;
@@ -1508,7 +1572,7 @@ window.renderArtists=function(){
         idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${idv.url}" target="_blank" style="font-size:11px;color:${statusColor}">${idv.type||'ID'} — ${idv.status||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
       }
       return `<tr>
-        <td>${typeBadge}${isLabel?`<div style="font-size:10px;color:#60a5fa;margin-top:2px">${laCount} artist${laCount!==1?'s':''}</div>`:''}</td>
+        <td>${typeSelect}${isLabel?`<div style="font-size:10px;color:#60a5fa;margin-top:2px">${laCount} artist${laCount!==1?'s':''}</div>`:''}</td>
         <td style="font-weight:600">${escA(a.name||'—')}</td>
         <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${escA(a.email||'—')}</td>
         <td style="font-size:12px;color:var(--txt3)">${escA(isLabel?'Label':(a.genre||'—'))}</td>
@@ -1534,8 +1598,10 @@ window.renderArtists=function(){
 window.saveArtistServices=async function(id){
   try{
     const royaltyEl=document.getElementById('art-royalty-'+id);
+    const typeEl=document.getElementById('art-type-'+id);
     const patch={releaseServices:{audio:document.getElementById('art-audio-'+id).value==='true', video:document.getElementById('art-video-'+id).value==='true'}};
     if(royaltyEl){ const v=Number(royaltyEl.value); if(!isNaN(v)&&v>=0&&v<=100) patch.royaltySplit=v; }
+    if(typeEl){ patch.accountType=typeEl.value; }
     await db.collection('users').doc(id).set(patch,{merge:true});
     toast('Artist account updated ✓');
     await loadArtists();
@@ -1556,7 +1622,7 @@ window.saveReleaseEdits=async function(id){
   var videoUrl=document.getElementById('er-video-url'); if(videoUrl){ payload.videoUrl=videoUrl.value.trim(); payload.videoDirector=document.getElementById('er-video-director').value.trim(); payload.videoChannel=document.getElementById('er-video-channel').value.trim(); payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim(); }
   try{ await db.collection('releases').doc(id).update(payload); await loadReleases(); window.openRelease(id); toast('Release updated ✓'); }catch(e){ toast('Error: '+e.message); }
 };
-document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureArtistAccessControls,100); });
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureArtistAccessControls,100); setTimeout(checkForCreateAccountDraft,100); setInterval(autosaveCreateAccountDraft,15000); });
 })();
 </script>
 </body>
