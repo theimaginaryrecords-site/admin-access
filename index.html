@@ -590,7 +590,7 @@ html,body{
           </div>
         </div>
       </div>
-      <div class="section"><div class="sh"><div><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div><button class="rb" onclick="grandfatherExistingArtists()">Grandfather Existing Artists (run once)</button></div><div class="tw" id="art-list"></div></div>
+      <div class="section"><div class="sh"><div><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div></div><div class="tw" id="art-list"></div></div>
     </div>
 
     <div class="pg" id="page-tickets">
@@ -866,7 +866,17 @@ window.createAccount = async function() {
       userData.labelArtists   = [];
       userData.releaseServices = { audio: true, video: true };
     }
-    await db.collection('users').doc(uid).set(userData, { merge: true });
+    try {
+      await db.collection('users').doc(uid).set(userData, { merge: true });
+    } catch (firestoreErr) {
+      // The Auth user was already created but the Firestore profile write failed.
+      // Roll back the Auth user so it doesn't become an orphaned login.
+      var rollbackNote = ' The login was rolled back automatically.';
+      try { await cred.user.delete(); }
+      catch (delErr) { rollbackNote = ' IMPORTANT: the login could NOT be rolled back automatically — remove it manually in Firebase Console → Authentication → Users (' + email + ').'; }
+      try { await secAuth.signOut(); } catch (soErr) {}
+      throw new Error('Profile save failed.' + rollbackNote + ' Details: ' + firestoreErr.message);
+    }
     await secAuth.signOut();
     ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio','ca-spotify','ca-apple-music','ca-soundcloud','ca-youtube-url'].forEach(function(id){
       var el = document.getElementById(id); if (el) el.value = '';
@@ -993,9 +1003,9 @@ function renderLaList(arr) {
   }
   el.innerHTML = arr.map(function(a,i){
     var links='';
-    if(a.spotifyUrl) links+='<a href="'+escA(a.spotifyUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(30,215,96,.1);color:#1ed760;border-radius:5px;text-decoration:none">Spotify</a> ';
-    if(a.appleMusicUrl) links+='<a href="'+escA(a.appleMusicUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,65,108,.1);color:#ff416c;border-radius:5px;text-decoration:none">Apple</a> ';
-    if(a.soundcloudUrl) links+='<a href="'+escA(a.soundcloudUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,85,0,.1);color:#ff5500;border-radius:5px;text-decoration:none">SoundCloud</a>';
+    if(a.spotifyUrl) links+='<a href="'+safeUrl(a.spotifyUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(30,215,96,.1);color:#1ed760;border-radius:5px;text-decoration:none">Spotify</a> ';
+    if(a.appleMusicUrl) links+='<a href="'+safeUrl(a.appleMusicUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,65,108,.1);color:#ff416c;border-radius:5px;text-decoration:none">Apple</a> ';
+    if(a.soundcloudUrl) links+='<a href="'+safeUrl(a.soundcloudUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,85,0,.1);color:#ff5500;border-radius:5px;text-decoration:none">SoundCloud</a>';
     return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--brd);border-radius:10px">'
       +'<div style="width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--gold);flex-shrink:0">'+(a.name||'A')[0].toUpperCase()+'</div>'
       +'<div style="flex:1;min-width:0">'
@@ -1081,7 +1091,7 @@ window.renderArtists = function(){
         +'<td style="font-weight:600">'+escA(a.name||'—')+(isLabel?'<div style="font-size:10px;color:#60a5fa;margin-top:2px">'+laCount+' artist'+(laCount!==1?'s':'')+'</div>':'')+'</td>'
         +'<td style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--txt2)">'+escA(a.email||'—')+'</td>'
         +'<td style="font-size:12px;color:var(--txt3)">'+escA(isLabel?'Label':a.genre||'—')+'</td>'
-        +'<td style="font-size:12px">'+(planMap[a.plan]||a.plan||'free')+'</td>'
+        +'<td style="font-size:12px">'+esc(planMap[a.plan]||a.plan||'free')+'</td>'
         +'<td><select class="ss" id="art-audio-'+a.id+'"><option value="true" '+(access.audio!==false?'selected':'')+'>On</option><option value="false" '+(access.audio===false?'selected':'')+'>Off</option></select></td>'
         +'<td><select class="ss" id="art-video-'+a.id+'"><option value="true" '+(access.video===true?'selected':'')+'>On</option><option value="false" '+(access.video!==true?'selected':'')+'>Off</option></select></td>'
         +'<td style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--gold);font-weight:700">'+rc+'</td>'
@@ -1103,6 +1113,16 @@ let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[],demos=[];
 let relFilter='all',tktFilter='all',demoFilter='all';
 
 function escapeAttr(str){return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── XSS hardening helpers ──
+// esc(): escape user-controlled text inserted into HTML.
+// safeUrl(): allow only http(s) URLs for href/src (returned HTML-attribute-safe).
+// escJs(): escape a string for a single-quoted JS literal inside a double-quoted HTML attribute.
+// igHandle(): sanitize an Instagram handle to [A-Za-z0-9._] before building a profile URL.
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function safeUrl(u){try{var x=String(u==null?'':u).trim();if(/^https?:\/\//i.test(x))return esc(x);}catch(e){}return '#';}
+function escJs(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"\\'");}
+function igHandle(h){return String(h==null?'':h).replace(/^@/,'').replace(/[^A-Za-z0-9._]/g,'');}
 function secondaryAuth(){
   try { return firebase.app('ArtistCreator').auth(); }
   catch(e){
@@ -1116,12 +1136,22 @@ function openDrawer(){document.getElementById('mob-drawer').classList.add('on');
 function closeDrawer(){document.getElementById('mob-drawer').classList.remove('on');document.getElementById('mob-overlay').classList.remove('on');document.body.style.overflow='';}
 function setMN(name,isDemo=false){document.querySelectorAll('.mob-ni').forEach(n=>{n.classList.remove('on');n.classList.remove('on-demo');});const el=document.getElementById('mni-'+name);if(el)el.classList.add(isDemo?'on-demo':'on');}
 
+// SECURITY: this check is UI-only. Real authorization MUST be enforced by Firestore Security Rules (deny all reads/writes except the admin UID/email) — client checks can be bypassed.
 auth.onAuthStateChanged(u=>{
   document.getElementById('ld').style.display='none';
   if(u&&u.email===ADMIN_EMAIL){document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();}
   else if(u&&u.email!==ADMIN_EMAIL){auth.signOut();document.getElementById('auth').style.display='flex';}
-  else{document.getElementById('auth').style.display='flex';document.getElementById('panel').style.display='none';}
+  else{document.getElementById('auth').style.display='flex';document.getElementById('panel').style.display='none';resetLoginForm();}
 });
+
+// Re-enables the login button and clears the password whenever the session ends,
+// so the "Access Admin Panel" button never gets stuck disabled after sign-out.
+function resetLoginForm(){
+  const btn=document.getElementById('blg');
+  if(btn){btn.disabled=false;btn.textContent='Access Admin Panel';}
+  const pw=document.getElementById('pw');
+  if(pw)pw.value='';
+}
 
 async function doLogin(){
   const em=document.getElementById('em').value.trim(),pw=document.getElementById('pw').value,btn=document.getElementById('blg'),err=document.getElementById('ae');
@@ -1130,11 +1160,18 @@ async function doLogin(){
   if(!pw){err.textContent='Please enter your password.';err.classList.add('on');return;}
   btn.disabled=true;btn.textContent='Signing in...';
   try{await auth.signInWithEmailAndPassword(em,pw);}
-  catch(e){err.textContent='Login failed: '+e.message;err.classList.add('on');btn.disabled=false;btn.textContent='Access Admin Panel';}
+  catch(e){err.textContent='Login failed: '+e.message;err.classList.add('on');}
+  finally{btn.disabled=false;btn.textContent='Access Admin Panel';}
 }
 function doSignOut(){auth.signOut();}
 
-async function loadAll(){toast('Loading...');await Promise.all([loadReleases(),loadArtists(),loadTickets(),loadBlogPosts(),loadRoyaltyHistory(),loadDemos()]);toast('All data loaded ✓');}
+async function loadAll(){
+  toast('Loading...');
+  const jobs=[['Releases',loadReleases()],['Artists',loadArtists()],['Tickets',loadTickets()],['Blog',loadBlogPosts()],['Royalties',loadRoyaltyHistory()],['Demos',loadDemos()]];
+  const results=await Promise.allSettled(jobs.map(j=>j[1]));
+  const failed=results.map((r,i)=>r.status==='rejected'?jobs[i][0]:null).filter(Boolean);
+  toast(failed.length?('Loaded with errors: '+failed.join(', ')+' — tap ↻ Refresh to retry'):'All data loaded ✓');
+}
 
 async function loadReleases(){
   try{const snap=await db.collection('releases').get();releases=[];snap.forEach(d=>releases.push({id:d.id,...d.data()}));releases.sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));renderLabelStats();renderRelTable('ov-list',releases.slice(0,8));renderRelTable('all-list',releases);renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review'));renderRelTable('live-list',releases.filter(r=>r.status==='live'));const pc=releases.filter(r=>r.status==='pending').length;['pend-cnt','mni-pend-cnt'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=pc;el.style.display=pc>0?'inline':'none';}});}catch(e){console.error(e);}
@@ -1162,10 +1199,10 @@ function trackPillsHTML(r){
     const color = done===tracks.length ? '#4ade80' : (done>0 ? 'var(--gold)' : 'var(--txt3)');
     return `<span class="file-pill" style="color:${color}">${done}/${tracks.length} TRACKS</span>${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`;
   }
-  return `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`;
+  return `${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${esc(r.audioFormat||'AUDIO')}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.artworkUrl?`<span class="file-pill" style="color:#4ade80">ART</span>`:''}`;
 }
 function artThumb(r){
-  if(r.artworkUrl)return `<img src="${r.artworkUrl}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--brd);vertical-align:middle" alt="Art"/>`;
+  if(r.artworkUrl)return `<img src="${safeUrl(r.artworkUrl)}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--brd);vertical-align:middle" alt="Art"/>`;
   return `<div style="width:36px;height:36px;border-radius:6px;background:var(--card);border:1px solid var(--brd);display:inline-flex;align-items:center;justify-content:center;font-size:14px">🎵</div>`;
 }
 
@@ -1175,15 +1212,15 @@ function renderRelTable(id,list){
   el.innerHTML=`<table><thead><tr><th>Art</th><th>Title</th><th>Artist</th><th>Format</th><th>Genre</th><th>Date</th><th>Files</th><th>Status</th><th>Action</th></tr></thead><tbody>
     ${list.map(r=>`<tr>
       <td>${artThumb(r)}</td>
-      <td style="font-weight:600">${r.title||'—'}</td>
-      <td style="color:var(--txt2)">${r.artistName||r.primaryArtist||'—'}</td>
-      <td style="font-size:12px;color:var(--txt3)">${r.releaseMedium==='video'?'Music Video':(r.type||'—')}</td>
-      <td style="font-size:12px;color:var(--txt3)">${r.genre||'—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.releaseDate||'—'}</td>
+      <td style="font-weight:600">${esc(r.title||'—')}</td>
+      <td style="color:var(--txt2)">${esc(r.artistName||r.primaryArtist||'—')}</td>
+      <td style="font-size:12px;color:var(--txt3)">${r.releaseMedium==='video'?'Music Video':esc(r.type||'—')}</td>
+      <td style="font-size:12px;color:var(--txt3)">${esc(r.genre||'—')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${esc(r.releaseDate||'—')}</td>
       <td>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
           ${r.releaseMedium==='video'
-            ? `${r.videoUrl?`<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>`:''}${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${r.audioFormat||'AUDIO'}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
+            ? `${r.videoUrl?`<span class="file-pill" style="color:var(--demo);border-color:var(--demo-brd)">VIDEO URL</span>`:''}${r.audioUrl?`<span class="file-pill" style="color:var(--gold)">${esc(r.audioFormat||'AUDIO')}</span>`:'<span style="color:var(--txt3);font-size:11px">No audio</span>'}${r.thumbnailUrl?`<span class="file-pill" style="color:#4ade80">THUMB</span>`:''}${r.artworkUrl?`<span class="file-pill" style="color:var(--gold)">ART</span>`:''}`
             : trackPillsHTML(r)
           }
         </div>
@@ -1208,19 +1245,19 @@ function openRelease(id){
   document.getElementById('rmo-title').textContent=r.title||'Release';
   const isVideo = r.releaseMedium==='video';
   const artworkHTML = r.artworkUrl
-    ? `<img class="artwork-thumb" src="${r.artworkUrl}" alt="Cover Artwork"/>`
+    ? `<img class="artwork-thumb" src="${safeUrl(r.artworkUrl)}" alt="Cover Artwork"/>`
     : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>No artwork uploaded</span></div>`;
   const thumbHTML = r.thumbnailUrl
-    ? `<img class="artwork-thumb" src="${r.thumbnailUrl}" alt="Thumbnail"/>`
+    ? `<img class="artwork-thumb" src="${safeUrl(r.thumbnailUrl)}" alt="Thumbnail"/>`
     : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>No thumbnail uploaded</span></div>`;
   const hasTracks = Array.isArray(r.trackItems) && r.trackItems.length>0;
   const audioHTML = hasTracks
-    ? `<div class="tracklist-admin">${r.trackItems.map((t,i)=>`<div class="track-admin-row"><div class="track-admin-row-head"><strong>${i+1}. ${escapeAttr(t.title||'Untitled track')}</strong><span style="color:var(--txt3);font-size:11px">${escapeAttr(t.artist||'')}</span></div><div style="font-size:11px;color:var(--txt3);margin-bottom:8px;line-height:1.6">${t.composer?`<div><strong>Composer:</strong> ${escapeAttr(t.composer)}</div>`:''}${t.lyricist?`<div><strong>Lyricist:</strong> ${escapeAttr(t.lyricist)}</div>`:''}${t.producer?`<div><strong>Producer:</strong> ${escapeAttr(t.producer)}</div>`:''}${t.featured?`<div><strong>Featuring:</strong> ${escapeAttr(t.featured)}</div>`:''}${t.otherContributors?`<div><strong>Other:</strong> ${escapeAttr(t.otherContributors)}</div>`:''}</div>${t.audioUrl?`<audio class="admin-audio" controls src="${t.audioUrl}"></audio><div class="audio-filemeta"><span class="audio-format-pill">${t.audioFormat||'AUDIO'}</span>${t.audioSize?`<span style="color:var(--txt3)">${t.audioSize}</span>`:''}${t.audioFilename?`<span style="color:var(--txt3)">${t.audioFilename}</span>`:''}</div><div class="audio-actions"><a class="audio-dl-btn" href="${t.audioUrl}" target="_blank" download>Download Track ${i+1}</a></div>`:`<div class="no-file-msg">No audio uploaded for this track yet</div>`}</div>`).join('')}</div>`
+    ? `<div class="tracklist-admin">${r.trackItems.map((t,i)=>`<div class="track-admin-row"><div class="track-admin-row-head"><strong>${i+1}. ${escapeAttr(t.title||'Untitled track')}</strong><span style="color:var(--txt3);font-size:11px">${escapeAttr(t.artist||'')}</span></div><div style="font-size:11px;color:var(--txt3);margin-bottom:8px;line-height:1.6">${t.composer?`<div><strong>Composer:</strong> ${escapeAttr(t.composer)}</div>`:''}${t.lyricist?`<div><strong>Lyricist:</strong> ${escapeAttr(t.lyricist)}</div>`:''}${t.producer?`<div><strong>Producer:</strong> ${escapeAttr(t.producer)}</div>`:''}${t.featured?`<div><strong>Featuring:</strong> ${escapeAttr(t.featured)}</div>`:''}${t.otherContributors?`<div><strong>Other:</strong> ${escapeAttr(t.otherContributors)}</div>`:''}</div>${t.audioUrl?`<audio class="admin-audio" controls src="${safeUrl(t.audioUrl)}"></audio><div class="audio-filemeta"><span class="audio-format-pill">${esc(t.audioFormat||'AUDIO')}</span>${t.audioSize?`<span style="color:var(--txt3)">${esc(t.audioSize)}</span>`:''}${t.audioFilename?`<span style="color:var(--txt3)">${esc(t.audioFilename)}</span>`:''}</div><div class="audio-actions"><a class="audio-dl-btn" href="${safeUrl(t.audioUrl)}" target="_blank" download>Download Track ${i+1}</a></div>`:`<div class="no-file-msg">No audio uploaded for this track yet</div>`}</div>`).join('')}</div>`
     : (r.audioUrl
-      ? `<div class="audio-player-admin"><div class="audio-filename">${r.audioFilename||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${r.audioFormat||'AUDIO'}</span>${r.audioSize?`<span style="color:var(--txt3)">${r.audioSize}</span>`:''}</div><audio class="admin-audio" controls src="${r.audioUrl}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${r.audioUrl}" target="_blank" download>Download Audio</a></div></div>`
+      ? `<div class="audio-player-admin"><div class="audio-filename">${esc(r.audioFilename)||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${esc(r.audioFormat||'AUDIO')}</span>${r.audioSize?`<span style="color:var(--txt3)">${esc(r.audioSize)}</span>`:''}</div><audio class="admin-audio" controls src="${safeUrl(r.audioUrl)}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${safeUrl(r.audioUrl)}" target="_blank" download>Download Audio</a></div></div>`
       : `<div class="no-file-msg">No audio file uploaded</div>`);
   const videoHTML = r.videoUrl
-    ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${r.videoDirector}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${r.videoUrl}</div><div class="audio-actions"><a class="audio-dl-btn" href="${r.videoUrl}" target="_blank">Open Video URL</a></div></div>`
+    ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${esc(r.videoDirector)}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${esc(r.videoUrl)}</div><div class="audio-actions"><a class="audio-dl-btn" href="${safeUrl(r.videoUrl)}" target="_blank">Open Video URL</a></div></div>`
     : `<div class="no-file-msg">No video URL added</div>`;
   document.getElementById('rmo-body').innerHTML=`
     <div style="margin-bottom:18px">
@@ -1235,17 +1272,17 @@ function openRelease(id){
     </div>
 
     <div class="file-preview-panel">
-      <div class="fp-card"><div class="fp-label">🖼 Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.artworkUrl}" target="_blank">Open Artwork</a></div>`:''}</div></div>
+      <div class="fp-card"><div class="fp-label">🖼 Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${safeUrl(r.artworkUrl)}" target="_blank">Open Artwork</a></div>`:''}</div></div>
       <div class="fp-card"><div class="fp-label">${hasTracks?`🎵 Tracklist (${r.trackItems.filter(t=>t.audioUrl).length}/${r.trackItems.length} uploaded)`:'🎵 Audio File'}</div><div class="fp-content">${audioHTML}</div></div>
       ${isVideo?`<div class="fp-card"><div class="fp-label">🎬 Video URL</div><div class="fp-content">${videoHTML}</div></div>`:''}
-      ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${r.thumbnailUrl}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
+      ${isVideo?`<div class="fp-card"><div class="fp-label">🖼 Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${safeUrl(r.thumbnailUrl)}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
     </div>
 
     <div class="edit-card">
       <h4>Full Submitted Metadata (read-only)</h4>
       <div class="release-edit-grid" style="font-size:12px">
-        ${r.spotifyArtistUrl?`<div class="fg"><label>Spotify Artist URL</label><div style="padding:8px 10px"><a href="${r.spotifyArtistUrl}" target="_blank" style="color:#1db954">${escapeAttr(r.spotifyArtistUrl)}</a></div></div>`:''}
-        ${r.appleMusicArtistUrl?`<div class="fg"><label>Apple Music Artist URL</label><div style="padding:8px 10px"><a href="${r.appleMusicArtistUrl}" target="_blank" style="color:#fa9e9b">${escapeAttr(r.appleMusicArtistUrl)}</a></div></div>`:''}
+        ${r.spotifyArtistUrl?`<div class="fg"><label>Spotify Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.spotifyArtistUrl)}" target="_blank" style="color:#1db954">${escapeAttr(r.spotifyArtistUrl)}</a></div></div>`:''}
+        ${r.appleMusicArtistUrl?`<div class="fg"><label>Apple Music Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.appleMusicArtistUrl)}" target="_blank" style="color:#fa9e9b">${escapeAttr(r.appleMusicArtistUrl)}</a></div></div>`:''}
         ${r.subGenre?`<div class="fg"><label>Sub-Genre</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.subGenre)}</div></div>`:''}
         ${r.language?`<div class="fg"><label>Language</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.language)}</div></div>`:''}
         ${r.contentRating?`<div class="fg"><label>Content Rating</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.contentRating)}</div></div>`:''}
@@ -1301,10 +1338,10 @@ function renderDemoTable(id,list){
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div class="empty-text">No demos found</div></div>';return;}
   el.innerHTML=`<table><thead><tr><th>Artist</th><th>Genre</th><th>Email</th><th>Instagram</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
     ${list.map(d=>`<tr>
-      <td><div style="font-weight:600">${d.name||'—'}</div><span class="ref-badge">${d.refId||'—'}</span></td>
-      <td style="color:var(--txt2);font-size:12px">${d.genre||'—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${d.email||'—'}</td>
-      <td style="font-size:12px;color:var(--txt2)">${d.instagram||'—'}</td>
+      <td><div style="font-weight:600">${esc(d.name)||'—'}</div><span class="ref-badge">${esc(d.refId)||'—'}</span></td>
+      <td style="color:var(--txt2);font-size:12px">${esc(d.genre)||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${esc(d.email)||'—'}</td>
+      <td style="font-size:12px;color:var(--txt2)">${esc(d.instagram)||'—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</td>
       <td><select class="ss" onchange="updateDemoStatus('${d.id}',this.value)">
         <option value="new" ${d.status==='new'?'selected':''}>🆕 New</option>
@@ -1325,14 +1362,14 @@ function renderArtists(){
   el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>PayPal</th><th>Instagram</th><th>Releases</th><th>Royalties</th><th>Agreement</th><th>ID Verification</th><th>Action</th></tr></thead><tbody>
     ${artists.map(a=>{const rc=releases.filter(r=>r.userId===a.id).length;const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);
       const agr=a.agreement;
-      const agreementHTML=agr&&agr.signed?`<a href="${agr.signatureUrl}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
+      const agreementHTML=agr&&agr.signed?`<a href="${safeUrl(agr.signatureUrl)}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${esc(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
       const idv=a.idVerification;
       let idHTML='<span style="color:var(--txt3);font-size:11px">Not submitted</span>';
       if(idv&&idv.url){
         const statusColor=idv.status==='verified'?'#4ade80':(idv.status==='rejected'?'var(--red)':'var(--gold)');
-        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${idv.url}" target="_blank" style="font-size:11px;color:${statusColor}">${idv.type||'ID'} — ${idv.status||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
+        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${safeUrl(idv.url)}" target="_blank" style="font-size:11px;color:${statusColor}">${esc(idv.type)||'ID'} — ${esc(idv.status)||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
       }
-      return `<tr><td style="font-weight:600">${a.name||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${a.email||'—'}</td><td style="font-size:12px;color:var(--txt3)">${a.genre||'—'}</td><td style="font-size:12px">${a.country||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${a.paypal||'Not set'}</td><td style="font-size:12px">${a.instagram||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td>${agreementHTML}</td><td>${idHTML}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
+      return `<tr><td style="font-weight:600">${esc(a.name)||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${esc(a.email)||'—'}</td><td style="font-size:12px;color:var(--txt3)">${esc(a.genre)||'—'}</td><td style="font-size:12px">${esc(a.country)||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px;color:${a.paypal?'var(--gold)':'var(--txt3)'}">${esc(a.paypal)||'Not set'}</td><td style="font-size:12px">${esc(a.instagram)||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${rc}</td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold)">₹${tr.toFixed(2)}</td><td>${agreementHTML}</td><td>${idHTML}</td><td><button class="db" onclick="deleteArtistProfile('${a.id}')">Delete Profile</button></td></tr>`;}).join('')}
   </tbody></table>`;
 }
 async function setIdVerificationStatus(uid,status){
@@ -1341,29 +1378,11 @@ async function setIdVerificationStatus(uid,status){
   renderArtists();
   toast('ID marked as '+status);
 }
-async function grandfatherExistingArtists(){
-  if(!confirm('This will mark ALL current artists who have not yet signed the new agreement or uploaded an ID as pre-verified, so they are NOT blocked by the new onboarding gate on their next login. Only use this once, right after deploying the new verification flow. Continue?'))return;
-  let count=0;
-  for(const a of artists){
-    const needsAgreement=!a.agreement||!a.agreement.signed;
-    const needsId=!a.idVerification||!a.idVerification.url;
-    if(needsAgreement||needsId){
-      const patch={};
-      if(needsAgreement) patch.agreement={signed:true,signedAt:new Date().toISOString(),version:'legacy-grandfathered'};
-      if(needsId) patch.idVerification={status:'verified',type:'legacy-exempt',uploadedAt:new Date().toISOString()};
-      await db.collection('users').doc(a.id).set(patch,{merge:true});
-      count++;
-    }
-  }
-  toast(count+' existing artist(s) grandfathered ✓');
-  await loadArtists();
-}
-
 function renderOvTickets(){
   const open=tickets.filter(t=>t.status==='open');const el=document.getElementById('ov-tickets');if(!el)return;
   if(!open.length){el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">No open tickets</div></div>';return;}
   el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Date</th><th>Action</th></tr></thead><tbody>
-    ${open.map(t=>`<tr><td style="font-weight:600">${t.artistName||'—'}</td><td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td><td>${t.subject||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
+    ${open.map(t=>`<tr><td style="font-weight:600">${esc(t.artistName)||'—'}</td><td style="font-size:12px;color:var(--txt2)">${esc(t.category)||'—'}</td><td>${esc(t.subject)||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${esc(t.priority)||'Normal'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
   </tbody></table>`;
 }
 
@@ -1372,7 +1391,7 @@ function renderTickets(list){
   if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">No tickets</div></div>';return;}
   const bc={open:'bp',pending:'br',resolved:'ba',closed:'bx'};
   el.innerHTML=`<table><thead><tr><th>Artist</th><th>Category</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>
-    ${list.map(t=>`<tr><td style="font-weight:600">${t.artistName||'—'}</td><td style="font-size:12px;color:var(--txt2)">${t.category||'—'}</td><td>${t.subject||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></td><td><span class="badge ${bc[t.status]||'bp'}">${t.status||'Open'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
+    ${list.map(t=>`<tr><td style="font-weight:600">${esc(t.artistName)||'—'}</td><td style="font-size:12px;color:var(--txt2)">${esc(t.category)||'—'}</td><td>${esc(t.subject)||'—'}</td><td><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${esc(t.priority)||'Normal'}</span></td><td><span class="badge ${bc[t.status]||'bp'}">${esc(t.status)||'Open'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${t.createdAt?t.createdAt.substring(0,10):'—'}</td><td><button class="rb" onclick="openTicket('${t.id}')">Reply</button></td></tr>`).join('')}
   </tbody></table>`;
 }
 
@@ -1380,7 +1399,7 @@ function renderRoyaltyHistory(){
   const el=document.getElementById('roy-history-list');if(!el)return;
   if(!royalties.length){el.innerHTML='<div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No statements yet</div></div>';return;}
   el.innerHTML=`<table><thead><tr><th>Artist</th><th>Period</th><th>Release</th><th>Total</th><th>Type</th><th>Date</th><th>Action</th></tr></thead><tbody>
-    ${royalties.map(r=>`<tr><td style="font-weight:600">${r.artistName||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px">${r.period||'—'}</td><td style="font-size:12px;color:var(--txt2)">${r.releaseTitle||'Overall'}</td><td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--gold)">₹${Number(r.totalAmount||0).toFixed(2)}</td><td><span class="badge ${r.type==='payout'?'ba':'br'}">${r.type==='payout'?'Payout':'Statement'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.createdAt?r.createdAt.substring(0,10):'—'}</td><td><button class="db" onclick="deleteRoyalty('${r.id}')">Delete</button></td></tr>`).join('')}
+    ${royalties.map(r=>`<tr><td style="font-weight:600">${esc(r.artistName)||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px">${esc(r.period)||'—'}</td><td style="font-size:12px;color:var(--txt2)">${esc(r.releaseTitle)||'Overall'}</td><td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--gold)">₹${Number(r.totalAmount||0).toFixed(2)}</td><td><span class="badge ${r.type==='payout'?'ba':'br'}">${r.type==='payout'?'Payout':'Statement'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.createdAt?r.createdAt.substring(0,10):'—'}</td><td><button class="db" onclick="deleteRoyalty('${r.id}')">Delete</button></td></tr>`).join('')}
   </tbody></table>`;
 }
 
@@ -1388,11 +1407,11 @@ function renderBlogList(){
   const el=document.getElementById('blog-list');if(!el)return;
   document.getElementById('blog-count').textContent=blogPosts.length+' post'+(blogPosts.length!==1?'s':'');
   if(!blogPosts.length){el.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No posts yet</div></div>';return;}
-  el.innerHTML=blogPosts.map(p=>`<div class="blog-admin-card"><div style="width:40px;height:40px;background:var(--card);border:1px solid var(--brd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📝</div><div class="blog-admin-info"><div class="blog-admin-title">${p.title||'—'}</div><div class="blog-admin-meta">${p.category||'—'} · ${p.createdAt?p.createdAt.substring(0,10):'—'}</div></div><button class="db" onclick="deleteBlog('${p.id}')">Delete</button></div>`).join('');
+  el.innerHTML=blogPosts.map(p=>`<div class="blog-admin-card"><div style="width:40px;height:40px;background:var(--card);border:1px solid var(--brd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📝</div><div class="blog-admin-info"><div class="blog-admin-title">${esc(p.title)||'—'}</div><div class="blog-admin-meta">${esc(p.category)||'—'} · ${p.createdAt?p.createdAt.substring(0,10):'—'}</div></div><button class="db" onclick="deleteBlog('${p.id}')">Delete</button></div>`).join('');
 }
 
-async function updateRelStatus(id,status){try{await db.collection('releases').doc(id).update({status});const r=releases.find(x=>x.id===id);if(r)r.status=status;renderLabelStats();toast('Status → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
-async function updateDemoStatus(id,status){try{await db.collection('demos').doc(id).update({status});const d=demos.find(x=>x.id===id);if(d)d.status=status;renderDemoStats();toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
+async function updateRelStatus(id,status){try{await db.collection('releases').doc(id).update({status});await loadReleases();applyRelFilter();toast('Status → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
+async function updateDemoStatus(id,status){try{await db.collection('demos').doc(id).update({status});await loadDemos();toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
 async function updateTicketStatus(id,status){try{await db.collection('tickets').doc(id).update({status});const t=tickets.find(x=>x.id===id);if(t)t.status=status;toast('Ticket → '+status);await loadTickets();}catch(e){toast('Error: '+e.message);}}
 
 async function saveRoyalty(){
@@ -1440,15 +1459,25 @@ async function createArtistAccount(){
     const cred=await secAuth.createUserWithEmailAndPassword(email,password);
     const uid=cred.user.uid;
     try { await cred.user.sendEmailVerification(); } catch(e) {}
-    await db.collection('users').doc(uid).set({
-      name,email,
-      genre:document.getElementById('ca-genre').value.trim(),
-      country:document.getElementById('ca-country').value.trim(),
-      instagram:document.getElementById('ca-instagram').value.trim(),
-      bio:document.getElementById('ca-bio').value.trim(),
-      createdAt:new Date().toISOString(),
-      createdBy:'admin-panel'
-    },{merge:true});
+    try {
+      await db.collection('users').doc(uid).set({
+        name,email,
+        genre:document.getElementById('ca-genre').value.trim(),
+        country:document.getElementById('ca-country').value.trim(),
+        instagram:document.getElementById('ca-instagram').value.trim(),
+        bio:document.getElementById('ca-bio').value.trim(),
+        createdAt:new Date().toISOString(),
+        createdBy:'admin-panel'
+      },{merge:true});
+    } catch (firestoreErr) {
+      // The Auth user was already created but the Firestore profile write failed.
+      // Roll back the Auth user so it doesn't become an orphaned login.
+      var rbNote = ' The login was rolled back automatically.';
+      try { await cred.user.delete(); }
+      catch (delErr) { rbNote = ' IMPORTANT: the login could NOT be rolled back automatically — remove it manually in Firebase Console → Authentication → Users (' + email + ').'; }
+      try { await secAuth.signOut(); } catch (soErr) {}
+      throw new Error('Profile save failed.' + rbNote + ' Details: ' + firestoreErr.message);
+    }
     await secAuth.signOut();
     ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio'].forEach(id=>document.getElementById(id).value='');
     try{ localStorage.removeItem(CA_DRAFT_KEY); }catch(e){} var _cadb=document.getElementById('ca-draft-banner'); if(_cadb) _cadb.style.display='none';
@@ -1460,7 +1489,7 @@ async function createArtistAccount(){
 }
 
 async function deleteArtistProfile(id){
-  if(!confirm('Delete this artist profile document from Firestore? Auth account will remain unless removed manually or via backend.'))return;
+  if(!confirm('Delete this artist profile document from Firestore? The Firebase Auth login WILL REMAIN ACTIVE. Also delete the login in Firebase Console → Authentication → Users, otherwise the person can still sign in.'))return;
   try{await db.collection('users').doc(id).delete(); await loadArtists(); toast('Artist profile deleted ✓');}catch(e){toast('Error: '+e.message);}
 }
 
@@ -1491,6 +1520,7 @@ async function saveReleaseEdits(id){
 }
 
 async function deleteRelease(id){
+  // NOTE: Cloudinary artwork/audio (public_id, if any) is NOT deleted here — remove manually in the Cloudinary dashboard; client has no API secret.
   if(!confirm('Delete this release submission?'))return;
   try{await db.collection('releases').doc(id).delete(); releases=releases.filter(r=>r.id!==id); renderLabelStats(); applyRelFilter(); renderRelTable('ov-list',releases.slice(0,8)); renderRelTable('pend-list',releases.filter(r=>r.status==='pending'||r.status==='review')); renderRelTable('live-list',releases.filter(r=>r.status==='live')); closeMo('rmo'); toast('Release deleted ✓');}catch(e){toast('Error: '+e.message);}
 }
@@ -1499,7 +1529,7 @@ async function deleteRelease(id){
 function openTicket(id){
   const t=tickets.find(x=>x.id===id);if(!t)return;
   document.getElementById('tmo-title').textContent=t.subject||'Ticket';
-  document.getElementById('tmo-body').innerHTML=`<div class="dr"><div class="dk">Artist</div><div class="dv">${t.artistName||'—'}</div></div><div class="dr"><div class="dk">Email</div><div class="dv">${t.artistEmail||'—'}</div></div><div class="dr"><div class="dk">Category</div><div class="dv">${t.category||'—'}</div></div><div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${t.priority||'Normal'}</span></div></div><div class="dr"><div class="dk">Status</div><div class="dv"><select class="ss" onchange="updateTicketStatus('${t.id}',this.value)"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option></select></div></div><div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--card);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${t.message||'—'}</div></div>${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${t.reply}</div></div>`:''}<div class="reply-box"><label>Reply to Artist</label><textarea id="reply-txt">${t.reply||''}</textarea><div class="reply-acts"><button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button><button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMo('tmo')">Close Ticket</button></div></div>`;
+  document.getElementById('tmo-body').innerHTML=`<div class="dr"><div class="dk">Artist</div><div class="dv">${esc(t.artistName)||'—'}</div></div><div class="dr"><div class="dk">Email</div><div class="dv">${esc(t.artistEmail)||'—'}</div></div><div class="dr"><div class="dk">Category</div><div class="dv">${esc(t.category)||'—'}</div></div><div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${esc(t.priority)||'Normal'}</span></div></div><div class="dr"><div class="dk">Status</div><div class="dv"><select class="ss" onchange="updateTicketStatus('${t.id}',this.value)"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option></select></div></div><div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--card);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${esc(t.message)||'—'}</div></div>${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${esc(t.reply)}</div></div>`:''}<div class="reply-box"><label>Reply to Artist</label><textarea id="reply-txt">${esc(t.reply)||''}</textarea><div class="reply-acts"><button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button><button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMo('tmo')">Close Ticket</button></div></div>`;
   document.getElementById('tmo').classList.add('on');
 }
 
@@ -1507,15 +1537,19 @@ function openDemo(id){
   const d=demos.find(x=>x.id===id);if(!d)return;
   const bc={new:'b-new',reviewing:'b-reviewing',shortlisted:'b-shortlisted',signed:'b-signed',rejected:'b-rejected',archived:'b-archived'};
   document.getElementById('dmo-title').textContent=d.name||'Demo';
-  document.getElementById('dmo-ref').innerHTML=`<span class="ref-badge">${d.refId||'—'}</span><span class="badge ${bc[d.status]||'b-new'}" style="margin-left:6px">${(d.status||'new').toUpperCase()}</span>`;
-  const links=[];if(d.demoLink)links.push(`<a href="${d.demoLink}" target="_blank">🎵 Demo Link</a>`);if(d.youtubeLink)links.push(`<a href="${d.youtubeLink}" target="_blank">▶️ YouTube/SC</a>`);
-  document.getElementById('dmo-body').innerHTML=`<div class="demo-grid"><div class="demo-field"><div class="df-label">Artist</div><div class="df-val" style="font-weight:700;font-size:15px">${d.name||'—'}</div></div><div class="demo-field"><div class="df-label">Genre</div><div class="df-val">${d.genre||'—'}</div></div><div class="demo-field"><div class="df-label">Email</div><div class="df-val"><a href="mailto:${d.email}">${d.email||'—'}</a></div></div><div class="demo-field"><div class="df-label">Phone</div><div class="df-val">${d.phone||'—'}</div></div><div class="demo-field"><div class="df-label">Instagram</div><div class="df-val"><a href="https://instagram.com/${(d.instagram||'').replace('@','')}" target="_blank">${d.instagram||'—'}</a></div></div><div class="demo-field"><div class="df-label">Submitted</div><div class="df-val">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</div></div><div class="demo-field full"><div class="df-label">Music Links</div><div class="df-val" style="display:flex;gap:16px;flex-wrap:wrap">${links.length?links.join(''):'No links provided'}</div></div><div class="demo-field full"><div class="df-label">Bio</div><div class="df-val bio">${d.bio||'—'}</div></div></div><div class="update-box"><label>Update Status</label><select onchange="updateDemoStatus('${d.id}',this.value)"><option value="new" ${d.status==='new'?'selected':''}>🆕 New</option><option value="reviewing" ${d.status==='reviewing'?'selected':''}>👂 Reviewing</option><option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>⭐ Shortlisted</option><option value="signed" ${d.status==='signed'?'selected':''}>✅ Signed</option><option value="rejected" ${d.status==='rejected'?'selected':''}>❌ Rejected</option><option value="archived" ${d.status==='archived'?'selected':''}>📦 Archived</option></select><label>Internal Notes</label><textarea id="modal-notes">${d.notes||''}</textarea><div class="update-acts"><button class="btn-save-demo" id="save-notes-btn" onclick="saveDemoNotes('${d.id}')">Save Notes</button><button class="btn-del-demo" onclick="deleteDemo('${d.id}')">Delete</button></div></div>`;
+  document.getElementById('dmo-ref').innerHTML=`<span class="ref-badge">${esc(d.refId)||'—'}</span><span class="badge ${bc[d.status]||'b-new'}" style="margin-left:6px">${esc(d.status||'new').toUpperCase()}</span>`;
+  const links=[];if(d.demoLink)links.push(`<a href="${safeUrl(d.demoLink)}" target="_blank">🎵 Demo Link</a>`);if(d.youtubeLink)links.push(`<a href="${safeUrl(d.youtubeLink)}" target="_blank">▶️ YouTube/SC</a>`);
+  document.getElementById('dmo-body').innerHTML=`<div class="demo-grid"><div class="demo-field"><div class="df-label">Artist</div><div class="df-val" style="font-weight:700;font-size:15px">${esc(d.name)||'—'}</div></div><div class="demo-field"><div class="df-label">Genre</div><div class="df-val">${esc(d.genre)||'—'}</div></div><div class="demo-field"><div class="df-label">Email</div><div class="df-val"><a href="mailto:${esc(d.email)}">${esc(d.email)||'—'}</a></div></div><div class="demo-field"><div class="df-label">Phone</div><div class="df-val">${esc(d.phone)||'—'}</div></div><div class="demo-field"><div class="df-label">Instagram</div><div class="df-val"><a href="https://instagram.com/${igHandle(d.instagram)}" target="_blank">${esc(d.instagram)||'—'}</a></div></div><div class="demo-field"><div class="df-label">Submitted</div><div class="df-val">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</div></div><div class="demo-field full"><div class="df-label">Music Links</div><div class="df-val" style="display:flex;gap:16px;flex-wrap:wrap">${links.length?links.join(''):'No links provided'}</div></div><div class="demo-field full"><div class="df-label">Bio</div><div class="df-val bio">${esc(d.bio)||'—'}</div></div></div><div class="update-box"><label>Update Status</label><select onchange="updateDemoStatus('${d.id}',this.value)"><option value="new" ${d.status==='new'?'selected':''}>🆕 New</option><option value="reviewing" ${d.status==='reviewing'?'selected':''}>👂 Reviewing</option><option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>⭐ Shortlisted</option><option value="signed" ${d.status==='signed'?'selected':''}>✅ Signed</option><option value="rejected" ${d.status==='rejected'?'selected':''}>❌ Rejected</option><option value="archived" ${d.status==='archived'?'selected':''}>📦 Archived</option></select><label>Internal Notes</label><textarea id="modal-notes">${esc(d.notes)||''}</textarea><div class="update-acts"><button class="btn-save-demo" id="save-notes-btn" onclick="saveDemoNotes('${d.id}')">Save Notes</button><button class="btn-del-demo" onclick="deleteDemo('${d.id}')">Delete</button></div></div>`;
   document.getElementById('dmo').classList.add('on');
 }
 
 async function sendReply(id){const reply=document.getElementById('reply-txt')?.value.trim();if(!reply){toast('Please type a reply first.');return;}const btn=document.getElementById('btn-reply');btn.disabled=true;btn.textContent='Sending...';try{await db.collection('tickets').doc(id).update({reply,status:'resolved',repliedAt:new Date().toISOString()});const t=tickets.find(x=>x.id===id);if(t){t.reply=reply;t.status='resolved';}toast('Reply sent ✓');closeMo('tmo');await loadTickets();}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Send Reply';}
 async function saveDemoNotes(id){const notes=document.getElementById('modal-notes')?.value.trim()||'';const btn=document.getElementById('save-notes-btn');btn.disabled=true;btn.textContent='Saving...';try{await db.collection('demos').doc(id).update({notes});const d=demos.find(x=>x.id===id);if(d)d.notes=notes;toast('Notes saved ✓');}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Save Notes';}
-async function deleteDemo(id){if(!confirm('Delete this demo?'))return;try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();renderDemoTable('demo-all-list',demos);closeMo('dmo');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+async function deleteDemo(id){
+  // NOTE: demo links point to external hosts; any Cloudinary assets (public_id, if any) are NOT deleted here — remove manually in the Cloudinary dashboard; client has no API secret.
+  if(!confirm('Delete this demo?'))return;
+  try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();renderDemoTable('demo-all-list',demos);closeMo('dmo');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}
+}
 
 function setRelSt(s,btn){relFilter=s;document.querySelectorAll('#page-all .fb:not(.demo-fb)').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyRelFilter();}
 function applyRelFilter(){const q=(document.getElementById('rel-search')?.value||'').toLowerCase();let list=releases;if(relFilter!=='all')list=list.filter(r=>r.status===relFilter);if(q)list=list.filter(r=>(r.title||'').toLowerCase().includes(q)||(r.artistName||'').toLowerCase().includes(q));renderRelTable('all-list',list);}
@@ -1564,12 +1598,12 @@ window.renderArtists=function(){
       const laCount=(a.labelArtists||[]).length;
       const typeSelect=`<select class="ss" id="art-type-${a.id}" style="font-size:11px;font-weight:700;padding:3px 6px"><option value="artist" ${!isLabel?'selected':''}>🎤 Artist</option><option value="label" ${isLabel?'selected':''}>🏢 Label</option></select>`;
       const agr=a.agreement;
-      const agreementHTML=agr&&agr.signed?`<a href="${agr.signatureUrl||'#'}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
+      const agreementHTML=agr&&agr.signed?`<a href="${safeUrl(agr.signatureUrl)}" target="_blank" style="color:#4ade80;font-size:11px">✓ Signed ${esc(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
       const idv=a.idVerification;
       let idHTML='<span style="color:var(--txt3);font-size:11px">Not submitted</span>';
       if(idv&&idv.url){
         const statusColor=idv.status==='verified'?'#4ade80':(idv.status==='rejected'?'var(--red)':'var(--gold)');
-        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${idv.url}" target="_blank" style="font-size:11px;color:${statusColor}">${idv.type||'ID'} — ${idv.status||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
+        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${safeUrl(idv.url)}" target="_blank" style="font-size:11px;color:${statusColor}">${esc(idv.type)||'ID'} — ${esc(idv.status)||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
       }
       return `<tr>
         <td>${typeSelect}${isLabel?`<div style="font-size:10px;color:#60a5fa;margin-top:2px">${laCount} artist${laCount!==1?'s':''}</div>`:''}</td>
@@ -1586,7 +1620,7 @@ window.renderArtists=function(){
         <td>${idHTML}</td>
         <td><div style="display:flex;gap:5px;flex-wrap:wrap">
           <button class="vb" onclick="saveArtistServices('${a.id}')">Save</button>
-          <button class="vb" style="background:rgba(255,193,7,.15);color:#ffc107" onclick="sendArtistPasswordReset('${escA(a.email||'')}')">Reset Password</button>
+          <button class="vb" style="background:rgba(255,193,7,.15);color:#ffc107" onclick="sendArtistPasswordReset('${escJs(a.email||'')}')">Reset Password</button>
           <button class="vb" style="background:rgba(168,85,247,.15);color:#c084fc" onclick="manageAccountExtra('${a.id}')">Bank &amp; Analytics</button>
           ${isLabel?`<button class="vb" style="background:rgba(59,130,246,.15);color:#60a5fa" onclick="manageLabelArtists('${a.id}')">Artists</button>`:''}
           <button class="db" onclick="deleteArtistProfile('${a.id}')">Delete</button>
