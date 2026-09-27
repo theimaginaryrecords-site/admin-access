@@ -409,6 +409,7 @@ tr:last-child td{border-bottom:none}
   .section-pill{display:none}
 }
 
+.store-logo{display:inline-flex;align-items:center;justify-content:center;flex:none;border-radius:6px;overflow:hidden;margin-right:10px;box-shadow:0 1px 3px rgba(0,0,0,.25)}.store-logo svg{width:100%;height:100%;display:block}
 </style>
 </head>
 <body>
@@ -705,7 +706,9 @@ tr:last-child td{border-bottom:none}
             <div class="fg"><label>Total Revenue (₹)</label><input type="number" id="anp-revenue-total" placeholder="e.g. 4200.50" step="0.01"/></div>
             <div class="fg"><label>Revenue This Month (₹)</label><input type="number" id="anp-revenue-month" placeholder="e.g. 310.75" step="0.01"/></div>
             <div class="fg rf-full"><label>Top Tracks <span style="font-weight:400;color:var(--txt3)">(one per line: Title, streams)</span></label><textarea id="anp-top-tracks" style="min-height:70px" placeholder="Midnight Drive, 12500"></textarea></div>
-            <div class="fg rf-full"><label>By Platform <span style="font-weight:400;color:var(--txt3)">(one per line: platform, streams)</span></label><textarea id="anp-platforms" style="min-height:70px" placeholder="spotify, 45000"></textarea></div>
+            <div class="fg rf-full"><label>By Platform <span style="font-weight:400;color:var(--txt3)">(one per line: platform, streams)</span></label><textarea id="anp-platforms" style="min-height:70px" placeholder="spotify, 45000" oninput="renderAnpPreview()"></textarea>
+              <div id="anp-preview" style="margin-top:10px"></div>
+            </div>
             <div class="fg rf-full"><button class="btn-pri" id="anp-save-btn" onclick="savePageAnalytics()">Save Analytics</button></div>
           </div>
         </div>
@@ -1193,7 +1196,54 @@ function loadAnalyticsPage(){
     sel.appendChild(o);
   });
   if(cur) sel.value = cur;
-  if(sel.value) anPageSelect();
+  if(sel.value){ anPageSelect(); try{ renderAnpPreview(); }catch(e){} }
+}
+// ── Store brand logos (original brand marks for analytics) ──
+function storeKey(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
+var STORE_LOGOS = {
+'spotify':'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1DB954"/><g stroke="#191414" stroke-width="1.7" fill="none" stroke-linecap="round"><path d="M7.2 9.8c3.2-1 6.5-.7 9.4.9"/><path d="M7.5 12.6c2.7-.8 5.4-.5 7.9.8"/><path d="M7.8 15.2c2.2-.6 4.3-.4 6.2.6"/></g></svg>',
+'applemusic':'<svg viewBox="0 0 24 24"><defs><linearGradient id="amg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FC5C7D"/><stop offset="1" stop-color="#FA243C"/></linearGradient></defs><rect x="1" y="1" width="22" height="22" rx="6" fill="url(#amg)"/><path transform="translate(6.3,4.3) scale(0.030)" fill="#fff" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52.7 16.2-69.9 34.8-13.9 15-30.7 44.5-27.6 71.8 26.6 2.1 50.3-13.4 73.5-34.1z"/></svg>',
+'apple':'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#000"/><path transform="translate(6.3,4.3) scale(0.030)" fill="#fff" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52.7 16.2-69.9 34.8-13.9 15-30.7 44.5-27.6 71.8 26.6 2.1 50.3-13.4 73.5-34.1z"/></svg>',
+'itunes':'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#000"/><path transform="translate(6.3,4.3) scale(0.030)" fill="#fff" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52.7 16.2-69.9 34.8-13.9 15-30.7 44.5-27.6 71.8 26.6 2.1 50.3-13.4 73.5-34.1z"/></svg>',
+'meta':'<svg viewBox="0 0 24 24"><path fill="#0082FB" d="M12 5.5c-2.7 0-4.6 1.1-6.4 3.4L2.5 12l3.1 3.1c1.8 2.3 3.7 3.4 6.4 3.4s4.6-1.1 6.4-3.4l3.1-3.1-3.1-3.1c-1.8-2.3-3.7-3.4-6.4-3.4zm0 3.2c1.2 0 2 .4 2.9 1.4l1.5 1.9-1.5 1.9c-.9 1-1.7 1.4-2.9 1.4s-2-.4-2.9-1.4L7.6 12l1.5-1.9c.9-1 1.7-1.4 2.9-1.4z"/></svg>',
+'facebook':'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1877F2"/><text x="12" y="17.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="14" fill="#fff">f</text></svg>',
+'instagram':'<svg viewBox="0 0 24 24"><defs><linearGradient id="igg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FEDA75"/><stop offset=".5" stop-color="#FA7E1E"/><stop offset="1" stop-color="#D62976"/></linearGradient></defs><rect x="1" y="1" width="22" height="22" rx="6" fill="url(#igg)"/><rect x="6.8" y="6.8" width="10.4" height="10.4" rx="3" stroke="#fff" stroke-width="1.8" fill="none"/><circle cx="12" cy="12" r="2.6" stroke="#fff" stroke-width="1.8" fill="none"/><circle cx="15.6" cy="8.4" r="1.3" fill="#fff"/></svg>',
+'jiosaavn':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#2BC86A"/><path d="M10 16.5V8.2l8-2v8.3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.6" cy="16.5" r="2.6" fill="#fff"/><circle cx="15.6" cy="14.5" r="2.6" fill="#fff"/></svg>',
+'saavn':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#2BC86A"/><path d="M10 16.5V8.2l8-2v8.3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.6" cy="16.5" r="2.6" fill="#fff"/><circle cx="15.6" cy="14.5" r="2.6" fill="#fff"/></svg>',
+'youtubemusic':'<svg viewBox="0 0 24 24"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#FF0000"/><path d="M10.3 9.3v5.4l4.8-2.7z" fill="#fff"/><circle cx="17.2" cy="15.8" r="1.6" fill="#fff"/></svg>',
+'youtube':'<svg viewBox="0 0 24 24"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#FF0000"/><path d="M10.3 9.3v5.4l4.8-2.7z" fill="#fff"/></svg>',
+'amazonmusic':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#0F1111"/><text x="12" y="12.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="10" fill="#fff">a</text><path d="M6 15.5c3 2.1 8 2.1 12-1" stroke="#FF9900" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
+'amazon':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#0F1111"/><text x="12" y="12.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="10" fill="#fff">a</text><path d="M6 15.5c3 2.1 8 2.1 12-1" stroke="#FF9900" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
+'gaana':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#E72C30"/><text x="12" y="17.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="14" fill="#fff">g</text></svg>',
+'wynk':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#00A9A5"/><text x="12" y="17.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="14" fill="#fff">w</text></svg>',
+'wynkmusic':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#00A9A5"/><text x="12" y="17.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="14" fill="#fff">w</text></svg>',
+'hungama':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#F26522"/><text x="12" y="17.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="14" fill="#fff">h</text></svg>',
+'hungamamusic':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#F26522"/><text x="12" y="17.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="14" fill="#fff">h</text></svg>',
+'deezer':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#191919"/><g><rect x="5.5" y="11" width="2.6" height="7" rx="1" fill="#A238FF"/><rect x="8.9" y="8" width="2.6" height="10" rx="1" fill="#FF0092"/><rect x="12.3" y="10" width="2.6" height="8" rx="1" fill="#FF7A00"/><rect x="15.7" y="6.5" width="2.6" height="11.5" rx="1" fill="#FFDC00"/></g></svg>',
+'tidal':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#000"/><g fill="#fff"><path d="M8.5 6.5l2.2 2.2-2.2 2.2-2.2-2.2z"/><path d="M14.5 9.5l2.2 2.2-2.2 2.2-2.2-2.2z"/><path d="M8.5 13l2.2 2.2-2.2 2.2-2.2-2.2z"/></g></svg>',
+'pandora':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#224099"/><text x="12" y="17.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="14" fill="#fff">P</text></svg>',
+'tiktok':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#000"/><path d="M14.5 6.5v8.7a3.2 3.2 0 1 1-2.2-3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M14.5 6.5v8.7a3.2 3.2 0 1 1-2.2-3" stroke="#FE2C55" stroke-width="2" fill="none" stroke-linecap="round" transform="translate(1,0)" opacity=".55"/></svg>',
+'soundcloud':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#FF5500"/><path d="M6.5 15h10a3.2 3.2 0 0 0 .7-6.3 4.6 4.6 0 0 0-9-1A3.6 3.6 0 0 0 6.5 15z" fill="#fff"/></svg>',
+'audiomack':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#FFA200"/><path d="M10 16.5V8l8-2v8.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="16.5" r="2.5" fill="#fff"/><circle cx="15.5" cy="14.5" r="2.5" fill="#fff"/></svg>',
+'napster':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#225BFF"/><circle cx="12" cy="12" r="5" stroke="#fff" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="1.6" fill="#fff"/></svg>',
+'iheartradio':'<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#C6002B"/><path d="M12 17.5s-5.5-3.4-5.5-7.3c0-2 1.5-3.4 3.2-3.4 1 0 1.9.5 2.3 1.3.4-.8 1.3-1.3 2.3-1.3 1.7 0 3.2 1.4 3.2 3.4 0 3.9-5.5 7.3-5.5 7.3z" fill="#fff"/></svg>'
+};
+var STORE_LOGO_FALLBACK = '<svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#3a4356"/><path d="M10 16.5V8l8-2v8.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="16.5" r="2.5" fill="#fff"/><circle cx="15.5" cy="14.5" r="2.5" fill="#fff"/></svg>';
+function storeLogo(name, px){
+  px = px || 22;
+  var svg = STORE_LOGOS[storeKey(name)] || STORE_LOGO_FALLBACK;
+  return '<span class="store-logo" style="width:'+px+'px;height:'+px+'px">'+svg+'</span>';
+}
+var STORE_DISPLAY = {'spotify':'Spotify','applemusic':'Apple Music','apple':'Apple Music','itunes':'iTunes','meta':'Meta','facebook':'Facebook','instagram':'Instagram','jiosaavn':'JioSaavn','saavn':'JioSaavn','youtubemusic':'YouTube Music','youtube':'YouTube Music','amazonmusic':'Amazon Music','amazon':'Amazon Music','gaana':'Gaana','wynk':'Wynk Music','wynkmusic':'Wynk Music','hungama':'Hungama Music','hungamamusic':'Hungama Music','deezer':'Deezer','tidal':'TIDAL','pandora':'Pandora','tiktok':'TikTok','soundcloud':'SoundCloud','audiomack':'Audiomack','napster':'Napster','iheartradio':'iHeartRadio','resso':'Resso','jio':'JioSaavn'};
+function prettyStore(n){ var d = STORE_DISPLAY[storeKey(n)]; if (d) return d; n=(n||'').trim(); return n ? n.charAt(0).toUpperCase()+n.slice(1) : 'Unknown'; }
+function dimList(el, entries, empty, logoFn){
+  var e = document.getElementById(el); if(!e) return;
+  e.innerHTML = entries.length ? entries.map(function(x,i){
+    var logo = logoFn ? logoFn(x.k) : '';
+    var label = logoFn ? prettyStore(x.k) : escA2(x.k||'Unknown');
+    var labHtml = logoFn ? escA2(label) : label;
+    return '<div class="rev-row"><span class="rev-k"><strong style="color:var(--accent);margin-right:8px">'+(i+1)+'</strong>'+logo+labHtml+'</span><span class="rev-v">'+fmtINR(x.v)+'</span></div>';
+  }).join('') : '<div class="hint" style="padding:10px 0">'+empty+'</div>';
 }
 function anPageSelect(){
   var id = document.getElementById('anp-artist').value;
@@ -1206,6 +1256,19 @@ function anPageSelect(){
   document.getElementById('anp-revenue-month').value = (an.revenue&&an.revenue.thisMonth!=null) ? an.revenue.thisMonth : '';
   document.getElementById('anp-top-tracks').value = (an.topTracks||[]).map(function(t){ return (t.title||'')+', '+(t.streams!=null?t.streams:''); }).join('\n');
   document.getElementById('anp-platforms').value = an.platforms ? Object.keys(an.platforms).map(function(k){ return k+', '+an.platforms[k]; }).join('\n') : '';
+}
+
+function renderAnpPreview(){
+  var host = document.getElementById('anp-preview'); if(!host) return;
+  var lines = (document.getElementById('anp-platforms').value||'').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  var rows = lines.map(function(line){
+    var parts = line.split(','); var v = parts.length>=2 ? Number(parts[1].trim()) : 0;
+    return {k: parts[0].trim(), v: isNaN(v)?0:v};
+  }).filter(function(r){ return r.k; }).sort(function(a,b){ return b.v-a.v; });
+  if(!rows.length){ host.innerHTML=''; return; }
+  host.innerHTML = '<div class="hint" style="margin-bottom:8px">Artist will see:</div>' + rows.map(function(x){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--brd);font-size:13px"><span style="display:flex;align-items:center">'+storeLogo(x.k,22)+esc(prettyStore(x.k))+'</span><span style="color:var(--txt2)">'+x.v.toLocaleString('en-IN')+' streams</span></div>';
+  }).join('');
 }
 window.savePageAnalytics = async function(){
   var id = document.getElementById('anp-artist').value;
@@ -1413,7 +1476,8 @@ function closeDrawer(){
 // SECURITY: this check is UI-only. Real authorization MUST be enforced by Firestore Security Rules (deny all reads/writes except the admin UID/email) — client checks can be bypassed.
 auth.onAuthStateChanged(u=>{
   document.getElementById('ld').style.display='none';
-  if(u&&u.email===ADMIN_EMAIL){document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();}
+  if(u&&u.email===ADMIN_EMAIL){document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();
+    try{var sp=localStorage.getItem('tir-admin-page');if(sp&&document.getElementById('page-'+sp))goPage(sp);}catch(e){}}
   else if(u&&u.email!==ADMIN_EMAIL){auth.signOut();document.getElementById('auth').style.display='flex';}
   else{document.getElementById('auth').style.display='flex';document.getElementById('panel').style.display='none';resetLoginForm();}
 });
@@ -1867,7 +1931,7 @@ function applyRelFilter(){const q=(document.getElementById('rel-search')?.value|
 /* ── Page navigation ── */
 function goPage(name,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('on');if(el)el.classList.add('on');
+  const pg=document.getElementById('page-'+name);if(pg){pg.classList.add('on');try{localStorage.setItem('tir-admin-page',name);}catch(e){}}if(el)el.classList.add('on');
   const isDemo=name==='demos';const pill=document.getElementById('section-pill');
   if(pill){pill.textContent=isDemo?'Demos':'Label';pill.className='section-pill '+(isDemo?'pill-demo':'pill-label');}
   const m={
