@@ -1694,6 +1694,10 @@ function openRelease(id){
     ? `<img class="artwork-thumb" src="${safeUrl(r.thumbnailUrl)}" alt="Thumbnail"/>`
     : `<div class="artwork-thumb-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>No thumbnail uploaded</span></div>`;
   const trackList = (Array.isArray(r.trackItems)&&r.trackItems.length) ? r.trackItems : (Array.isArray(r.tracks)?r.tracks:[]);
+  const trackKey = (Array.isArray(r.trackItems)&&r.trackItems.length) ? 'trackItems' : 'tracks';
+  const isrcListHTML = trackList.length ? trackList.map((t,i)=>
+    '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span style="flex:1;font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeAttr((i+1)+'. '+(t.title||'Untitled'))+'</span><input class="si" style="width:220px;flex:none" data-track="'+i+'" data-tkey="'+trackKey+'" placeholder="ISRC — assigned by label" value="'+escapeAttr(t.isrc||'')+'"/></div>'
+  ).join('') : '<div class="hint">No tracks in this submission</div>';
   const hasTracks = trackList.length>0;
   const audioHTML = hasTracks
     ? `<div class="tracklist-admin">${trackList.map((t,i)=>renderAdminTrack(t,i)).join('')}</div>`
@@ -1754,6 +1758,7 @@ function openRelease(id){
         <div class="fg"><label>Type</label><input id="er-type" value="${escapeAttr(r.type||'')}"/></div>
         <div class="fg"><label>Genre</label><input id="er-genre" value="${escapeAttr(r.genre||'')}"/></div>
         <div class="fg"><label>Release Date</label><input id="er-date" type="date" value="${escapeAttr(r.releaseDate||'')}"/></div>
+        <div class="fg"><label>UPC <span style="font-weight:400;color:var(--txt3)">(label assigns)</span></label><input id="er-upc" placeholder="Leave blank until assigned" value="${escapeAttr(r.upc||'')}"/></div>
         <div class="fg"><label>Label</label><input id="er-label" value="${escapeAttr(r.label||'')}"/></div>
         <div class="fg full"><label>Featured Artists</label><input id="er-featured" value="${escapeAttr(r.featuredArtists||'')}"/></div>
         <div class="fg"><label>Spotify Artist URL</label><input id="er-spotify-url" value="${escapeAttr(r.spotifyArtistUrl||'')}"/></div>
@@ -1769,6 +1774,7 @@ function openRelease(id){
         <div class="fg full"><label>Notes</label><textarea id="er-notes">${escapeAttr(r.notes||'')}</textarea></div>
         <div class="fg full"><label>Selected Platforms <span style="font-weight:400;color:var(--txt3)">(comma separated)</span></label><input id="er-platforms" value="${escapeAttr((r.selectedPlatforms||[]).join(', '))}"/></div>
         <div class="fg"><label>Preview Start Time (s)</label><input id="er-preview" type="number" value="${r.previewStartTime!=null?escapeAttr(String(r.previewStartTime)):''}"/></div>
+        <div class="fg full"><label>Track ISRCs <span style="font-weight:400;color:var(--txt3)">(label assigns after submission)</span></label><div id="er-isrc-list" style="border:1px solid var(--brd);border-radius:8px;padding:12px;background:var(--input)">${isrcListHTML}</div></div>
         ${hasTracks?`<div class="fg full"><label>Tracklist (read-only — edit tracks from the artist portal)</label><div style="padding:10px 13px;border:1px solid var(--brd);border-radius:8px;background:var(--input);font-size:12px;color:var(--txt2);line-height:1.8;max-height:160px;overflow:auto">${trackList.map((t,i)=>escapeAttr(((t.albumOrder!=null&&t.albumOrder!=='')?t.albumOrder:(i+1))+'. '+(t.title||'Untitled')+' — '+(t.artist||'')+(t.audioUrl?' (audio uploaded)':' (no audio yet)'))).join('<br/>')}</div></div>`:''}
       </div>
       <div class="update-acts">
@@ -1810,8 +1816,19 @@ async function saveReleaseEdits(id){
     artworkUrl:document.getElementById('er-art-url').value.trim(),
     notes:document.getElementById('er-notes').value.trim(),
     selectedPlatforms:(document.getElementById('er-platforms')&&document.getElementById('er-platforms').value.trim()?document.getElementById('er-platforms').value.split(',').map(function(x){return x.trim();}).filter(Boolean):[]),
-    previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null)
+    previewStartTime:(document.getElementById('er-preview')&&document.getElementById('er-preview').value.trim()?Number(document.getElementById('er-preview').value):null),
+    upc:(document.getElementById('er-upc')?document.getElementById('er-upc').value.trim():'')
   };
+  try{
+    var isrcInputs=document.querySelectorAll('#er-isrc-list input[data-track]');
+    if(isrcInputs.length){
+      var rel0=releases.find(function(x){return x.id===id;});
+      var tkey=isrcInputs[0].getAttribute('data-tkey')||'tracks';
+      var arr=((rel0&&rel0[tkey])||[]).map(function(t){return Object.assign({},t);});
+      isrcInputs.forEach(function(inp){var ix=Number(inp.getAttribute('data-track'));if(arr[ix])arr[ix].isrc=inp.value.trim();});
+      payload[tkey]=arr;
+    }
+  }catch(e){}
   const videoUrl=document.getElementById('er-video-url');
   if(videoUrl){
     payload.videoUrl=videoUrl.value.trim();
