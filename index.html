@@ -1100,13 +1100,13 @@ window.createAccount = async function() {
 function getLabelRoster(label){
   var out = [];
   (label.labelArtists||[]).forEach(function(a,i){
-    out.push({name:a.name||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
+    out.push({name:a.name||'', artistType:a.artistType||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
       spotifyUrl:a.spotifyUrl||a.spotify||'', appleMusicUrl:a.appleMusicUrl||a.appleMusic||'',
       soundcloudUrl:a.soundcloudUrl||a.soundcloud||'', socials:a.socials||'',
       _src:'labelArtists', _idx:i});
   });
   (label.savedArtists||[]).forEach(function(a,i){
-    out.push({name:a.name||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
+    out.push({name:a.name||'', artistType:a.artistType||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
       spotifyUrl:a.spotifyUrl||a.spotify||'', appleMusicUrl:a.appleMusicUrl||a.appleMusic||'',
       soundcloudUrl:a.soundcloudUrl||a.soundcloud||'', socials:a.socials||'',
       _src:'savedArtists', _idx:i});
@@ -1420,12 +1420,13 @@ window.renderRosterAll=function(){
   });
   if(q) rows=rows.filter(function(x){return ((x.r.name||'')+' '+(x.acct||'')).toLowerCase().indexOf(q)>=0;});
   if(!rows.length){el.innerHTML='<div class="empty"><div class="empty-text">No roster artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Account</th><th>Genre</th><th>Email</th><th>Spotify</th><th>Apple Music</th><th>SoundCloud</th><th>Website</th><th>Bio</th></tr></thead><tbody>
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Type</th><th>Account</th><th>Genre</th><th>Email</th><th>Spotify</th><th>Apple Music</th><th>SoundCloud</th><th>Website</th><th>Bio</th></tr></thead><tbody>
     ${rows.map(function(x){
       const r=x.r;
       const link=function(u,label,color){return u?`<a href="${safeUrl(u)}" target="_blank" style="font-size:11px;font-weight:700;color:${color};text-decoration:none">${label} ↗</a>`:'<span style="color:var(--txt3)">—</span>';};
       return `<tr>
         <td style="font-weight:700">${escA(r.name||'—')}</td>
+        <td style="font-size:12px;color:var(--txt2)">${escA(r.artistType||'—')}</td>
         <td style="font-size:12px;color:var(--txt2)">${escA(x.acct)}</td>
         <td style="font-size:12px;color:var(--txt3)">${escA(r.genre||'—')}</td>
         <td style="font-size:11px;font-family:'DM Mono',monospace">${escA(r.email||'—')}</td>
@@ -1693,6 +1694,7 @@ function renderAdminTrack(t,i){
   var comp = Array.isArray(t.composers) ? t.composers.join(', ') : (t.composers||'');
   var props = Array.isArray(t.props) ? t.props.join(', ') : (t.props||'');
   var expl = (t.explicit===true || t.explicitRaw==='explicit');
+  var explLabel = expl ? 'Explicit' : (t.explicitRaw==='instrumental' ? 'Instrumental' : (t.explicitRaw==='lyrics' ? 'Contains Lyrics' : 'Not Explicit'));
   var head = '<div class="track-admin-row-head"><strong>'+n+'. '+escapeAttr(t.title||'Untitled track')+'</strong>'
     + (t.artist?'<span style="color:var(--txt3);font-size:11px">'+escapeAttr(t.artist)+'</span>':'')
     + (expl?'<span class="badge bx" style="margin-left:6px">EXPLICIT</span>':'')
@@ -1706,6 +1708,11 @@ function renderAdminTrack(t,i){
     + tRow('P-Line', [t.pYear,t.pHolder].filter(Boolean).join(' '))
     + tRow('Duration', fmtDur(t.duration)) + tRow('File', [t.fileName, fmtBytes(t.size)].filter(Boolean).join(' · '))
     + tRow('Preview starts at', (t.previewStart!=null&&t.previewStart!=='')?t.previewStart+'s':'')
+    + tRow('Explicit Content', explLabel)
+    + tRow('Available for download purchase', t.dl===false?'No':'Yes')
+    + tRow('Available for streaming', t.stream===false?'No':'Yes')
+    + tRow('Available separately (as single)', t.separate===false?'No':'Yes')
+    + tRow('Catalog ID', t.catalogId)
     + tRow('Properties', props)
     + '</div>';
   var audio = t.audioUrl
@@ -1797,6 +1804,7 @@ function openRelease(id){
     <div class="edit-card">
       <h4>Full Submitted Metadata (read-only)</h4>
       <div class="release-edit-grid" style="font-size:12px">
+        ${r.primaryArtistType?`<div class="fg"><label>Primary Artist Type</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.primaryArtistType)}</div></div>`:''}
         ${r.spotifyArtistUrl?`<div class="fg"><label>Spotify Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.spotifyArtistUrl)}" target="_blank" style="color:#1db954">${escapeAttr(r.spotifyArtistUrl)}</a></div></div>`:''}
         ${r.appleMusicArtistUrl?`<div class="fg"><label>Apple Music Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.appleMusicArtistUrl)}" target="_blank" style="color:#fa9e9b">${escapeAttr(r.appleMusicArtistUrl)}</a></div></div>`:''}
         ${r.subGenre?`<div class="fg"><label>Sub-Genre</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.subGenre)}</div></div>`:''}
@@ -1811,6 +1819,13 @@ function openRelease(id){
         ${r.territories?`<div class="fg"><label>Territories</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.territories)}</div></div>`:''}
         ${(r.selectedPlatforms&&r.selectedPlatforms.length)?`<div class="fg full"><label>Selected Platforms</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.selectedPlatforms.join(', '))}</div></div>`:''}
         ${r.previewStartTime!=null?`<div class="fg"><label>Preview Start Time</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(String(r.previewStartTime))}s</div></div>`:''}
+        ${r.deliveryOptions?`
+          ${r.deliveryOptions.priceBand?`<div class="fg"><label>Price Band</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.priceBand)}</div></div>`:''}
+          ${r.deliveryOptions.prevDist?`<div class="fg"><label>Previously Distributed</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.prevDist)}</div></div>`:''}
+          ${(r.deliveryOptions.endDateType&&r.deliveryOptions.endDateType!=='none')?`<div class="fg"><label>End Date (${escapeAttr(r.deliveryOptions.endDateType)})</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.endDate||'—')}</div></div>`:''}
+        `:''}
+        ${r.motionArtUrl?`<div class="fg full"><label>Motion Art URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.motionArtUrl)}" target="_blank" style="color:var(--accent-tx)">Open motion art</a></div></div>`:''}
+        ${r.artistNotes?`<div class="fg full"><label>Artist Notes</label><div style="padding:8px 10px;color:var(--txt2);white-space:pre-wrap">${escapeAttr(r.artistNotes)}</div></div>`:''}
         ${r.lyrics?`<div class="fg full"><label>Lyrics</label><div style="padding:8px 10px;color:var(--txt2);white-space:pre-wrap;max-height:120px;overflow:auto">${escapeAttr(r.lyrics)}</div></div>`:''}
         ${r.videoCredits?`<div class="fg full"><label>Video Credits</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoCredits)}</div></div>`:''}
         ${r.videoNotes?`<div class="fg full"><label>Video Notes</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoNotes)}</div></div>`:''}
