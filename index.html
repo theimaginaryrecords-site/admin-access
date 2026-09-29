@@ -444,6 +444,7 @@ tr:last-child td{border-bottom:none}
     <div class="ni" onclick="goPage('demos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Demo Inbox <span class="cnt" id="demo-new-cnt" style="display:none">0</span></div>
     <div class="ns">Artists</div>
     <div class="ni" onclick="goPage('artists',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Artists/Users</div>
+    <div class="ni" onclick="goPage('roster',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M17.5 14.5a6.5 6.5 0 0 1 4 5.5"/></svg>Roster Artists</div>
     <div class="ni" onclick="goPage('kyc',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9,12 11,14 15,10"/></svg>KYC Approvals <span class="cnt" id="kyc-cnt" style="display:none">0</span></div>
     <div class="ns">Catalogue</div>
     <div class="ni" onclick="goPage('tracks',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Tracks</div>
@@ -633,6 +634,15 @@ tr:last-child td{border-bottom:none}
         </div>
       </div>
       <div class="section"><div class="sh"><div><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div></div><div class="tw" id="art-list"></div></div>
+    </div>
+
+    <div class="pg" id="page-roster">
+      <div class="section"><div class="sh"><h3>Roster Artists</h3><p>Every artist added by every account — with Spotify, Apple Music and full details</p></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <input class="si" type="text" id="roster-search" placeholder="Search artist or account..." oninput="renderRosterAll()"/>
+        </div></div>
+        <div class="tw" id="roster-list"></div>
+      </div>
     </div>
 
     <div class="pg" id="page-kyc">
@@ -1085,13 +1095,32 @@ window.createAccount = async function() {
 };
 
 /* ═══ MANAGE LABEL ARTISTS MODAL ═══ */
+// Roster helper: merges labelArtists (admin-added) + savedArtists (portal-added),
+// normalising the two field conventions so every artist shows with full details.
+function getLabelRoster(label){
+  var out = [];
+  (label.labelArtists||[]).forEach(function(a,i){
+    out.push({name:a.name||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
+      spotifyUrl:a.spotifyUrl||a.spotify||'', appleMusicUrl:a.appleMusicUrl||a.appleMusic||'',
+      soundcloudUrl:a.soundcloudUrl||a.soundcloud||'', socials:a.socials||'',
+      _src:'labelArtists', _idx:i});
+  });
+  (label.savedArtists||[]).forEach(function(a,i){
+    out.push({name:a.name||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
+      spotifyUrl:a.spotifyUrl||a.spotify||'', appleMusicUrl:a.appleMusicUrl||a.appleMusic||'',
+      soundcloudUrl:a.soundcloudUrl||a.soundcloud||'', socials:a.socials||'',
+      _src:'savedArtists', _idx:i});
+  });
+  return out;
+}
 var _labelId = null;
 window.manageLabelArtists = function(id) {
   _labelId = id;
   var label = artists.find(function(a){ return a.id===id; });
   if (!label) return;
-  document.getElementById('la-modal-title').textContent = label.name + ' — Artists';
-  renderLaList(label.labelArtists||[]);
+  var roster = getLabelRoster(label);
+  document.getElementById('la-modal-title').textContent = label.name + ' — Artists (' + roster.length + ')';
+  renderLaList(roster);
   document.getElementById('la-modal').style.display = 'flex';
 };
 function closeLaModal() {
@@ -1314,14 +1343,18 @@ function renderLaList(arr) {
     if(a.spotifyUrl) links+='<a href="'+safeUrl(a.spotifyUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(30,215,96,.12);color:#1ed760;border-radius:5px;text-decoration:none">Spotify</a> ';
     if(a.appleMusicUrl) links+='<a href="'+safeUrl(a.appleMusicUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,65,108,.12);color:#ff416c;border-radius:5px;text-decoration:none">Apple</a> ';
     if(a.soundcloudUrl) links+='<a href="'+safeUrl(a.soundcloudUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,85,0,.12);color:#ff5500;border-radius:5px;text-decoration:none">SoundCloud</a>';
+    var extra='';
+    if(a.email) extra+='<div style="font-size:11px;color:var(--txt3);margin-top:2px">'+escA(a.email)+'</div>';
+    if(a.website) extra+='<div style="font-size:11px;margin-top:2px"><a href="'+safeUrl(a.website)+'" target="_blank" style="color:var(--info)">'+escA(a.website)+'</a></div>';
     return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--input);border:1px solid var(--brd);border-radius:10px">'
       +'<div style="width:38px;height:38px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--accent-tx);flex-shrink:0">'+(a.name||'A')[0].toUpperCase()+'</div>'
       +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:13px;font-weight:700">'+escA(a.name)+'</div>'
         +'<div style="font-size:11px;color:var(--txt3);margin-top:3px">'+(a.genre?'<span style="margin-right:6px">'+escA(a.genre)+'</span>':'')+links+'</div>'
+        +extra
         +(a.bio?'<div style="font-size:11px;color:var(--txt3);margin-top:4px">'+escA(a.bio)+'</div>':'')
       +'</div>'
-      +'<button onclick="removeLaArtist('+i+')" style="padding:5px 12px;background:var(--bad-bg);border:1px solid var(--bad);border-radius:6px;color:var(--bad);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">Remove</button>'
+      +'<button onclick="removeLaArtist(\''+a._src+'\','+a._idx+')" style="padding:5px 12px;background:var(--bad-bg);border:1px solid var(--bad);border-radius:6px;color:var(--bad);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">Remove</button>'
       +'</div>';
   }).join('');
 }
@@ -1329,16 +1362,18 @@ function toggleAddLaForm(){
   var f=document.getElementById('la-add-form');
   f.style.display=f.style.display==='none'?'block':'none';
 }
-window.removeLaArtist = async function(idx){
+window.removeLaArtist = async function(src, idx){
   if(!confirm('Remove this artist from the label?')) return;
   var label = artists.find(function(a){ return a.id===_labelId; });
   if(!label) return;
-  var arr = (label.labelArtists||[]).slice();
+  var key = (src==='savedArtists') ? 'savedArtists' : 'labelArtists';
+  var arr = (label[key]||[]).slice();
   arr.splice(idx,1);
   try{
-    await db.collection('users').doc(_labelId).update({labelArtists:arr});
-    label.labelArtists=arr;
-    renderLaList(arr);
+    var patch={}; patch[key]=arr;
+    await db.collection('users').doc(_labelId).update(patch);
+    label[key]=arr;
+    manageLabelArtists(_labelId);
     renderArtists();
     toast('Artist removed ✓');
   }catch(e){toast('Error: '+e.message);}
@@ -1374,6 +1409,36 @@ window.addLabelArtist = async function(){
   btn.disabled=false;btn.textContent='Add Artist';
 };
 
+window.renderRosterAll=function(){
+  const el=document.getElementById('roster-list');if(!el)return;
+  const q=(document.getElementById('roster-search')?document.getElementById('roster-search').value:'').toLowerCase();
+  var rows=[];
+  artists.forEach(function(a){
+    getLabelRoster(a).forEach(function(r){
+      rows.push({acct:a.name||a.email||a.id, acctId:a.id, r:r});
+    });
+  });
+  if(q) rows=rows.filter(function(x){return ((x.r.name||'')+' '+(x.acct||'')).toLowerCase().indexOf(q)>=0;});
+  if(!rows.length){el.innerHTML='<div class="empty"><div class="empty-text">No roster artists yet</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Account</th><th>Genre</th><th>Email</th><th>Spotify</th><th>Apple Music</th><th>SoundCloud</th><th>Website</th><th>Bio</th></tr></thead><tbody>
+    ${rows.map(function(x){
+      const r=x.r;
+      const link=function(u,label,color){return u?`<a href="${safeUrl(u)}" target="_blank" style="font-size:11px;font-weight:700;color:${color};text-decoration:none">${label} ↗</a>`:'<span style="color:var(--txt3)">—</span>';};
+      return `<tr>
+        <td style="font-weight:700">${escA(r.name||'—')}</td>
+        <td style="font-size:12px;color:var(--txt2)">${escA(x.acct)}</td>
+        <td style="font-size:12px;color:var(--txt3)">${escA(r.genre||'—')}</td>
+        <td style="font-size:11px;font-family:'DM Mono',monospace">${escA(r.email||'—')}</td>
+        <td>${link(r.spotifyUrl,'Spotify','#1ed760')}</td>
+        <td>${link(r.appleMusicUrl,'Apple','#ff416c')}</td>
+        <td>${link(r.soundcloudUrl,'SoundCloud','#ff5500')}</td>
+        <td>${link(r.website,'Site','var(--info)')}</td>
+        <td style="font-size:11px;color:var(--txt3);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escA(r.bio||'')}">${escA(r.bio||'—')}</td>
+      </tr>`;
+    }).join('')}
+  </tbody></table>`;
+};
+
 /* ═══ RENDER ACCOUNTS TABLE (type, access controls, royalties, agreement, ID verification) ═══ */
 window.renderArtists=function(){
   const el=document.getElementById('art-list');if(!el)return;
@@ -1385,7 +1450,7 @@ window.renderArtists=function(){
       const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);
       const access=a.releaseServices||{};
       const isLabel=a.accountType==='label';
-      const laCount=(a.labelArtists||[]).length;
+      const laCount=getLabelRoster(a).length;
       const typeSelect=`<select class="ss" id="art-type-${a.id}" style="font-size:11px;font-weight:700;padding:3px 6px"><option value="artist" ${!isLabel?'selected':''}>Artist</option><option value="label" ${isLabel?'selected':''}>Label</option></select>`;
       const agr=a.agreement;
       const agreementHTML=agr&&agr.signed?`<a href="${safeUrl(agr.signatureUrl)}" target="_blank" style="color:var(--ok);font-size:11px;font-weight:700">✓ Signed ${esc(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
@@ -1697,7 +1762,9 @@ function openRelease(id){
   const trackKey = (Array.isArray(r.trackItems)&&r.trackItems.length) ? 'trackItems' : 'tracks';
   const isrcListHTML = trackList.length ? trackList.map((t,i)=>
     '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span style="flex:1;font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeAttr((i+1)+'. '+(t.title||'Untitled'))+'</span><input class="si" style="width:220px;flex:none" data-track="'+i+'" data-tkey="'+trackKey+'" placeholder="ISRC — assigned by label" value="'+escapeAttr(t.isrc||'')+'"/></div>'
-  ).join('') : '<div class="hint">No tracks in this submission</div>';
+  ).join('') : (r.audioUrl
+    ? '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span style="flex:1;font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">1. '+(escapeAttr(r.audioFilename)||'Audio file')+'</span><input class="si" style="width:220px;flex:none" data-track="0" data-tkey="__audio__" placeholder="ISRC — assigned by label" value="'+escapeAttr(r.audioIsrc||'')+'"/></div>'
+    : '<div class="hint">No tracks in this submission</div>');
   const hasTracks = trackList.length>0;
   const audioHTML = hasTracks
     ? `<div class="tracklist-admin">${trackList.map((t,i)=>renderAdminTrack(t,i)).join('')}</div>`
@@ -1822,11 +1889,16 @@ async function saveReleaseEdits(id){
   try{
     var isrcInputs=document.querySelectorAll('#er-isrc-list input[data-track]');
     if(isrcInputs.length){
-      var rel0=releases.find(function(x){return x.id===id;});
       var tkey=isrcInputs[0].getAttribute('data-tkey')||'tracks';
-      var arr=((rel0&&rel0[tkey])||[]).map(function(t){return Object.assign({},t);});
-      isrcInputs.forEach(function(inp){var ix=Number(inp.getAttribute('data-track'));if(arr[ix])arr[ix].isrc=inp.value.trim();});
-      payload[tkey]=arr;
+      if(tkey==='__audio__'){
+        // Single audio file with no registered track list — store ISRC on the release itself
+        payload.audioIsrc=isrcInputs[0].value.trim();
+      } else {
+        var rel0=releases.find(function(x){return x.id===id;});
+        var arr=((rel0&&rel0[tkey])||[]).map(function(t){return Object.assign({},t);});
+        isrcInputs.forEach(function(inp){var ix=Number(inp.getAttribute('data-track'));if(arr[ix])arr[ix].isrc=inp.value.trim();});
+        payload[tkey]=arr;
+      }
     }
   }catch(e){}
   const videoUrl=document.getElementById('er-video-url');
@@ -1956,6 +2028,7 @@ function goPage(name,el){
     releases:['All Submissions','Every release'],
     demos:['Demo Inbox','Every demo'],
     artists:['Artists/Users','Registered accounts'],
+    roster:['Roster Artists','Every artist on every account'],
     kyc:['KYC Approvals','Identity & payout verification'],
     tickets:['Service Requests','Artist support'],
     royalties:['Manage Royalties','Update artist earnings'],
@@ -1981,6 +2054,7 @@ function goPage(name,el){
   if(name==='kyc')renderKycQueue();
   if(name==='withdrawals')loadWithdrawals();
   if(name==='notifications')loadNotifications();
+  if(name==='roster')renderRosterAll();
   if(name==='logs')loadActivityLogs();
   if(name==='profile')loadAdminProfile();
   if(name==='logins')loadLoginHistory();
