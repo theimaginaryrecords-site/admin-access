@@ -562,7 +562,7 @@ tr:last-child td{border-bottom:none}
           <input class="si" type="text" id="rel-search" placeholder="Search title or artist..." oninput="applyRelFilter()"/>
           <button class="fb on" onclick="setRelSt('all',this)">All</button>
           <button class="fb" onclick="setRelSt('pending',this)">Pending</button>
-          <button class="fb" onclick="setRelSt('review',this)">Review</button>
+          <button class="fb" onclick="setRelSt('review',this)">In Review</button>
           <button class="fb" onclick="setRelSt('approved',this)">Approved</button>
           <button class="fb" onclick="setRelSt('live',this)">Live</button>
           <button class="fb" onclick="setRelSt('rejected',this)">Rejected</button>
@@ -1673,7 +1673,7 @@ function renderRelTable(id,list){
       </td>
       <td><select class="ss" onchange="updateRelStatus('${r.id}',this.value)">
         <option value="pending" ${r.status==='pending'?'selected':''}>Pending</option>
-        <option value="review" ${r.status==='review'?'selected':''}>Review</option>
+        <option value="review" ${r.status==='review'?'selected':''}>In Review</option>
         <option value="approved" ${r.status==='approved'?'selected':''}>Approved</option>
         <option value="live" ${r.status==='live'?'selected':''}>Live</option>
         <option value="rejected" ${r.status==='rejected'?'selected':''}>Rejected</option>
@@ -1698,7 +1698,7 @@ function renderAdminTrack(t,i){
     + (expl?'<span class="badge bx" style="margin-left:6px">EXPLICIT</span>':'')
     + (t.isrc?'<span style="color:var(--txt3);font-size:11px;margin-left:6px">ISRC '+escapeAttr(t.isrc)+'</span>':'') + '</div>';
   var meta = '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px;line-height:1.7">'
-    + tRow('Role', t.role) + tRow('Version', t.version||t.trackVersion)
+    + tRow('Role', t.role||'Primary Artist') + tRow('Version', t.version||t.trackVersion)
     + tRow('Language', t.lang) + tRow('Genre', [t.genre,t.genre2].filter(Boolean).join(' / '))
     + tRow('Composers', comp) + tRow('Lyricist', t.lyricist) + tRow('Producer', t.producer)
     + tRow('Mixer', t.mixer) + tRow('Arranger', t.arranger) + tRow('Publisher', t.publisher)
@@ -2516,18 +2516,21 @@ function renderTracks(){
   var list=tracks.filter(function(t){
     if(!q) return true;
     var u=artists.find(function(a){return a.id===t.uid;});
-    return ((t.title||'')+' '+[t.artists].flat().filter(Boolean).join(' ')+' '+(t.uid||'')+' '+((u&&u.email)||'')).toLowerCase().indexOf(q)>=0;
+    return ((t.title||'')+' '+[t.artist||t.artists].flat().filter(Boolean).join(' ')+' '+(t.releaseName||t.releaseTitle||'')+' '+(t.uid||'')+' '+((u&&u.email)||'')).toLowerCase().indexOf(q)>=0;
   });
   if(!list.length){ el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">'+(q?'No tracks match your search':'No tracks uploaded yet')+'</div></div>'; return; }
-  el.innerHTML='<table><thead><tr><th>Title</th><th>Artist(s)</th><th>Owner</th><th>Duration</th><th>Size</th><th>Uploaded</th><th>Play</th></tr></thead><tbody>'
+  el.innerHTML='<table><thead><tr><th>Title</th><th>Artist(s)</th><th>Release</th><th>Owner</th><th>Duration</th><th>Size</th><th>Uploaded</th><th>Play</th></tr></thead><tbody>'
     +list.map(function(t){
       var u=artists.find(function(a){return a.id===t.uid;});
       var who=u?esc(u.name||u.email||t.uid):esc(t.uid||'—');
       var sub=u?('<div style="font-size:10px;color:var(--txt3);font-family:\'DM Mono\',monospace">'+esc(u.email||'')+'</div>'):'';
-      var arts=[t.artists].flat().filter(Boolean).map(String);
-      var play=t.fileUrl?('<div class="track-play"><audio controls preload="none" src="'+safeUrl(t.fileUrl)+'"></audio></div>'):'<span style="color:var(--txt3);font-size:11px">No file</span>';
+      var arts=[t.artist||t.artists].flat().filter(Boolean).map(String);
+      var fileUrl=t.audioUrl||t.fileUrl||'';
+      var play=fileUrl?('<div class="track-play"><audio controls preload="none" src="'+safeUrl(fileUrl)+'"></audio></div>'):'<span style="color:var(--txt3);font-size:11px">No file</span>';
+      var rel=t.releaseName||t.releaseTitle||'';
       return '<tr><td style="font-weight:700">'+esc(t.title||'—')+(t.genres?('<div style="font-size:10px;color:var(--txt3)">'+esc([t.genres].flat().filter(Boolean).join(', '))+'</div>'):'')+'</td>'
         +'<td style="font-size:12px;color:var(--txt2)">'+(arts.length?arts.map(esc).join(', '):'—')+'</td>'
+        +'<td style="font-size:12px;color:var(--txt2)">'+(rel?esc(rel):'<span style="color:var(--txt3)">—</span>')+'</td>'
         +'<td style="font-size:12px;color:var(--txt2)">'+who+sub+'</td>'
         +'<td class="size-mono">'+esc(t.duration||'—')+'</td>'
         +'<td class="size-mono">'+esc(t.size?fmtSize(t.size):'—')+'</td>'
@@ -2574,7 +2577,7 @@ function renderSplits(){
   el.innerHTML='<table><thead><tr><th>Name</th><th>Artist</th><th>Type</th><th>Collaborators</th><th>Signed</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>'
     +list.map(function(s){
       var u=artists.find(function(a){return a.id===s.uid;});
-      var who=u?esc(u.name||u.email||s.uid):esc(s.uid||'—');
+      var who=s.artist?esc(s.artist):(u?esc(u.name||u.email||s.uid):esc(s.uid||'—'));
       var active=(s.status||'inactive')==='active';
       var cols=(s.collaborators||[]);
       return '<tr><td style="font-weight:700">'+esc(s.name||'—')+((s.releaseIds&&s.releaseIds.length)?('<div style="font-size:10px;color:var(--txt3)">'+s.releaseIds.length+' release'+(s.releaseIds.length!==1?'s':'')+' linked</div>'):'')+'</td>'
@@ -2598,7 +2601,7 @@ function openSplit(id){
   var cols=s.collaborators||[];
   document.getElementById('smod-title').textContent=s.name||'Split Sheet';
   document.getElementById('smod-body').innerHTML=
-      '<div class="dr"><div class="dk">Artist</div><div class="dv">'+esc((u&&u.name)||s.uid||'—')+(u?' <span style="color:var(--txt3);font-family:\'DM Mono\',monospace;font-size:11px">'+esc(u.email||'')+'</span>':'')+'</div></div>'
+      '<div class="dr"><div class="dk">Artist</div><div class="dv">'+esc(s.artist||((u&&u.name)||s.uid)||'—')+(u&&!s.artist?' <span style="color:var(--txt3);font-family:\'DM Mono\',monospace;font-size:11px">'+esc(u.email||'')+'</span>':'')+'</div></div>'
     + '<div class="dr"><div class="dk">Type</div><div class="dv"><span class="badge bt">'+esc(s.splitType||'—').toUpperCase()+'</span></div></div>'
     + '<div class="dr"><div class="dk">Status</div><div class="dv"><span class="badge '+((s.status||'inactive')==='active'?'ba':'br')+'">'+esc(s.status||'inactive').toUpperCase()+'</span></div></div>'
     + ((s.releaseIds&&s.releaseIds.length)?'<div class="dr"><div class="dk">Releases</div><div class="dv">'+esc(s.releaseIds.join(', '))+'</div></div>':'')
