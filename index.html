@@ -9,15 +9,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script type="module">
-/* TOTP 2FA lives in the modular SDK (compat 10.12.0 does not export it).
-   We import only the pure TOTP functions and run them against the modular
-   instances hidden inside the compat SDK (auth._delegate / user._delegate),
-   so enrollment + challenges share the exact same session — no second app. */
-import { multiFactor, TotpMultiFactorGenerator, getMultiFactorResolver } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-window._mfaMod = { multiFactor: multiFactor, TotpMultiFactorGenerator: TotpMultiFactorGenerator, getMultiFactorResolver: getMultiFactorResolver };
-</script>
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
@@ -443,29 +434,8 @@ tr:last-child td{border-bottom:none}
     <div class="iw"><label>Email</label><input type="email" id="em" placeholder="admin@example.com" autocomplete="username"/></div>
     <div class="iw"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
     <button class="btn-pri" id="blg" onclick="doLogin()">Access Admin Panel</button>
-    <div style="margin-top:14px;font-size:11.5px;color:var(--txt3);text-align:center">🔒 Protected by password + authenticator app (2-step verification)</div>
+    <div style="margin-top:14px;font-size:11.5px;color:var(--txt3);text-align:center">🔒 Protected by your password</div>
   </div>
-</div>
-
-<!-- ═══ TWO-STEP VERIFICATION (TOTP) ═══ -->
-<div class="mo" id="mfa-modal">
-  <div class="mbox" style="max-width:420px"><div class="mh"><div class="mt2" id="mfa-title">Two-step verification</div></div>
-  <div class="mb">
-      <div class="err-box" id="mfa-err"></div>
-      <p style="font-size:13px;color:var(--txt2);margin:0 0 12px" id="mfa-sub">Enter the 6-digit code from your authenticator app.</p>
-      <!-- enrollment step (first-time setup) -->
-      <div id="mfa-enroll" style="display:none">
-        <p style="font-size:13px;color:var(--txt2);margin:0 0 12px">Scan this QR code with Google Authenticator, Authy, or any TOTP app, then enter the 6-digit code below.</p>
-        <div id="mfa-qr" style="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;margin-bottom:12px"></div>
-        <div style="font-size:11.5px;color:var(--txt3);margin-bottom:12px;word-break:break-all">Can't scan? Enter this key manually:<br><b id="mfa-key" style="color:var(--txt);font-family:'DM Mono',monospace"></b></div>
-      </div>
-      <!-- verify step (every login) -->
-      <div class="iw"><label>6-digit code</label><input id="mfa-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="123456" autocomplete="one-time-code" style="text-align:center;font-size:22px;letter-spacing:8px;font-family:'DM Mono',monospace" onkeydown="if(event.key==='Enter')mfaVerify()"/></div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
-        <button class="btn-ghost" id="mfa-cancel" onclick="mfaCancel()">Cancel</button>
-        <button class="btn-pri" id="mfa-go" onclick="mfaVerify()">Verify</button>
-      </div>
-  </div></div>
 </div>
 
 <div id="panel">
@@ -1585,48 +1555,11 @@ function closeDrawer(){
 }
 
 // SECURITY: this check is UI-only. Real authorization MUST be enforced by Firestore Security Rules (deny all reads/writes except the admin UID/email) — client checks can be bypassed.
-/* ═══ TWO-STEP VERIFICATION (TOTP authenticator) — MANDATORY ═══
-   Password alone is not enough: every admin session must complete a second
-   factor. First login enrolls a TOTP secret (QR scan); every later login
-   challenges for the 6-digit code. If the authenticator is lost, disable MFA
-   in Firebase Console → Authentication → Users → (admin) → Disable 2FA. */
-var _mfaMode=null, _mfaResolver=null, _mfaSecret=null, _mfaError=null;
-/* Returns the modular-SDK MFA bridge (throws if the module hasn't loaded yet). */
-function _mfaBridge(){
-  var mod=window._mfaMod;
-  if(!mod) throw new Error('Security module still loading — please wait a moment and try again.');
-  return mod;
-}
-/* Reads enrolled MFA factors via the module-bundle bridge only (never touches
-   compat user.multiFactor — it sets a reload listener that conflicts with the
-   TOTP bridge and throws auth/internal-error). */
-async function _getMfaFactors(user){
-  try{
-    var mod=_mfaBridge();
-    var mu=(user && user._delegate)?user._delegate:user;
-    if(!mu) return [];
-    var mfu=mod.multiFactor(mu);
-    try{ await mu.reload(); }catch(e){}
-    return mfu.enrolledFactors||[];
-  }catch(e){ return []; }
-}
-/* The modular Auth/User instances hidden inside the compat SDK — same session,
-   so TOTP enrollment + challenges act on the user that just signed in. */
-function _modAuth(){ return auth._delegate || auth; }
-function _modUser(){ var u=auth.currentUser; return (u && u._delegate) ? u._delegate : u; }
 
-auth.onAuthStateChanged(async u=>{
+
+auth.onAuthStateChanged(u=>{
   document.getElementById('ld').style.display='none';
   if(u&&u.email===ADMIN_EMAIL){
-    var factors=await _getMfaFactors(u);
-    if(!factors.length && _mfaMode!=='enroll'){
-      // Signed in with password but no second factor yet → mandatory enrollment
-      document.getElementById('auth').style.display='none';
-      document.getElementById('panel').style.display='none';
-      mfaStartEnrollment(u);
-      return;
-    }
-    if(_mfaMode==='enroll') return; // enrollment modal is up; wait for it
     document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();
     try{var sp=localStorage.getItem('tir-admin-page');if(sp&&document.getElementById('page-'+sp))goPage(sp);}catch(e){}
   }
@@ -1651,111 +1584,14 @@ async function doLogin(){
   btn.disabled=true;btn.textContent='Signing in...';
   try{
     await auth.signInWithEmailAndPassword(em,pw);
-    // Success → onAuthStateChanged routes to MFA enrollment or the panel.
+    // Success → onAuthStateChanged routes to the panel.
   }
   catch(e){
-    if(e.code==='auth/multi-factor-auth-required'){
-      try{
-        _mfaError=e;
-        _mfaMode='challenge'; _mfaSecret=null; _mfaResolver=null;
-        document.getElementById('mfa-title').textContent='Two-step verification';
-        document.getElementById('mfa-sub').textContent='Enter the 6-digit code from your authenticator app.';
-        document.getElementById('mfa-enroll').style.display='none';
-        mfaShow();
-      }catch(re){err.textContent='Login failed: '+re.message;err.classList.add('on');}
-    } else {
-      err.textContent='Login failed: '+e.message;err.classList.add('on');
-    }
+    err.textContent='Login failed: '+e.message;err.classList.add('on');
   }
   finally{btn.disabled=false;btn.textContent='Access Admin Panel';}
 }
 
-/* ── MFA helpers ── */
-function mfaShow(){
-  document.getElementById('mfa-err').classList.remove('on');
-  document.getElementById('mfa-code').value='';
-  document.getElementById('mfa-modal').classList.add('on');
-  setTimeout(function(){try{document.getElementById('mfa-code').focus();}catch(e){}},150);
-}
-function mfaHide(){ document.getElementById('mfa-modal').classList.remove('on'); }
-async function mfaCancel(){
-  // 2FA is mandatory — cancelling means signing out.
-  _mfaMode=null; _mfaResolver=null; _mfaSecret=null; mfaHide();
-  try{ await auth.signOut(); }catch(e){}
-}
-async function mfaStartEnrollment(user){
-  _mfaMode='enroll'; _mfaResolver=null; _mfaError=null;
-  try{
-    var mod=_mfaBridge();
-    var modUser=_modUser();
-    if(!modUser) throw new Error('Session expired — please sign in again.');
-    // Bypass mod.multiFactor() entirely: generateSecret only needs {user, credential}.
-    var idToken=await modUser.getIdToken();
-    _mfaSecret=await mod.TotpMultiFactorGenerator.generateSecret({user: modUser, credential: idToken});
-    var key=_mfaSecret.secretKey;
-    var otpauth='otpauth://totp/'+encodeURIComponent('TIR Admin')+':'+encodeURIComponent(user.email||'admin')+'?secret='+encodeURIComponent(key)+'&issuer='+encodeURIComponent('TheImaginaryRecords');
-    document.getElementById('mfa-title').textContent='Set up two-step verification';
-    document.getElementById('mfa-sub').textContent='Scan the code with your authenticator app, then enter the 6-digit code to finish setup.';
-    document.getElementById('mfa-enroll').style.display='block';
-    document.getElementById('mfa-key').textContent=key;
-    var qrEl=document.getElementById('mfa-qr'); qrEl.innerHTML='';
-    try{ new QRCode(qrEl,{text:otpauth,width:180,height:180,correctLevel:QRCode.CorrectLevel.M}); }
-    catch(qe){ qrEl.innerHTML='<span style="font-size:12px;color:#666">QR unavailable — enter the key manually.</span>'; }
-    mfaShow();
-  }catch(e){
-    _mfaMode=null;
-    try{ await auth.signOut(); }catch(e2){}
-    var err=document.getElementById('ae'); err.textContent='Could not start 2-step setup: '+e.message; err.classList.add('on');
-    document.getElementById('auth').style.display='flex';
-  }
-}
-async function mfaVerify(){
-  var codeEl=document.getElementById('mfa-code'), err=document.getElementById('mfa-err'), btn=document.getElementById('mfa-go');
-  var code=(codeEl.value||'').trim();
-  err.classList.remove('on');
-  if(!/^\d{6}$/.test(code)){ err.textContent='Enter the 6-digit code.'; err.classList.add('on'); return; }
-  btn.disabled=true; btn.textContent='Verifying...';
-  try{
-    if(_mfaMode==='enroll'){
-      var mod=_mfaBridge();
-      var modUser=_modUser(); if(!modUser) throw new Error('Session expired — please sign in again.');
-      var assertion=mod.TotpMultiFactorGenerator.assertionForEnrollment(_mfaSecret,code);
-      // Finalize directly (bypasses multiFactor().enroll to avoid the reload-listener conflict).
-      var enrollIdToken=await modUser.getIdToken();
-      await assertion._finalizeEnroll(modUser.auth, enrollIdToken, 'Authenticator app');
-      try{ await modUser.getIdToken(true); }catch(e){}
-      try{ await logActivity('','','mfa_enroll','Admin enrolled a TOTP second factor'); }catch(e){}
-      _mfaMode=null; _mfaSecret=null; mfaHide();
-      document.getElementById('auth').style.display='none';
-      document.getElementById('panel').style.display='block';
-      loadAll();
-      toast('Two-step verification enabled ✓');
-    } else if(_mfaMode==='challenge'){
-      var mod2=_mfaBridge();
-      // The compat error lacks the operationType the modular resolver asserts.
-      try{
-        _mfaError.operationType='signIn';
-        _mfaError.customData=_mfaError.customData||{};
-        _mfaError.customData.operationType='signIn';
-      }catch(e){}
-      var resolver=mod2.getMultiFactorResolver(_modAuth(), _mfaError);
-      var hint=resolver.hints[0];
-      var assertion2=mod2.TotpMultiFactorGenerator.assertionForSignIn(hint.uid,code);
-      await resolver.resolveSignIn(assertion2);
-      _mfaMode=null; _mfaResolver=null; mfaHide();
-      // onAuthStateChanged will show the panel.
-    } else {
-      throw new Error('No verification in progress.');
-    }
-  }catch(e){
-    var m='Verification failed. ';
-    if(e.code==='auth/invalid-verification-code'||/invalid/i.test(e.message)) m+='Wrong code — check your authenticator app time sync and try again.';
-    else m+=e.message;
-    err.textContent=m; err.classList.add('on');
-  }finally{
-    btn.disabled=false; btn.textContent='Verify';
-  }
-}
 function doSignOut(){auth.signOut();}
 
 /* ── loadAll: settled results, reports which loaders failed, never claims false success ── */
