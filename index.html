@@ -10,6 +10,13 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+/* TOTP 2FA lives in the modular SDK (compat 10.12.0 does not export it).
+   This bridges the modular TOTP functions onto the same Firebase app/auth
+   instance the compat SDK uses, so enrollment + challenges share the session. */
+import { getAuth, multiFactor, TotpMultiFactorGenerator, getMultiFactorResolver } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+window._mfaMod = { getAuth: getAuth, multiFactor: multiFactor, TotpMultiFactorGenerator: TotpMultiFactorGenerator, getMultiFactorResolver: getMultiFactorResolver };
+</script>
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
@@ -1582,7 +1589,13 @@ function closeDrawer(){
    factor. First login enrolls a TOTP secret (QR scan); every later login
    challenges for the 6-digit code. If the authenticator is lost, disable MFA
    in Firebase Console → Authentication → Users → (admin) → Disable 2FA. */
-var _mfaMode=null, _mfaResolver=null, _mfaSecret=null;
+var _mfaMode=null, _mfaResolver=null, _mfaSecret=null, _mfaError=null;
+/* Returns the modular-SDK MFA bridge (throws if the module hasn't loaded yet). */
+function _mfaBridge(){
+  var mod=window._mfaMod;
+  if(!mod) throw new Error('Security module still loading — please wait a moment and try again.');
+  return mod;
+}
 
 auth.onAuthStateChanged(u=>{
   document.getElementById('ld').style.display='none';
@@ -1625,8 +1638,8 @@ async function doLogin(){
   catch(e){
     if(e.code==='auth/multi-factor-auth-required'){
       try{
-        _mfaResolver=firebase.auth.getMultiFactorResolver(auth,e);
-        _mfaMode='challenge'; _mfaSecret=null;
+        _mfaError=e;
+        _mfaMode='challenge'; _mfaSecret=null; _mfaResolver=null;
         document.getElementById('mfa-title').textContent='Two-step verification';
         document.getElementById('mfa-sub').textContent='Enter the 6-digit code from your authenticator app.';
         document.getElementById('mfa-enroll').style.display='none';
@@ -1653,10 +1666,13 @@ async function mfaCancel(){
   try{ await auth.signOut(); }catch(e){}
 }
 async function mfaStartEnrollment(user){
-  _mfaMode='enroll'; _mfaResolver=null;
+  _mfaMode='enroll'; _mfaResolver=null; _mfaError=null;
   try{
-    var session=await user.multiFactor.getSession();
-    _mfaSecret=await firebase.auth.TotpMultiFactorGenerator.generateSecret(session);
+    var mod=_mfaBridge();
+    var modUser=mod.getAuth().currentUser;
+    if(!modUser) throw new Error('Session expired — please sign in again.');
+    var session=await mod.multiFactor(modUser).getSession();
+    _mfaSecret=await mod.TotpMultiFactorGenerator.generateSecret(session);
     var key=_mfaSecret.secretKey;
     var otpauth='otpauth://totp/'+encodeURIComponent('TIR Admin')+':'+encodeURIComponent(user.email||'admin')+'?secret='+encodeURIComponent(key)+'&issuer='+encodeURIComponent('TheImaginaryRecords');
     document.getElementById('mfa-title').textContent='Set up two-step verification';
@@ -1682,9 +1698,10 @@ async function mfaVerify(){
   btn.disabled=true; btn.textContent='Verifying...';
   try{
     if(_mfaMode==='enroll'){
-      var user=auth.currentUser; if(!user) throw new Error('Session expired — please sign in again.');
-      var assertion=firebase.auth.TotpMultiFactorGenerator.assertionForEnrollment(_mfaSecret,code);
-      await user.multiFactor.enroll(assertion,'Authenticator app');
+      var mod=_mfaBridge();
+      var modUser=mod.getAuth().currentUser; if(!modUser) throw new Error('Session expired — please sign in again.');
+      var assertion=mod.TotpMultiFactorGenerator.assertionForEnrollment(_mfaSecret,code);
+      await mod.multiFactor(modUser).enroll(assertion,'Authenticator app');
       try{ await logActivity('','','mfa_enroll','Admin enrolled a TOTP second factor'); }catch(e){}
       _mfaMode=null; _mfaSecret=null; mfaHide();
       document.getElementById('auth').style.display='none';
@@ -1692,9 +1709,11 @@ async function mfaVerify(){
       loadAll();
       toast('Two-step verification enabled ✓');
     } else if(_mfaMode==='challenge'){
-      var hint=_mfaResolver.hints[0];
-      var assertion2=firebase.auth.TotpMultiFactorGenerator.assertionForSignIn(hint.uid,code);
-      await _mfaResolver.resolveSignIn(assertion2);
+      var mod2=_mfaBridge();
+      var resolver=mod2.getMultiFactorResolver(mod2.getAuth(), _mfaError);
+      var hint=resolver.hints[0];
+      var assertion2=mod2.TotpMultiFactorGenerator.assertionForSignIn(hint.uid,code);
+      await resolver.resolveSignIn(assertion2);
       _mfaMode=null; _mfaResolver=null; mfaHide();
       // onAuthStateChanged will show the panel.
     } else {
