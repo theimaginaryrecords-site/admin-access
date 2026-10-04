@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
@@ -21,6 +22,17 @@ firebase.initializeApp({
 const auth=firebase.auth();
 const db=firebase.firestore();
 const ADMIN_EMAIL='theimaginaryrecords@gmail.com';
+/* SECURITY (defense in depth): every admin mutation must call requireAdmin() first.
+   This is a client-side tripwire only — real authorization is enforced by Firestore
+   Security Rules (admin UID/email). It stops casual console abuse and fails closed. */
+function requireAdmin(){
+  try {
+    var u = (typeof auth!=='undefined' && auth) ? auth.currentUser : null;
+    if (u && u.email === ADMIN_EMAIL) return true;
+  } catch(e) {}
+  try { if (typeof toast==='function') toast('Access denied: admin session required.'); } catch(e2) {}
+  return false;
+}
 </script>
 <script>
 /* Apply persisted theme before first paint — light is the default, dark via [data-theme="dark"]. Shares localStorage key 'tir-theme' with the artist portal. */
@@ -420,10 +432,32 @@ tr:last-child td{border-bottom:none}
   <div class="abox">
     <div class="abox-top"><div class="abox-brand">T·I·R</div><div class="abox-sub">Admin Panel</div><div class="abox-tag">Label owner access only</div></div>
     <div class="err-box" id="ae"></div>
-    <div class="iw"><label>Email</label><input type="email" id="em" value="theimaginaryrecords@gmail.com"/></div>
+    <div class="iw"><label>Email</label><input type="email" id="em" placeholder="admin@example.com" autocomplete="username"/></div>
     <div class="iw"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
     <button class="btn-pri" id="blg" onclick="doLogin()">Access Admin Panel</button>
+    <div style="margin-top:14px;font-size:11.5px;color:var(--txt3);text-align:center">🔒 Protected by password + authenticator app (2-step verification)</div>
   </div>
+</div>
+
+<!-- ═══ TWO-STEP VERIFICATION (TOTP) ═══ -->
+<div class="mo" id="mfa-modal">
+  <div class="mbox" style="max-width:420px"><div class="mh"><div class="mt2" id="mfa-title">Two-step verification</div></div>
+  <div class="mb">
+      <div class="err-box" id="mfa-err"></div>
+      <p style="font-size:13px;color:var(--txt2);margin:0 0 12px" id="mfa-sub">Enter the 6-digit code from your authenticator app.</p>
+      <!-- enrollment step (first-time setup) -->
+      <div id="mfa-enroll" style="display:none">
+        <p style="font-size:13px;color:var(--txt2);margin:0 0 12px">Scan this QR code with Google Authenticator, Authy, or any TOTP app, then enter the 6-digit code below.</p>
+        <div id="mfa-qr" style="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;margin-bottom:12px"></div>
+        <div style="font-size:11.5px;color:var(--txt3);margin-bottom:12px;word-break:break-all">Can't scan? Enter this key manually:<br><b id="mfa-key" style="color:var(--txt);font-family:'DM Mono',monospace"></b></div>
+      </div>
+      <!-- verify step (every login) -->
+      <div class="iw"><label>6-digit code</label><input id="mfa-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="123456" autocomplete="one-time-code" style="text-align:center;font-size:22px;letter-spacing:8px;font-family:'DM Mono',monospace" onkeydown="if(event.key==='Enter')mfaVerify()"/></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button class="btn-ghost" id="mfa-cancel" onclick="mfaCancel()">Cancel</button>
+        <button class="btn-pri" id="mfa-go" onclick="mfaVerify()">Verify</button>
+      </div>
+  </div></div>
 </div>
 
 <div id="panel">
@@ -1023,6 +1057,7 @@ function switchAcctType(type) {
 
 /* ═══ CREATE ACCOUNT ═══ */
 window.createAccount = async function() {
+  if(!requireAdmin())return;
   var name     = (document.getElementById('ca-name').value||'').trim();
   var email    = (document.getElementById('ca-email').value||'').trim();
   var password = (document.getElementById('ca-password').value||'');
@@ -1086,6 +1121,7 @@ window.createAccount = async function() {
     sEl.textContent = '✓ ' + (isLabel?'Label':'Artist') + ' account created: ' + name + ' (' + email + ')';
     sEl.classList.add('on');
     await loadArtists();
+    logActivity('',ADMIN_EMAIL,'account_create',(isLabel?'Label':'Artist')+' account created: '+name+' ('+email+')');
     toast((isLabel?'Label':'Artist') + ' account created ✓');
   } catch(ex) {
     eEl.textContent = 'Error: ' + ex.message; eEl.classList.add('on');
@@ -1139,7 +1175,7 @@ window.manageAccountExtra = function(id) {
     bankView.innerHTML =
       '<div><strong>Account Holder:</strong> ' + escA(b.accountHolder||'—') + '</div>' +
       '<div><strong>Bank Name:</strong> ' + escA(b.bankName||'—') + '</div>' +
-      '<div><strong>Account Number:</strong> ' + escA(b.accountNumber||'—') + '</div>' +
+      '<div><strong>Account Number:</strong> <span class="masked-pii" data-full="'+escA(b.accountNumber||'—')+'" onclick="this.textContent=this.getAttribute(\'data-full\');this.classList.remove(\'masked-pii\')" title="Click to reveal">'+escA(maskId(b.accountNumber,4))+'</span></div>' +
       '<div><strong>IFSC / SWIFT:</strong> ' + escA(b.ifscSwift||'—') + '</div>' +
       '<div><strong>Bank Country:</strong> ' + escA(b.bankCountry||'—') + '</div>' +
       '<div><strong>UPI ID:</strong> ' + escA(b.upiId||'—') + '</div>' +
@@ -1269,8 +1305,8 @@ function dimList(el, entries, empty, logoFn){
   var e = document.getElementById(el); if(!e) return;
   e.innerHTML = entries.length ? entries.map(function(x,i){
     var logo = logoFn ? logoFn(x.k) : '';
-    var label = logoFn ? prettyStore(x.k) : escA2(x.k||'Unknown');
-    var labHtml = logoFn ? escA2(label) : label;
+    var label = logoFn ? prettyStore(x.k) : esc(x.k||'Unknown');
+    var labHtml = logoFn ? esc(label) : label;
     return '<div class="rev-row"><span class="rev-k"><strong style="color:var(--accent);margin-right:8px">'+(i+1)+'</strong>'+logo+labHtml+'</span><span class="rev-v">'+fmtINR(x.v)+'</span></div>';
   }).join('') : '<div class="hint" style="padding:10px 0">'+empty+'</div>';
 }
@@ -1498,6 +1534,7 @@ window.saveArtistServices=async function(id){
   }catch(e){toast('Error: '+e.message);}
 };
 window.sendArtistPasswordReset=async function(email){
+  if(!requireAdmin())return;
   if(!email){ toast('No email on file for this artist.'); return; }
   if(!confirm('Send a password reset email to '+email+'? The artist will get a link to set a new password themselves.')) return;
   try{ await auth.sendPasswordResetEmail(email); toast('Password reset email sent to '+email+' ✓'); }
@@ -1517,7 +1554,7 @@ window.setIdVerificationStatus=async function(uid,status){
    igHandle(): sanitize an Instagram handle to [A-Za-z0-9._] before building a profile URL. */
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function safeUrl(u){try{var x=String(u==null?'':u).trim();if(/^https?:\/\//i.test(x))return esc(x);}catch(e){}return '#';}
-function escJs(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"\\'");}
+function escJs(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"\\'");}
 function igHandle(h){return String(h==null?'':h).replace(/^@/,'').replace(/[^A-Za-z0-9._]/g,'');}
 function secondaryAuth(){
   try { return firebase.app('ArtistCreator').auth(); }
@@ -1540,10 +1577,28 @@ function closeDrawer(){
 }
 
 // SECURITY: this check is UI-only. Real authorization MUST be enforced by Firestore Security Rules (deny all reads/writes except the admin UID/email) — client checks can be bypassed.
+/* ═══ TWO-STEP VERIFICATION (TOTP authenticator) — MANDATORY ═══
+   Password alone is not enough: every admin session must complete a second
+   factor. First login enrolls a TOTP secret (QR scan); every later login
+   challenges for the 6-digit code. If the authenticator is lost, disable MFA
+   in Firebase Console → Authentication → Users → (admin) → Disable 2FA. */
+var _mfaMode=null, _mfaResolver=null, _mfaSecret=null;
+
 auth.onAuthStateChanged(u=>{
   document.getElementById('ld').style.display='none';
-  if(u&&u.email===ADMIN_EMAIL){document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();
-    try{var sp=localStorage.getItem('tir-admin-page');if(sp&&document.getElementById('page-'+sp))goPage(sp);}catch(e){}}
+  if(u&&u.email===ADMIN_EMAIL){
+    var factors=[]; try{ factors=u.multiFactor?u.multiFactor.enrolledFactors:[]; }catch(e){}
+    if(!factors.length && _mfaMode!=='enroll'){
+      // Signed in with password but no second factor yet → mandatory enrollment
+      document.getElementById('auth').style.display='none';
+      document.getElementById('panel').style.display='none';
+      mfaStartEnrollment(u);
+      return;
+    }
+    if(_mfaMode==='enroll') return; // enrollment modal is up; wait for it
+    document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();
+    try{var sp=localStorage.getItem('tir-admin-page');if(sp&&document.getElementById('page-'+sp))goPage(sp);}catch(e){}
+  }
   else if(u&&u.email!==ADMIN_EMAIL){auth.signOut();document.getElementById('auth').style.display='flex';}
   else{document.getElementById('auth').style.display='flex';document.getElementById('panel').style.display='none';resetLoginForm();}
 });
@@ -1563,9 +1618,96 @@ async function doLogin(){
   if(em!==ADMIN_EMAIL){err.textContent='Access denied.';err.classList.add('on');return;}
   if(!pw){err.textContent='Please enter your password.';err.classList.add('on');return;}
   btn.disabled=true;btn.textContent='Signing in...';
-  try{await auth.signInWithEmailAndPassword(em,pw);}
-  catch(e){err.textContent='Login failed: '+e.message;err.classList.add('on');}
+  try{
+    await auth.signInWithEmailAndPassword(em,pw);
+    // Success → onAuthStateChanged routes to MFA enrollment or the panel.
+  }
+  catch(e){
+    if(e.code==='auth/multi-factor-auth-required'){
+      try{
+        _mfaResolver=firebase.auth.getMultiFactorResolver(auth,e);
+        _mfaMode='challenge'; _mfaSecret=null;
+        document.getElementById('mfa-title').textContent='Two-step verification';
+        document.getElementById('mfa-sub').textContent='Enter the 6-digit code from your authenticator app.';
+        document.getElementById('mfa-enroll').style.display='none';
+        mfaShow();
+      }catch(re){err.textContent='Login failed: '+re.message;err.classList.add('on');}
+    } else {
+      err.textContent='Login failed: '+e.message;err.classList.add('on');
+    }
+  }
   finally{btn.disabled=false;btn.textContent='Access Admin Panel';}
+}
+
+/* ── MFA helpers ── */
+function mfaShow(){
+  document.getElementById('mfa-err').classList.remove('on');
+  document.getElementById('mfa-code').value='';
+  document.getElementById('mfa-modal').classList.add('on');
+  setTimeout(function(){try{document.getElementById('mfa-code').focus();}catch(e){}},150);
+}
+function mfaHide(){ document.getElementById('mfa-modal').classList.remove('on'); }
+async function mfaCancel(){
+  // 2FA is mandatory — cancelling means signing out.
+  _mfaMode=null; _mfaResolver=null; _mfaSecret=null; mfaHide();
+  try{ await auth.signOut(); }catch(e){}
+}
+async function mfaStartEnrollment(user){
+  _mfaMode='enroll'; _mfaResolver=null;
+  try{
+    var session=await user.multiFactor.getSession();
+    _mfaSecret=await firebase.auth.TotpMultiFactorGenerator.generateSecret(session);
+    var key=_mfaSecret.secretKey;
+    var otpauth='otpauth://totp/'+encodeURIComponent('TIR Admin')+':'+encodeURIComponent(user.email||'admin')+'?secret='+encodeURIComponent(key)+'&issuer='+encodeURIComponent('TheImaginaryRecords');
+    document.getElementById('mfa-title').textContent='Set up two-step verification';
+    document.getElementById('mfa-sub').textContent='Scan the code with your authenticator app, then enter the 6-digit code to finish setup.';
+    document.getElementById('mfa-enroll').style.display='block';
+    document.getElementById('mfa-key').textContent=key;
+    var qrEl=document.getElementById('mfa-qr'); qrEl.innerHTML='';
+    try{ new QRCode(qrEl,{text:otpauth,width:180,height:180,correctLevel:QRCode.CorrectLevel.M}); }
+    catch(qe){ qrEl.innerHTML='<span style="font-size:12px;color:#666">QR unavailable — enter the key manually.</span>'; }
+    mfaShow();
+  }catch(e){
+    _mfaMode=null;
+    try{ await auth.signOut(); }catch(e2){}
+    var err=document.getElementById('ae'); err.textContent='Could not start 2-step setup: '+e.message; err.classList.add('on');
+    document.getElementById('auth').style.display='flex';
+  }
+}
+async function mfaVerify(){
+  var codeEl=document.getElementById('mfa-code'), err=document.getElementById('mfa-err'), btn=document.getElementById('mfa-go');
+  var code=(codeEl.value||'').trim();
+  err.classList.remove('on');
+  if(!/^\d{6}$/.test(code)){ err.textContent='Enter the 6-digit code.'; err.classList.add('on'); return; }
+  btn.disabled=true; btn.textContent='Verifying...';
+  try{
+    if(_mfaMode==='enroll'){
+      var user=auth.currentUser; if(!user) throw new Error('Session expired — please sign in again.');
+      var assertion=firebase.auth.TotpMultiFactorGenerator.assertionForEnrollment(_mfaSecret,code);
+      await user.multiFactor.enroll(assertion,'Authenticator app');
+      try{ await logActivity('','','mfa_enroll','Admin enrolled a TOTP second factor'); }catch(e){}
+      _mfaMode=null; _mfaSecret=null; mfaHide();
+      document.getElementById('auth').style.display='none';
+      document.getElementById('panel').style.display='block';
+      loadAll();
+      toast('Two-step verification enabled ✓');
+    } else if(_mfaMode==='challenge'){
+      var hint=_mfaResolver.hints[0];
+      var assertion2=firebase.auth.TotpMultiFactorGenerator.assertionForSignIn(hint.uid,code);
+      await _mfaResolver.resolveSignIn(assertion2);
+      _mfaMode=null; _mfaResolver=null; mfaHide();
+      // onAuthStateChanged will show the panel.
+    } else {
+      throw new Error('No verification in progress.');
+    }
+  }catch(e){
+    var m='Verification failed. ';
+    if(e.code==='auth/invalid-verification-code'||/invalid/i.test(e.message)) m+='Wrong code — check your authenticator app time sync and try again.';
+    else m+=e.message;
+    err.textContent=m; err.classList.add('on');
+  }finally{
+    btn.disabled=false; btn.textContent='Verify';
+  }
 }
 function doSignOut(){auth.signOut();}
 
@@ -1870,8 +2012,11 @@ function openRelease(id){
 function escapeAttr(str){return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 async function updateRelStatus(id,status){
+  if(!requireAdmin())return;
+  if((status==='live'||status==='rejected')&&!confirm('Change release status to "'+status+'"?'))return;
   try{
     await db.collection('releases').doc(id).update({status});
+    logActivity(null,ADMIN_EMAIL,'release_status','Release '+id+' → '+status);
     // Status changes reload every table, widget, stat and badge.
     await loadReleases();applyRelFilter();
     const rm=document.getElementById('rmo');
@@ -1881,6 +2026,7 @@ async function updateRelStatus(id,status){
 }
 
 async function saveReleaseEdits(id){
+  if(!requireAdmin())return;
   const payload={
     title:document.getElementById('er-title').value.trim(),
     primaryArtist:document.getElementById('er-artist').value.trim(),
@@ -1923,10 +2069,11 @@ async function saveReleaseEdits(id){
     payload.videoChannel=document.getElementById('er-video-channel').value.trim();
     payload.thumbnailUrl=document.getElementById('er-thumb-url').value.trim();
   }
-  try{await db.collection('releases').doc(id).update(payload); await loadReleases(); openRelease(id); toast('Release updated ✓');}catch(e){toast('Error: '+e.message);}
+  try{await db.collection('releases').doc(id).update(payload); await loadReleases(); openRelease(id); logActivity('',ADMIN_EMAIL,'release_edit','Release '+id+' edited'); toast('Release updated ✓');}catch(e){toast('Error: '+e.message);}
 }
 
 async function deleteRelease(id){
+  if(!requireAdmin())return;
   // NOTE: Cloudinary artwork/audio (public_id, if any) is NOT deleted here — remove manually in the Cloudinary dashboard; client has no API secret.
   if(!confirm('Delete this release submission?'))return;
   try{
@@ -1973,12 +2120,13 @@ function openDemo(id){
   document.getElementById('dmo').classList.add('on');
 }
 
-async function updateDemoStatus(id,status){try{await db.collection('demos').doc(id).update({status});await loadDemos();toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
-async function saveDemoNotes(id){const notes=document.getElementById('modal-notes')?.value.trim()||'';const btn=document.getElementById('save-notes-btn');btn.disabled=true;btn.textContent='Saving...';try{await db.collection('demos').doc(id).update({notes});const d=demos.find(x=>x.id===id);if(d)d.notes=notes;toast('Notes saved ✓');}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Save Notes';}
+async function updateDemoStatus(id,status){if(!requireAdmin())return;try{await db.collection('demos').doc(id).update({status});await loadDemos();logActivity('',ADMIN_EMAIL,'demo_status','Demo '+id+' → '+status);toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
+async function saveDemoNotes(id){if(!requireAdmin())return;const notes=document.getElementById('modal-notes')?.value.trim()||'';const btn=document.getElementById('save-notes-btn');btn.disabled=true;btn.textContent='Saving...';try{await db.collection('demos').doc(id).update({notes});const d=demos.find(x=>x.id===id);if(d)d.notes=notes;toast('Notes saved ✓');}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Save Notes';}
 async function deleteDemo(id){
+  if(!requireAdmin())return;
   // NOTE: demo links point to external hosts; any Cloudinary assets (public_id, if any) are NOT deleted here — remove manually in the Cloudinary dashboard; client has no API secret.
   if(!confirm('Delete this demo?'))return;
-  try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();applyDemoFilter();renderDemoTable('ov-demos',demos.filter(d=>d.status==='new').slice(0,6));closeMo('dmo');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}
+  try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();applyDemoFilter();renderDemoTable('ov-demos',demos.filter(d=>d.status==='new').slice(0,6));closeMo('dmo');logActivity('',ADMIN_EMAIL,'demo_delete','Demo '+id+' deleted');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}
 }
 
 function setDemoF(s,btn){demoFilter=s;document.querySelectorAll('#page-demos .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyDemoFilter();}
@@ -2027,8 +2175,8 @@ function openTicket(id){
   document.getElementById('tmo-body').innerHTML=`<div class="dr"><div class="dk">Artist</div><div class="dv">${esc(t.artistName)||'—'}</div></div><div class="dr"><div class="dk">Email</div><div class="dv">${esc(t.artistEmail)||'—'}</div></div><div class="dr"><div class="dk">Category</div><div class="dv">${esc(t.category)||'—'}</div></div><div class="dr"><div class="dk">Type</div><div class="dv"><span class="badge bt">${esc(t.ticketType||'Support')}</span></div></div><div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${esc(t.priority)||'Normal'}</span></div></div><div class="dr"><div class="dk">Status</div><div class="dv"><select class="ss" onchange="updateTicketStatus('${t.id}',this.value)"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option></select></div></div><div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--input);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${esc(t.message)||'—'}</div></div>${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${esc(t.reply)}</div></div>`:''}<div class="reply-box"><label>Reply to Artist</label><textarea id="reply-txt">${esc(t.reply)||''}</textarea><div class="reply-acts"><button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button><button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMo('tmo')">Close Ticket</button></div></div>`;
   document.getElementById('tmo').classList.add('on');
 }
-async function sendReply(id){const reply=document.getElementById('reply-txt')?.value.trim();if(!reply){toast('Please type a reply first.');return;}const btn=document.getElementById('btn-reply');btn.disabled=true;btn.textContent='Sending...';try{await db.collection('tickets').doc(id).update({reply,status:'resolved',repliedAt:new Date().toISOString()});const t=tickets.find(x=>x.id===id);if(t){t.reply=reply;t.status='resolved';}toast('Reply sent ✓');closeMo('tmo');await loadTickets();}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Send Reply';}
-async function updateTicketStatus(id,status){try{await db.collection('tickets').doc(id).update({status});const t=tickets.find(x=>x.id===id);if(t)t.status=status;toast('Ticket → '+status);await loadTickets();}catch(e){toast('Error: '+e.message);}}
+async function sendReply(id){if(!requireAdmin())return;const reply=document.getElementById('reply-txt')?.value.trim();if(!reply){toast('Please type a reply first.');return;}const btn=document.getElementById('btn-reply');btn.disabled=true;btn.textContent='Sending...';try{await db.collection('tickets').doc(id).update({reply,status:'resolved',repliedAt:new Date().toISOString()});const t=tickets.find(x=>x.id===id);if(t){t.reply=reply;t.status='resolved';}logActivity('',ADMIN_EMAIL,'ticket_reply','Ticket '+id+' replied & resolved');toast('Reply sent ✓');closeMo('tmo');await loadTickets();}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Send Reply';}
+async function updateTicketStatus(id,status){if(!requireAdmin())return;try{await db.collection('tickets').doc(id).update({status});const t=tickets.find(x=>x.id===id);if(t)t.status=status;toast('Ticket → '+status);await loadTickets();}catch(e){toast('Error: '+e.message);}}
 function setRelSt(s,btn){relFilter=s;document.querySelectorAll('#page-releases .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyRelFilter();}
 function applyRelFilter(){const q=(document.getElementById('rel-search')?.value||'').toLowerCase();let list=releases;if(relFilter!=='all')list=list.filter(r=>r.status===relFilter);if(q)list=list.filter(r=>((r.title||'')+' '+(r.artistName||'')+' '+(r.primaryArtist||'')).toLowerCase().includes(q));renderRelTable('all-list',list);}
 
@@ -2089,8 +2237,9 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
    Deletes the Firestore profile document only. The Firebase Auth login remains
    and must be deleted manually in Firebase Console → Authentication → Users. */
 async function deleteArtistProfile(id){
-  if(!confirm('Delete this artist profile document from Firestore? The Firebase Auth login WILL REMAIN ACTIVE. Also delete the login in Firebase Console → Authentication → Users, otherwise the person can still sign in.'))return;
-  try{await db.collection('users').doc(id).delete(); await loadArtists(); toast('Artist profile deleted ✓');}catch(e){toast('Error: '+e.message);}
+  if(!requireAdmin())return;
+  if(!confirm('Delete this artist profile document from Firestore? IMPORTANT: the Firebase Auth login stays ACTIVE — also disable/delete the login in Firebase Console → Authentication → Users, otherwise the person can still sign in.'))return;
+  try{await db.collection('users').doc(id).delete(); await loadArtists(); logActivity(id,'','artist_delete','Artist profile '+id+' deleted from Firestore (Auth login must be removed separately)'); toast('Artist profile deleted ✓');}catch(e){toast('Error: '+e.message);}
 }
 </script>
 
@@ -2141,6 +2290,12 @@ function logActivity(uid,email,action,detail){
 var kycFilter='pending';
 function setKycF(s,btn){ kycFilter=s; document.querySelectorAll('#page-kyc .fb').forEach(function(b){b.classList.remove('on');}); btn.classList.add('on'); renderKycQueue(); }
 function kycKV(label,val){ return '<div class="kyc-kv"><span>'+esc(label)+'</span><b>'+esc(val||'—')+'</b></div>'; }
+/* SECURITY: mask high-sensitivity identifiers by default; full value revealed only on explicit click.
+   Reduces shoulder-surfing / screenshot exposure of identity-theft-grade PII. */
+function maskId(v, keep){ v=String(v||''); if(!v) return '—'; keep=keep||4;
+  return v.length<=keep ? '••••' : '•••• '+v.slice(-keep); }
+function kycKVm(label,val,keep){ var full=String(val||'—');
+  return '<div class="kyc-kv"><span>'+esc(label)+'</span><b class="masked-pii" data-full="'+esc(full)+'" onclick="this.textContent=this.getAttribute(\'data-full\');this.classList.remove(\'masked-pii\')" title="Click to reveal">'+esc(maskId(val,keep))+'</b></div>'; }
 function kycDoc(label,url){
   return url
     ? '<a class="doc-link" href="'+safeUrl(url)+'" target="_blank" rel="noopener">'+esc(label)+' ↗</a>'
@@ -2179,13 +2334,13 @@ function renderKycQueue(){
       +'<div class="kyc-head"><div><div class="kyc-name">'+esc(k.legalName||a.name||'—')+'</div><div class="kyc-mail">'+esc(a.email||'—')+' · submitted '+(k.submittedAt?esc(k.submittedAt.substring(0,10)):'—')+'</div></div>'+kycBadge(a.kycStatus||'none')+'</div>'
       +'<div class="kyc-grid">'
         +'<div class="kyc-sec"><h5>Identity</h5>'
-          +kycKV('Legal name',k.legalName)+kycKV('Mobile',k.mobile)+kycKV('PAN',k.pan)+kycKV('Aadhaar',k.aadhaar)
+          +kycKV('Legal name',k.legalName)+kycKV('Mobile',k.mobile)+kycKVm('PAN',k.pan,5)+kycKVm('Aadhaar',k.aadhaar,4)
         +'</div>'
         +'<div class="kyc-sec"><h5>Address</h5>'
           +kycKV('Address 1',k.address1)+kycKV('Address 2',k.address2)+kycKV('City',k.city)+kycKV('State',k.state)+kycKV('Pincode',k.pincode)
         +'</div>'
         +'<div class="kyc-sec"><h5>Bank / Payout</h5>'
-          +kycKV('Account holder',k.bankHolder)+kycKV('Bank name',k.bankName)+kycKV('Account no.',k.accountNumber)+kycKV('IFSC',k.ifsc)+kycKV('UPI ID',k.upiId)
+          +kycKV('Account holder',k.bankHolder)+kycKV('Bank name',k.bankName)+kycKVm('Account no.',k.accountNumber,4)+kycKV('IFSC',k.ifsc)+kycKV('UPI ID',k.upiId)
         +'</div>'
         +'<div class="kyc-sec"><h5>Documents</h5><div style="margin-top:2px">'
           +kycDoc('Aadhaar Front',docs.aadhaarFront)+kycDoc('Aadhaar Back',docs.aadhaarBack)+kycDoc('PAN',docs.panDoc)+kycDoc('Signature',docs.signature)
@@ -2196,6 +2351,7 @@ function renderKycQueue(){
   }).join('');
 }
 async function decideKyc(uid,decision){
+  if(!requireAdmin())return;
   var user=artists.find(function(a){return a.id===uid;});
   var noteEl=document.getElementById('kyc-note-'+uid);
   var note=noteEl?noteEl.value.trim():'';
@@ -2265,6 +2421,7 @@ function renderWithdrawals(){
     +'</tbody></table>';
 }
 async function decideWithdrawal(id,decision){
+  if(!requireAdmin())return;
   var w=withdrawals.find(function(x){return x.id===id;}); if(!w) return;
   var noteEl=document.getElementById('wd-note-'+id);
   var note=noteEl?noteEl.value.trim():'';
@@ -2283,6 +2440,7 @@ async function decideWithdrawal(id,decision){
 
 /* ═══ ROYALTIES ═══ */
 async function saveRoyalty(){
+  if(!requireAdmin())return;
   const artistId=document.getElementById('r-artist').value,period=document.getElementById('r-period').value,total=document.getElementById('r-total').value;
   document.getElementById('roy-e').classList.remove('on');document.getElementById('roy-s').classList.remove('on');
   if(!artistId)return showAl('roy-e','Please select an artist.');if(!period)return showAl('roy-e','Please select a period.');if(!total)return showAl('roy-e','Please enter the total amount.');
@@ -2295,7 +2453,7 @@ async function saveRoyalty(){
     showAl('roy-s','✓ Royalty statement saved!');
     ['r-total','r-release-title','r-notes','p-spotify','p-apple','p-amazon','p-youtube','p-jio','p-gaana','p-tidal','p-other'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('r-artist').value='';document.getElementById('r-period').value='';
-    await loadRoyaltyHistory();toast('Royalty saved ✓');
+    await loadRoyaltyHistory();logActivity('',ADMIN_EMAIL,'royalty_save','Royalty statement saved for artist '+artistId+' ('+period+', ₹'+total+')');toast('Royalty saved ✓');
   }catch(e){showAl('roy-e','Error: '+e.message);}
   btn.disabled=false;btn.textContent='Save Royalty Statement';
 }
@@ -2306,19 +2464,20 @@ function renderRoyaltyHistory(){
     ${royalties.map(r=>`<tr><td style="font-weight:700">${esc(r.artistName)||'—'}</td><td style="font-family:'DM Mono',monospace;font-size:11px">${esc(r.period)||'—'}</td><td style="font-size:12px;color:var(--txt2)">${esc(r.releaseTitle)||'Overall'}</td><td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--accent-tx)">₹${Number(r.totalAmount||0).toFixed(2)}</td><td><span class="badge ${r.type==='payout'?'ba':'br'}">${r.type==='payout'?'Payout':'Statement'}</span></td><td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${r.createdAt?r.createdAt.substring(0,10):'—'}</td><td><button class="db" onclick="deleteRoyalty('${r.id}')">Delete</button></td></tr>`).join('')}
   </tbody></table>`;
 }
-async function deleteRoyalty(id){if(!confirm('Delete this royalty statement?'))return;try{await db.collection('royalties').doc(id).delete();await loadRoyaltyHistory();toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+async function deleteRoyalty(id){if(!requireAdmin())return;if(!confirm('Delete this royalty statement?'))return;try{await db.collection('royalties').doc(id).delete();await loadRoyaltyHistory();logActivity('',ADMIN_EMAIL,'royalty_delete','Royalty statement '+id+' deleted');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
 
 /* ═══ BLOG / CMS ═══ */
 async function saveBlog(){
+  if(!requireAdmin())return;
   const title=document.getElementById('b-title').value.trim(),cat=document.getElementById('b-cat').value,content=document.getElementById('b-content').value.trim();
   document.getElementById('blog-e').classList.remove('on');document.getElementById('blog-s').classList.remove('on');
   if(!title)return showAl('blog-e','Please enter a post title.');if(!content)return showAl('blog-e','Please write some content.');
   const btn=document.getElementById('b-btn');btn.disabled=true;btn.textContent='Publishing...';
-  try{await db.collection('blog').add({title,category:cat,content,createdAt:new Date().toISOString()});document.getElementById('b-title').value='';document.getElementById('b-content').value='';showAl('blog-s','✓ Post published!');await loadBlogPosts();toast('Post published ✓');}
+  try{await db.collection('blog').add({title,category:cat,content,createdAt:new Date().toISOString()});document.getElementById('b-title').value='';document.getElementById('b-content').value='';showAl('blog-s','✓ Post published!');await loadBlogPosts();logActivity('',ADMIN_EMAIL,'blog_publish','Blog post published: '+title);toast('Post published ✓');}
   catch(e){showAl('blog-e','Error: '+e.message);}
   btn.disabled=false;btn.textContent='Publish Post';
 }
-async function deleteBlog(id){if(!confirm('Delete this blog post?'))return;try{await db.collection('blog').doc(id).delete();await loadBlogPosts();toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
+async function deleteBlog(id){if(!requireAdmin())return;if(!confirm('Delete this blog post?'))return;try{await db.collection('blog').doc(id).delete();await loadBlogPosts();logActivity('',ADMIN_EMAIL,'blog_delete','Blog post '+id+' deleted');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}}
 function renderBlogList(){
   const el=document.getElementById('blog-list');if(!el)return;
   const c=document.getElementById('blog-count');if(c)c.textContent=blogPosts.length+' post'+(blogPosts.length!==1?'s':'');
@@ -2367,6 +2526,7 @@ function renderNotifications(){
     +'</tbody></table>';
 }
 async function sendNotification(){
+  if(!requireAdmin())return;
   var toEl=document.getElementById('nt-to');
   var to=toEl?toEl.value:'all';
   var subject=document.getElementById('nt-subject').value.trim();
