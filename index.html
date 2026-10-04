@@ -1597,15 +1597,28 @@ function _mfaBridge(){
   if(!mod) throw new Error('Security module still loading — please wait a moment and try again.');
   return mod;
 }
+/* Reads enrolled MFA factors via the module-bundle bridge only (never touches
+   compat user.multiFactor — it sets a reload listener that conflicts with the
+   TOTP bridge and throws auth/internal-error). */
+async function _getMfaFactors(user){
+  try{
+    var mod=_mfaBridge();
+    var mu=(user && user._delegate)?user._delegate:user;
+    if(!mu) return [];
+    var mfu=mod.multiFactor(mu);
+    try{ await mu.reload(); }catch(e){}
+    return mfu.enrolledFactors||[];
+  }catch(e){ return []; }
+}
 /* The modular Auth/User instances hidden inside the compat SDK — same session,
    so TOTP enrollment + challenges act on the user that just signed in. */
 function _modAuth(){ return auth._delegate || auth; }
 function _modUser(){ var u=auth.currentUser; return (u && u._delegate) ? u._delegate : u; }
 
-auth.onAuthStateChanged(u=>{
+auth.onAuthStateChanged(async u=>{
   document.getElementById('ld').style.display='none';
   if(u&&u.email===ADMIN_EMAIL){
-    var factors=[]; try{ factors=u.multiFactor?u.multiFactor.enrolledFactors:[]; }catch(e){}
+    var factors=await _getMfaFactors(u);
     if(!factors.length && _mfaMode!=='enroll'){
       // Signed in with password but no second factor yet → mandatory enrollment
       document.getElementById('auth').style.display='none';
@@ -1715,6 +1728,12 @@ async function mfaVerify(){
       toast('Two-step verification enabled ✓');
     } else if(_mfaMode==='challenge'){
       var mod2=_mfaBridge();
+      // The compat error lacks the operationType the modular resolver asserts.
+      try{
+        _mfaError.operationType='signIn';
+        _mfaError.customData=_mfaError.customData||{};
+        _mfaError.customData.operationType='signIn';
+      }catch(e){}
       var resolver=mod2.getMultiFactorResolver(_modAuth(), _mfaError);
       var hint=resolver.hints[0];
       var assertion2=mod2.TotpMultiFactorGenerator.assertionForSignIn(hint.uid,code);
