@@ -1689,8 +1689,9 @@ async function mfaStartEnrollment(user){
     var mod=_mfaBridge();
     var modUser=_modUser();
     if(!modUser) throw new Error('Session expired — please sign in again.');
-    var session=await mod.multiFactor(modUser).getSession();
-    _mfaSecret=await mod.TotpMultiFactorGenerator.generateSecret(session);
+    // Bypass mod.multiFactor() entirely: generateSecret only needs {user, credential}.
+    var idToken=await modUser.getIdToken();
+    _mfaSecret=await mod.TotpMultiFactorGenerator.generateSecret({user: modUser, credential: idToken});
     var key=_mfaSecret.secretKey;
     var otpauth='otpauth://totp/'+encodeURIComponent('TIR Admin')+':'+encodeURIComponent(user.email||'admin')+'?secret='+encodeURIComponent(key)+'&issuer='+encodeURIComponent('TheImaginaryRecords');
     document.getElementById('mfa-title').textContent='Set up two-step verification';
@@ -1719,7 +1720,10 @@ async function mfaVerify(){
       var mod=_mfaBridge();
       var modUser=_modUser(); if(!modUser) throw new Error('Session expired — please sign in again.');
       var assertion=mod.TotpMultiFactorGenerator.assertionForEnrollment(_mfaSecret,code);
-      await mod.multiFactor(modUser).enroll(assertion,'Authenticator app');
+      // Finalize directly (bypasses multiFactor().enroll to avoid the reload-listener conflict).
+      var enrollIdToken=await modUser.getIdToken();
+      await assertion._finalizeEnroll(modUser.auth, enrollIdToken, 'Authenticator app');
+      try{ await modUser.getIdToken(true); }catch(e){}
       try{ await logActivity('','','mfa_enroll','Admin enrolled a TOTP second factor'); }catch(e){}
       _mfaMode=null; _mfaSecret=null; mfaHide();
       document.getElementById('auth').style.display='none';
