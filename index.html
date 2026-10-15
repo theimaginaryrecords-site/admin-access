@@ -522,6 +522,8 @@ details.acc .b{padding:0 16px 16px;color:#cfcfcf;font-size:13px}
     <div class="ni on" onclick="goPage('overview',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</div>
     <div class="ns">Releases</div>
     <div class="ni" onclick="goPage('releases',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions <span class="cnt" id="pend-cnt" style="display:none">0</span></div>
+    <div class="ns">Artists</div>
+    <div class="ni" onclick="goPage('artists',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M16 5.5a3.5 3.5 0 0 1 0 6.5"/><path d="M17.5 15.5c2.2.5 3.5 2 3.5 4.5"/></svg>All Artists</div>
     <div class="ns">Catalogue</div>
     <div class="ni" onclick="goPage('tracks',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Tracks</div>
     <div class="ni" onclick="goPage('splits',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 3 7.5 7.5a4 4 0 0 1-1.172 2.872L12 22"/></svg>Split Sheets</div>
@@ -812,6 +814,61 @@ details.acc .b{padding:0 16px 16px;color:#cfcfcf;font-size:13px}
           <input class="si" type="text" id="log-search" placeholder="Search email, action, detail..." oninput="applyLogFilter()"/>
         </div></div>
         <div class="tw tbl" id="log-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
+      </div>
+    </div>
+
+    <div class="pg" id="page-artists">
+      <div class="section" style="margin-bottom:18px">
+        <div class="sh pg-h"><h3>Create Account</h3><p>Artist or Label — no Firebase Console needed</p></div>
+        <div class="sb2">
+          <div class="al al-e" id="artist-e"></div><div class="al al-s" id="artist-s"></div>
+          <div id="ca-created" style="display:none;background:var(--ok-bg);border:1px solid var(--ok);border-radius:10px;padding:12px 16px;margin-bottom:14px">
+            <div style="font-size:12px;font-weight:700;color:var(--txt)">Account created — share these login details once:</div>
+            <div style="font-size:12px;color:var(--txt2);margin-top:6px">Email: <b id="ca-created-email" style="color:var(--txt)"></b><br/>Temporary password: <b id="ca-created-pw" style="color:var(--txt)"></b></div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:6px">This password is shown once and is not stored anywhere. Ask the artist/label to change it after first sign-in.</div>
+            <div style="margin-top:10px"><button class="fb pill" onclick="document.getElementById('ca-created').style.display='none'">Dismiss</button></div>
+          </div>
+          <div id="ca-draft-banner" style="display:none;background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 16px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="font-size:12px;color:var(--txt2)">Unsaved account draft from <span id="ca-draft-banner-time" style="font-weight:700;color:var(--txt)"></span> (password not saved for security)</div>
+            <div style="display:flex;gap:8px">
+              <button onclick="restoreCreateAccountDraft()" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Restore</button>
+              <button onclick="discardCreateAccountDraft()" style="padding:6px 14px;background:none;border:1px solid var(--brd);border-radius:8px;font-size:11px;color:var(--txt2);cursor:pointer">Discard</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:0;background:var(--input);border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:16px">
+            <button id="att-artist" onclick="switchAcctType('artist')" style="flex:1;padding:11px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:none;background:var(--accent);color:#fff;transition:all .2s">Artist Account</button>
+            <button id="att-label" onclick="switchAcctType('label')" style="flex:1;padding:11px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:none;background:none;color:var(--txt2);transition:all .2s">Label Account</button>
+          </div>
+          <div class="roy-form" id="ca-form">
+            <div class="fg fld rf-full"><div style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;padding-bottom:6px;border-bottom:1px solid var(--brd)">Account Details</div></div>
+            <div class="fg fld"><label id="ca-name-label">Artist / Stage Name *</label><input type="text" id="ca-name" placeholder="Artist name"/></div>
+            <div class="fg fld"><label>Email *</label><input type="email" id="ca-email" placeholder="artist@email.com"/></div>
+            <div class="fg fld"><label>Password *</label><div style="display:flex;gap:8px"><input type="password" id="ca-password" placeholder="Minimum 6 characters" style="flex:1"/><button type="button" class="fb pill" onclick="generateTempPassword()">Generate</button></div></div>
+            <div class="fg fld"><label>Genre</label><input type="text" id="ca-genre" placeholder="Hip Hop / Trap"/></div>
+            <div class="fg fld"><label>Country</label><input type="text" id="ca-country" placeholder="India"/></div>
+            <div class="fg fld"><label>Instagram</label><input type="text" id="ca-instagram" placeholder="@handle"/></div>
+            <div class="fg fld rf-full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio or label description"></textarea></div>
+            <div class="fg fld rf-full" id="ca-spotify-grp"><div style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Streaming Profiles</div></div>
+            <div class="fg fld" id="ca-spotify-row"><label>Spotify Artist URL</label><input type="url" id="ca-spotify" placeholder="https://open.spotify.com/artist/..."/></div>
+            <div class="fg fld" id="ca-apple-row"><label>Apple Music URL</label><input type="url" id="ca-apple-music" placeholder="https://music.apple.com/..."/></div>
+            <div class="fg fld" id="ca-soundcloud-row"><label>SoundCloud URL</label><input type="url" id="ca-soundcloud" placeholder="https://soundcloud.com/..."/></div>
+            <div class="fg fld" id="ca-youtube-row"><label>YouTube Channel URL</label><input type="url" id="ca-youtube-url" placeholder="https://youtube.com/@..."/></div>
+            <div class="fg fld"><label>Plan</label><select id="ca-plan"><option value="free">Free</option><option value="custom">Custom Label</option></select></div>
+            <div class="fg fld"><label>Royalty Split (%)</label><input type="number" id="ca-royalty" placeholder="85" value="85" min="0" max="100"/></div>
+            <div class="fg fld" id="ca-audio-row"><label>Audio Release Access</label><select id="ca-audio-access"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+            <div class="fg fld" id="ca-video-row"><label>Music Video Access</label><select id="ca-video-access"><option value="false">Disabled</option><option value="true">Enabled</option></select></div>
+            <div class="fg fld rf-full"><button class="btn-pri btn primary" id="ca-btn" onclick="createAccount()">Create Artist Account</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="sh pg-h"><div><h3>All Accounts</h3><p id="acct-count">0 accounts</p></div></div>
+        <div style="padding:14px 18px 0"><div class="frow" id="acct-filter-row">
+          <input class="si" type="text" id="acct-search" placeholder="Search name, email, genre..." oninput="applyAcctFilter()"/>
+          <button class="fb pill on" onclick="setAcctF('all',this)">All</button>
+          <button class="fb pill" onclick="setAcctF('artist',this)">Artists</button>
+          <button class="fb pill" onclick="setAcctF('label',this)">Labels</button>
+        </div></div>
+        <div class="tw tbl" id="acct-list"></div>
       </div>
     </div>
 
@@ -1134,6 +1191,7 @@ async function loadUsers(){
     const snap=await db.collection('users').get();
     artists=[];snap.forEach(d=>artists.push({id:d.id,...d.data()}));
     renderLabelStats();
+    renderAccounts();
     const sel=document.getElementById('r-artist');
     if(sel){
       sel.innerHTML='<option value="">Select Artist —</option>';
@@ -1141,6 +1199,216 @@ async function loadUsers(){
     }
   }catch(e){console.error(e);}
 }
+
+/* ═══ ALL ARTISTS — accounts list + create account + disable/enable ═══ */
+/* Ported from the pre-restructure admin (Artists/Users). Scope is deliberately
+   account management only: create accounts, list accounts, disable/enable.
+   No roster, no KYC, no agreement/ID verification, no bank/analytics editing. */
+var _acctType = 'artist';
+var _acctFilter = 'all';
+var _acctQuery = '';
+var CA_DRAFT_KEY = 'tir_admin_create_account_draft_v1';
+var CA_DRAFT_FIELDS = ['ca-name','ca-email','ca-genre','ca-country','ca-instagram','ca-bio','ca-spotify','ca-apple-music','ca-soundcloud','ca-youtube-url','ca-plan','ca-royalty','ca-audio-access','ca-video-access'];
+function autosaveCreateAccountDraft() {
+  try {
+    var data = { savedAt: new Date().toISOString(), acctType: _acctType, fields: {} };
+    var hasContent = false;
+    CA_DRAFT_FIELDS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { data.fields[id] = el.value; if (el.value && id !== 'ca-plan' && id !== 'ca-royalty' && id !== 'ca-audio-access' && id !== 'ca-video-access') hasContent = true; }
+    });
+    if (!hasContent) return;
+    localStorage.setItem(CA_DRAFT_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+function checkForCreateAccountDraft() {
+  var raw;
+  try { raw = localStorage.getItem(CA_DRAFT_KEY); } catch(e) { return; }
+  if (!raw) return;
+  try {
+    var data = JSON.parse(raw);
+    var banner = document.getElementById('ca-draft-banner');
+    var timeEl = document.getElementById('ca-draft-banner-time');
+    if (banner && timeEl) { timeEl.textContent = new Date(data.savedAt).toLocaleString(); banner.style.display = 'flex'; }
+  } catch(e) {}
+}
+window.restoreCreateAccountDraft = function() {
+  var raw;
+  try { raw = localStorage.getItem(CA_DRAFT_KEY); } catch(e) { return; }
+  if (!raw) return;
+  try {
+    var data = JSON.parse(raw);
+    if (data.acctType) switchAcctType(data.acctType);
+    Object.keys(data.fields||{}).forEach(function(id) { var el = document.getElementById(id); if (el && data.fields[id]) el.value = data.fields[id]; });
+    document.getElementById('ca-draft-banner').style.display = 'none';
+    toast('Draft restored — remember to re-enter the password ✓');
+  } catch(e) {}
+};
+window.discardCreateAccountDraft = function() {
+  try { localStorage.removeItem(CA_DRAFT_KEY); } catch(e) {}
+  document.getElementById('ca-draft-banner').style.display = 'none';
+};
+function switchAcctType(type) {
+  _acctType = type;
+  var isLabel = type === 'label';
+  var artistBtn = document.getElementById('att-artist');
+  var labelBtn  = document.getElementById('att-label');
+  artistBtn.style.background = isLabel ? 'none' : 'var(--accent)';
+  artistBtn.style.color      = isLabel ? 'var(--txt2)' : '#fff';
+  labelBtn.style.background  = isLabel ? 'var(--accent)' : 'none';
+  labelBtn.style.color       = isLabel ? '#fff' : 'var(--txt2)';
+  document.getElementById('ca-name-label').textContent = isLabel ? 'Label Name *' : 'Artist / Stage Name *';
+  document.getElementById('ca-name').placeholder = isLabel ? 'e.g. Sheen Valley Records' : 'Artist name';
+  document.getElementById('ca-genre').placeholder = isLabel ? 'Various' : 'Hip Hop / Trap';
+  document.getElementById('ca-btn').textContent = isLabel ? 'Create Label Account' : 'Create Artist Account';
+  document.getElementById('ca-plan').value = isLabel ? 'custom' : 'free';
+  var hide = ['ca-spotify-grp','ca-spotify-row','ca-apple-row','ca-soundcloud-row','ca-youtube-row','ca-audio-row','ca-video-row'];
+  hide.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.style.display = isLabel ? 'none' : '';
+  });
+}
+function generateTempPassword(){
+  var chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+  var out='';
+  for(var i=0;i<12;i++) out+=chars.charAt(Math.floor(Math.random()*chars.length));
+  var el=document.getElementById('ca-password'); if(el) el.value=out;
+}
+
+/* ═══ CREATE ACCOUNT ═══ */
+/* Same flow as the original admin: a SECONDARY Firebase app ('ArtistCreator')
+   creates the Auth user, so the admin's own session is never disturbed.
+   If the Firestore profile write fails, the Auth user is rolled back. */
+window.createAccount = async function() {
+  if(!requireAdmin())return;
+  var name     = (document.getElementById('ca-name').value||'').trim();
+  var email    = (document.getElementById('ca-email').value||'').trim();
+  var password = (document.getElementById('ca-password').value||'');
+  var eEl = document.getElementById('artist-e');
+  var sEl = document.getElementById('artist-s');
+  eEl.classList.remove('on'); sEl.classList.remove('on');
+  var _cc0 = document.getElementById('ca-created'); if (_cc0) _cc0.style.display = 'none';
+  if (!name)              { eEl.textContent = 'Please enter a name.'; eEl.classList.add('on'); return; }
+  if (!email)             { eEl.textContent = 'Please enter an email.'; eEl.classList.add('on'); return; }
+  if (password.length<6)  { eEl.textContent = 'Password must be at least 6 characters.'; eEl.classList.add('on'); return; }
+  var btn = document.getElementById('ca-btn');
+  btn.disabled = true; btn.textContent = 'Creating...';
+  var isLabel = _acctType === 'label';
+  try {
+    var secAuth = secondaryAuth();
+    var cred = await secAuth.createUserWithEmailAndPassword(email, password);
+    var uid = cred.user.uid;
+    try { await cred.user.sendEmailVerification(); } catch(e) {}
+    var userData = {
+      name: name, email: email,
+      accountType: _acctType,
+      genre:    (document.getElementById('ca-genre').value||'').trim(),
+      country:  (document.getElementById('ca-country').value||'').trim(),
+      instagram:(document.getElementById('ca-instagram').value||'').trim(),
+      bio:      (document.getElementById('ca-bio').value||'').trim(),
+      plan:     document.getElementById('ca-plan').value,
+      royaltySplit: Number(document.getElementById('ca-royalty').value)||85,
+      createdAt: new Date().toISOString(),
+      createdBy: 'admin-panel'
+    };
+    if (!isLabel) {
+      userData.spotify       = (document.getElementById('ca-spotify').value||'').trim();
+      userData.appleMusicUrl = (document.getElementById('ca-apple-music').value||'').trim();
+      userData.soundcloudUrl = (document.getElementById('ca-soundcloud').value||'').trim();
+      userData.youtube       = (document.getElementById('ca-youtube-url').value||'').trim();
+      userData.releaseServices = {
+        audio: document.getElementById('ca-audio-access').value === 'true',
+        video: document.getElementById('ca-video-access').value === 'true'
+      };
+    } else {
+      userData.labelArtists   = [];
+      userData.releaseServices = { audio: true, video: true };
+    }
+    try {
+      await db.collection('users').doc(uid).set(userData, { merge: true });
+    } catch (firestoreErr) {
+      var rollbackNote = ' The login was rolled back automatically.';
+      try { await cred.user.delete(); }
+      catch (delErr) { rollbackNote = ' IMPORTANT: the login could NOT be rolled back automatically — remove it manually in Firebase Console → Authentication → Users (' + email + ').'; }
+      try { await secAuth.signOut(); } catch (soErr) {}
+      throw new Error('Profile save failed.' + rollbackNote + ' Details: ' + firestoreErr.message);
+    }
+    await secAuth.signOut();
+    var _cc = document.getElementById('ca-created');
+    if (_cc) {
+      document.getElementById('ca-created-email').textContent = email;
+      document.getElementById('ca-created-pw').textContent = password;
+      _cc.style.display = 'block';
+    }
+    ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio','ca-spotify','ca-apple-music','ca-soundcloud','ca-youtube-url'].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('ca-royalty').value = '85';
+    try { localStorage.removeItem(CA_DRAFT_KEY); } catch(e) {}
+    var _cadb = document.getElementById('ca-draft-banner'); if (_cadb) _cadb.style.display = 'none';
+    sEl.textContent = '✓ ' + (isLabel?'Label':'Artist') + ' account created: ' + name + ' (' + email + ')';
+    sEl.classList.add('on');
+    await loadUsers();
+    logActivity('',ADMIN_EMAIL,'account_create',(isLabel?'Label':'Artist')+' account created: '+name+' ('+email+')');
+    toast((isLabel?'Label':'Artist') + ' account created ✓');
+  } catch(ex) {
+    eEl.textContent = 'Error: ' + ex.message; eEl.classList.add('on');
+  }
+  btn.disabled = false;
+  btn.textContent = isLabel ? 'Create Label Account' : 'Create Artist Account';
+};
+
+/* ═══ ACCOUNTS LIST + DISABLE/ENABLE (kill-switch) ═══ */
+function renderAccounts(){
+  var el=document.getElementById('acct-list'); if(!el) return;
+  var countEl=document.getElementById('acct-count');
+  var all=(typeof artists!=='undefined'&&artists)?artists:[];
+  if(countEl) countEl.textContent=all.length+' account'+(all.length!==1?'s':'');
+  var list=all.slice();
+  if(_acctFilter==='artist') list=list.filter(function(a){return a.accountType!=='label';});
+  if(_acctFilter==='label') list=list.filter(function(a){return a.accountType==='label';});
+  var q=(_acctQuery||'').toLowerCase();
+  if(q) list=list.filter(function(a){return ((a.name||'')+' '+(a.email||'')+' '+(a.genre||'')).toLowerCase().indexOf(q)>-1;});
+  list.sort(function(a,b){return new Date(b.createdAt||0)-new Date(a.createdAt||0);});
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No accounts found</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>`+
+    list.map(function(a){
+      var isLabel=a.accountType==='label';
+      var disabled=a.disabled===true;
+      var created=a.createdAt?new Date(a.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+      return `<tr>
+        <td style="font-weight:700">${esc(a.name)||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${esc(a.email)||'—'}</td>
+        <td>${isLabel?'<span class="pill">Label</span>':'Artist'}</td>
+        <td>${disabled?'<span style="color:var(--bad);font-weight:700;font-size:11px">Disabled</span>':'<span style="color:var(--ok);font-weight:700;font-size:11px">Active</span>'}</td>
+        <td style="font-size:12px">${created}</td>
+        <td><button class="vb" style="${disabled?'background:var(--ok-bg);color:var(--ok)':'background:var(--bad-bg);color:var(--bad)'}" onclick="toggleAccountDisabled('${a.id}',${disabled?'false':'true'})">${disabled?'Enable':'Disable'}</button></td>
+      </tr>`;
+    }).join('')+`</tbody></table>`;
+}
+function applyAcctFilter(){ _acctQuery=(document.getElementById('acct-search').value||''); renderAccounts(); }
+function setAcctF(f,el){
+  _acctFilter=f;
+  document.querySelectorAll('#acct-filter-row .fb').forEach(function(b){b.classList.remove('on');});
+  if(el) el.classList.add('on');
+  renderAccounts();
+}
+async function toggleAccountDisabled(id, disable){
+  if(!requireAdmin())return;
+  var all=(typeof artists!=='undefined'&&artists)?artists:[];
+  var a=all.find(function(x){return x.id===id;});
+  var name=(a&&(a.name||a.email))||id;
+  if(auth.currentUser && id===auth.currentUser.uid){ toast('You cannot disable your own admin account.'); return; }
+  if(!confirm((disable?'Disable':'Enable')+' account "'+name+'"?'+(disable?' They will be locked out of the portal immediately (kill-switch).':''))) return;
+  try{
+    await db.collection('users').doc(id).update({disabled:disable});
+    if(a) a.disabled=disable;
+    renderAccounts();
+    logActivity('',ADMIN_EMAIL, disable?'account_disable':'account_enable', 'Account '+(disable?'disabled':'enabled')+': '+name);
+    toast('Account '+(disable?'disabled':'enabled')+' ✓');
+  }catch(e){ toast('Error: '+e.message); }
+}
+
 async function loadTickets(){
   try{
     const snap=await db.collection('tickets').get();
@@ -1606,6 +1874,7 @@ function goPage(name,el){
   const m={
     overview:['Overview','Label summary'],
     releases:['All Submissions','Every release'],
+    artists:['All Artists','Artist & label accounts'],
     tickets:['Service Requests','Artist support'],
     demos:['Demos','Demo submissions'],
     royalties:['Manage Royalties','Update artist earnings'],
@@ -1622,7 +1891,7 @@ function goPage(name,el){
     logins:['Login History','Sign-in records']
   };
   const[t,s]=m[name]||['Admin',''];document.getElementById('pgt').textContent=t;document.getElementById('pgs').textContent=s;
-  if(name==='releases')loadReleases();
+  if(name==='releases')loadReleases();if(name==='artists')renderAccounts();
   if(name==='blog')loadBlogPosts();
   if(name==='royalties'){loadRoyaltyHistory();loadUsers();}
   if(name==='analytics'){loadUsers();loadAnalyticsPage();}
@@ -1673,7 +1942,7 @@ function toggleTheme(){
 document.addEventListener('DOMContentLoaded',function(){
   var t='light';
   try{ t=localStorage.getItem('tir-theme')||'light'; }catch(e){}
-  setTheme(t);
+  setTheme(t);   setTimeout(checkForCreateAccountDraft,100);   setInterval(autosaveCreateAccountDraft,15000);
   });
 
 /* ── Activity log helper (audit trail for admin actions) ── */
