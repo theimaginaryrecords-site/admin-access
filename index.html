@@ -365,6 +365,15 @@ tr:last-child td{border-bottom:none}
 
 .store-logo{display:inline-flex;align-items:center;justify-content:center;flex:none;border-radius:6px;overflow:hidden;margin-right:10px;box-shadow:0 1px 3px rgba(0,0,0,.25)}.store-logo svg{width:100%;height:100%;display:block}
 
+/* ── Demos (intake queue) ── */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.demo-field{background:var(--panel);border:1px solid var(--brd);border-radius:12px;padding:12px 14px}
+.demo-field.full{grid-column:1/-1}
+.df-label{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.df-val{font-size:13px;color:var(--txt)}
+.df-val.bio{white-space:pre-wrap}
+@media(max-width:768px){.demo-grid{grid-template-columns:1fr}.demo-field.full{grid-column:1}}
+
 /* ===== PORTAL DESIGN SYSTEM (tokens + components, from distribution-with-backend.html) ===== */
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 p{margin:0}
@@ -523,6 +532,7 @@ details.acc .b{padding:0 16px 16px;color:#cfcfcf;font-size:13px}
     <div class="ni" onclick="goPage('withdrawals',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Withdrawals <span class="cnt" id="wd-cnt" style="display:none">0</span></div>
     <div class="ns">Support</div>
     <div class="ni" onclick="goPage('tickets',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Service Requests <span class="cnt" id="tkt-cnt" style="display:none">0</span></div>
+    <div class="ni" onclick="goPage('demos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Demos <span class="cnt" id="demo-new-cnt" style="display:none">0</span></div>
     <div class="ns">Analytics</div>
     <div class="ni" onclick="goPage('analytics',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
     <div class="ns">Content</div>
@@ -652,6 +662,23 @@ details.acc .b{padding:0 16px 16px;color:#cfcfcf;font-size:13px}
         </div>
       </div>
       <div class="section"><div class="sh pg-h"><h3>Royalty History</h3></div><div class="tw tbl" id="roy-history-list"></div></div>
+    </div>
+
+    <div class="pg" id="page-demos">
+      <div class="stats">
+        <div class="sc stat"><div class="sc-l">Total Demos</div><div class="sc-v" id="ds0">—</div></div>
+        <div class="sc stat"><div class="sc-l">New</div><div class="sc-v" id="ds1">—</div></div>
+        <div class="sc stat"><div class="sc-l">Reviewing</div><div class="sc-v" id="ds2">—</div></div>
+      </div>
+      <div class="section"><div class="sh pg-h"><div><h3>Demo Submissions</h3><p id="demo-all-count"></p></div></div>
+        <div style="padding:14px 18px 0"><div class="frow">
+          <input class="si" type="text" id="demo-search" placeholder="Search name, email, genre..." oninput="applyDemoFilter()"/>
+          <button class="fb pill on" onclick="setDemoF('all',this)">All</button>
+          <button class="fb pill" onclick="setDemoF('new',this)">New</button>
+          <button class="fb pill" onclick="setDemoF('reviewing',this)">Reviewing</button>
+        </div></div>
+        <div class="tw tbl" id="demo-all-list"></div>
+      </div>
     </div>
 
     <div class="pg" id="page-analytics">
@@ -853,6 +880,11 @@ details.acc .b{padding:0 16px 16px;color:#cfcfcf;font-size:13px}
 <div class="mo" id="tmo" onclick="if(event.target===this)closeMo('tmo')">
   <div class="mbox modal"><div class="mh"><div class="mt2" id="tmo-title">Ticket</div><button class="mc" onclick="closeMo('tmo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="tmo-body"></div></div>
 </div>
+<!-- DEMO MODAL -->
+<div class="mo" id="dmo" onclick="if(event.target===this)closeMo('dmo')">
+  <div class="mbox modal"><div class="mh"><div><div class="mt2" id="dmo-title">Demo</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center" id="dmo-ref"></div></div><button class="mc" onclick="closeMo('dmo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="dmo-body"></div></div>
+</div>
+
 <!-- SPLIT SHEET MODAL -->
 <div class="mo" id="smod" onclick="if(event.target===this)closeMo('smod')">
   <div class="mbox modal"><div class="mh"><div class="mt2" id="smod-title">Split Sheet</div><button class="mc" onclick="closeMo('smod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="smod-body"></div></div>
@@ -1076,14 +1108,14 @@ function doSignOut(){auth.signOut();}
 /* ── loadAll: settled results, reports which loaders failed, never claims false success ── */
 async function loadAll(){
   toast('Loading...');
-  const jobs=[['Releases',loadReleases()],['Users',loadUsers()],['Tickets',loadTickets()],['Blog',loadBlogPosts()],['Royalties',loadRoyaltyHistory()],['Withdrawals',loadWithdrawals()],['Notifications',loadNotifications()],['Activity Logs',loadActivityLogs()],['Tracks',loadTracks()],['Split Sheets',loadSplits()],['Licenses',loadLicenses()],['Contracts',loadContracts()],['Login History',loadLoginHistory()]];
+  const jobs=[['Releases',loadReleases()],['Users',loadUsers()],['Tickets',loadTickets()],['Demos',loadDemos()],['Blog',loadBlogPosts()],['Royalties',loadRoyaltyHistory()],['Withdrawals',loadWithdrawals()],['Notifications',loadNotifications()],['Activity Logs',loadActivityLogs()],['Tracks',loadTracks()],['Split Sheets',loadSplits()],['Licenses',loadLicenses()],['Contracts',loadContracts()],['Login History',loadLoginHistory()]];
   const results=await Promise.allSettled(jobs.map(j=>j[1]));
   const failed=results.map((r,i)=>r.status==='rejected'?jobs[i][0]:null).filter(Boolean);
   toast(failed.length?('Loaded with errors: '+failed.join(', ')+' — tap ↻ Refresh to retry'):'All data loaded ✓');
 }
 
-let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[];
-let relFilter='all',tktFilter='all',tktTypeFilter='all';
+let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[],demos=[];
+let relFilter='all',tktFilter='all',tktTypeFilter='all',demoFilter='all';
 
 /* ── Loaders ── */
 async function loadReleases(){
@@ -1120,6 +1152,86 @@ async function loadTickets(){
     if(el){el.textContent=oc;el.style.display=oc>0?'inline':'none';}
   }catch(e){console.error(e);}
 }
+/* ── Demos (intake queue: read + mark reviewed + delete) ── */
+/* Ported from the pre-restructure admin. Scope is deliberately read-focused:
+   no onboarding, no artist creation, no emails/messages sent from this section.
+   Status writes are limited to New / Reviewing only. */
+async function loadDemos(){
+  try{
+    const snap=await db.collection('demos').orderBy('submittedAt','desc').get();
+    demos=[];snap.forEach(d=>demos.push({id:d.id,...d.data()}));
+    renderDemoStats();renderDemoTable('demo-all-list',demos);
+    const nw=demos.filter(d=>d.status==='new').length;
+    const el=document.getElementById('demo-new-cnt');
+    if(el){el.textContent=nw;el.style.display=nw>0?'inline':'none';}
+    const c=document.getElementById('demo-all-count'); if(c)c.textContent=demos.length+' submission'+(demos.length!==1?'s':'');
+  }catch(e){console.log(e);}
+}
+function renderDemoStats(){
+  const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length;
+  [['ds0',total],['ds1',nw],['ds2',rv]].forEach(function(p){
+    const b=document.getElementById(p[0]);if(b)b.textContent=p[1];
+  });
+}
+function demoStatusCell(d){
+  // Intake queue only tracks New / Reviewing. Any older pipeline status on a
+  // legacy doc renders as read-only text and can never be written from here.
+  if(d.status==='new'||d.status==='reviewing'){
+    return `<select class="ss" onchange="updateDemoStatus('${d.id}',this.value)">
+      <option value="new" ${d.status==='new'?'selected':''}>New</option>
+      <option value="reviewing" ${d.status==='reviewing'?'selected':''}>Reviewing</option>
+    </select>`;
+  }
+  return `<span class="badge">${esc(d.status||'new').toUpperCase()}</span>`;
+}
+function renderDemoTable(id,list){
+  const el=document.getElementById(id);if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No demos found</div></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Genre</th><th>Email</th><th>Instagram</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${list.map(d=>`<tr>
+      <td><div style="font-weight:700">${esc(d.name)||'—'}</div><span class="ref-badge">${esc(d.refId)||'—'}</span></td>
+      <td style="color:var(--txt2);font-size:12px">${esc(d.genre)||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${esc(d.email)||'—'}</td>
+      <td style="font-size:12px;color:var(--txt2)">${esc(d.instagram)||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</td>
+      <td>${demoStatusCell(d)}</td>
+      <td><button class="vb" onclick="openDemo('${d.id}')">View</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+function openDemo(id){
+  const d=demos.find(x=>x.id===id);if(!d)return;
+  const bc={new:'b-new',reviewing:'b-reviewing',shortlisted:'b-shortlisted',signed:'b-signed',rejected:'b-rejected',archived:'b-archived'};
+  document.getElementById('dmo-title').textContent=d.name||'Demo';
+  document.getElementById('dmo-ref').innerHTML=`<span class="ref-badge">${esc(d.refId)||'—'}</span><span class="badge ${bc[d.status]||'b-new'}" style="margin-left:6px">${esc(d.status||'new').toUpperCase()}</span>`;
+  const links=[];if(d.demoLink)links.push(`<a href="${safeUrl(d.demoLink)}" target="_blank">Demo Link</a>`);if(d.youtubeLink)links.push(`<a href="${safeUrl(d.youtubeLink)}" target="_blank">YouTube / SoundCloud</a>`);
+  const statusCtl=(d.status==='new'||d.status==='reviewing')
+    ? `<select onchange="updateDemoStatus('${d.id}',this.value)"><option value="new" ${d.status==='new'?'selected':''}>New</option><option value="reviewing" ${d.status==='reviewing'?'selected':''}>Reviewing</option></select>`
+    : `<span class="badge">${esc(d.status||'new').toUpperCase()}</span>`;
+  document.getElementById('dmo-body').innerHTML=`<div class="demo-grid"><div class="demo-field"><div class="df-label">Artist</div><div class="df-val" style="font-weight:700;font-size:15px">${esc(d.name)||'—'}</div></div><div class="demo-field"><div class="df-label">Genre</div><div class="df-val">${esc(d.genre)||'—'}</div></div><div class="demo-field"><div class="df-label">Email</div><div class="df-val"><a href="mailto:${esc(d.email)}">${esc(d.email)||'—'}</a></div></div><div class="demo-field"><div class="df-label">Phone</div><div class="df-val">${esc(d.phone)||'—'}</div></div><div class="demo-field"><div class="df-label">Instagram</div><div class="df-val"><a href="https://instagram.com/${igHandle(d.instagram)}" target="_blank">${esc(d.instagram)||'—'}</a></div></div><div class="demo-field"><div class="df-label">Submitted</div><div class="df-val">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</div></div><div class="demo-field full"><div class="df-label">Music Links</div><div class="df-val" style="display:flex;gap:16px;flex-wrap:wrap">${links.length?links.join(''):'No links provided'}</div></div><div class="demo-field full"><div class="df-label">Bio</div><div class="df-val bio">${esc(d.bio)||'—'}</div></div></div><div class="update-box card"><label>Update Status</label>${statusCtl}<div class="update-acts"><button class="btn danger" onclick="deleteDemo('${d.id}')">Delete</button></div></div>`;
+  document.getElementById('dmo').classList.add('on');
+}
+async function updateDemoStatus(id,status){
+  if(status!=='new'&&status!=='reviewing')return;
+  if(!requireAdmin())return;
+  try{await db.collection('demos').doc(id).update({status});await loadDemos();logActivity('',ADMIN_EMAIL,'demo_status','Demo '+id+' → '+status);toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}
+}
+async function deleteDemo(id){
+  if(!requireAdmin())return;
+  // NOTE: demo links point to external hosts; any Cloudinary assets (public_id, if any) are NOT deleted here — remove manually in the Cloudinary dashboard; client has no API secret.
+  if(!confirm('Delete this demo?'))return;
+  try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();applyDemoFilter();closeMo('dmo');logActivity('',ADMIN_EMAIL,'demo_delete','Demo '+id+' deleted');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}
+}
+function setDemoF(s,btn){demoFilter=s;document.querySelectorAll('#page-demos .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyDemoFilter();}
+function applyDemoFilter(){
+  const q=(document.getElementById('demo-search')?.value||'').toLowerCase();
+  let list=demos;
+  if(demoFilter!=='all')list=list.filter(d=>d.status===demoFilter);
+  if(q)list=list.filter(d=>(d.name||'').toLowerCase().includes(q)||(d.email||'').toLowerCase().includes(q)||(d.genre||'').toLowerCase().includes(q));
+  renderDemoTable('demo-all-list',list);
+  document.getElementById('demo-all-count').textContent=list.length+' result'+(list.length!==1?'s':'');
+}
+
 async function loadBlogPosts(){try{const snap=await db.collection('blog').orderBy('createdAt','desc').get();blogPosts=[];snap.forEach(d=>blogPosts.push({id:d.id,...d.data()}));renderBlogList();}catch(e){console.log(e);}}
 async function loadRoyaltyHistory(){try{const snap=await db.collection('royalties').orderBy('createdAt','desc').get();royalties=[];snap.forEach(d=>royalties.push({id:d.id,...d.data()}));renderRoyaltyHistory();}catch(e){console.log(e);}}
 async 
@@ -1495,6 +1607,7 @@ function goPage(name,el){
     overview:['Overview','Label summary'],
     releases:['All Submissions','Every release'],
     tickets:['Service Requests','Artist support'],
+    demos:['Demos','Demo submissions'],
     royalties:['Manage Royalties','Update artist earnings'],
     analytics:['Analytics','Update artist streaming stats'],
     withdrawals:['Withdrawal Requests','Review artist payouts'],
@@ -1522,6 +1635,7 @@ function goPage(name,el){
   if(name==='splits')loadSplits();
   if(name==='licenses')loadLicenses();
   if(name==='contracts')loadContracts();
+  if(name==='demos')loadDemos();
   if(typeof closeDrawer==='function')closeDrawer();
   window.scrollTo(0,0);
 }
