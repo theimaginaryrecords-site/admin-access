@@ -4,8 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TIR Admin Panel</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%234f46e5%22/%3E%3Cpath d=%22M16 42V18l24-4v24%22 stroke=%22%23ffffff%22 stroke-width=%224%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Ccircle cx=%2218%22 cy=%2244%22 r=%226%22 fill=%22%23ffffff%22/%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%226%22 fill=%22%23ffffff%22/%3E%3C/svg%3E"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2319d3c5%22/%3E%3Cpath d=%22M16 42V18l24-4v24%22 stroke=%22%23ffffff%22 stroke-width=%224%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Ccircle cx=%2218%22 cy=%2244%22 r=%226%22 fill=%22%23ffffff%22/%3E%3Ccircle cx=%2240%22 cy=%2240%22 r=%226%22 fill=%22%23ffffff%22/%3E%3C/svg%3E"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -46,54 +46,9 @@ try{var _t=localStorage.getItem('tir-theme');if(_t==='dark')document.documentEle
    Theme persisted in localStorage 'tir-theme' (shared with artist portal).
    ═══════════════════════════════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f1f3f9;
-  --sidebar:#ffffff;
-  --card:#ffffff;
-  --txt:#111827;
-  --txt2:#5b6472;
-  --txt3:#9aa3b5;
-  --brd:#e3e8f1;
-  --brd2:#d3dbe8;
-  --accent:#4f46e5;
-  --accent-tx:#4f46e5;
-  --accent-soft:rgba(79,70,229,.08);
-  --accent-brd:rgba(79,70,229,.32);
-  --on-accent:#ffffff;
-  --input:#f6f8fb;
-  --hover:rgba(17,24,39,.03);
-  --shadow:0 8px 24px rgba(20,30,60,.08);
-  --r:14px;
-  --ok:#16a34a;--ok-bg:rgba(22,163,74,.1);
-  --bad:#dc2626;--bad-bg:rgba(220,38,38,.08);
-  --warn:#d97706;--warn-bg:rgba(217,119,6,.1);
-  --info:#2563eb;--info-bg:rgba(37,99,235,.1);
-  --mut:#6b7280;--mut-bg:rgba(107,114,128,.12);
-  color-scheme:light;
-}
-:root[data-theme="dark"]{
-  --bg:#0a0c11;
-  --sidebar:#0e1118;
-  --card:#12161f;
-  --txt:#eef1f7;
-  --txt2:#98a3b8;
-  --txt3:#5d6b82;
-  --brd:#1d2432;
-  --brd2:#2b3547;
-  --accent:#4f46e5;
-  --accent-tx:#8b93f8;
-  --accent-soft:rgba(79,70,229,.16);
-  --accent-brd:rgba(79,70,229,.4);
-  --input:#0c1017;
-  --hover:rgba(255,255,255,.03);
-  --shadow:0 10px 30px rgba(0,0,0,.45);
-  --ok:#4ade80;--ok-bg:rgba(74,222,128,.1);
-  --bad:#f87171;--bad-bg:rgba(248,113,113,.1);
-  --warn:#fbbf24;--warn-bg:rgba(251,191,36,.1);
-  --info:#60a5fa;--info-bg:rgba(96,165,250,.12);
-  --mut:#9aa3b5;--mut-bg:rgba(154,163,181,.14);
-  color-scheme:dark;
-}
+:root{--bg:#0d0d0d;--panel:#161616;--card:#1b1b1b;--chip:#262626;--chip2:#303030;--line:#262626;--text:#f2f2f2;--mute:#8d8d8d;--teal:#19d3c5;--teal2:#0fa89c;--green:#4ade80;--red:#f87171;--amber:#fbbf24;--orange:#fb923c;--blue:#60a5fa;--purple:#4a2a7d;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--sidebar:var(--panel);--txt:var(--text);--txt2:var(--mute);--txt3:#6f6f6f;--brd:var(--line);--brd2:var(--chip2);--accent:var(--teal);--accent-tx:var(--teal);--accent-soft:rgba(25,211,197,.12);--accent-brd:rgba(25,211,197,.45);--on-accent:#06201e;--input:var(--chip);--hover:rgba(255,255,255,.04);--shadow:0 10px 30px rgba(0,0,0,.5);--r:14px;--ok:var(--green);--ok-bg:rgba(74,222,128,.1);--bad:var(--red);--bad-bg:rgba(248,113,113,.1);--warn:var(--amber);--warn-bg:rgba(251,191,36,.1);--info:var(--blue);--info-bg:rgba(96,165,250,.12);--mut:var(--mute);--mut-bg:rgba(141,141,141,.12)}
+
 html{background:var(--bg)}
 body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--accent-soft)}
@@ -421,6 +376,124 @@ tr:last-child td{border-bottom:none}
 }
 
 .store-logo{display:inline-flex;align-items:center;justify-content:center;flex:none;border-radius:6px;overflow:hidden;margin-right:10px;box-shadow:0 1px 3px rgba(0,0,0,.25)}.store-logo svg{width:100%;height:100%;display:block}
+
+/* ===== PORTAL DESIGN SYSTEM (tokens + components, from distribution-with-backend.html) ===== */
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+p{margin:0}
+.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mute{color:var(--mute)}.teal{color:var(--teal)}.small{font-size:12px}.tiny{font-size:11px}
+.row{display:flex;align-items:center;gap:10px}.wrap{flex-wrap:wrap}.sp{flex:1}.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 16px;border-radius:20px;background:var(--chip);font-size:12px;font-weight:600;white-space:nowrap;transition:background .15s}
+.btn:hover{background:var(--chip2)}
+.btn.primary{background:var(--teal);color:#06201e}.btn.primary:hover{background:#3fe0d3}
+.btn.danger{background:#3a1c1c;color:var(--red)}.btn.danger:hover{background:#4a2222}
+.btn.ghost{background:none;box-shadow:inset 0 0 0 1px var(--line)}.btn.ghost:hover{background:var(--chip)}
+.btn.sm{height:28px;padding:0 12px;font-size:11px}.btn.lg{height:46px;padding:0 26px;font-size:14px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.icobtn{width:30px;height:30px;border-radius:8px;display:inline-grid;place-items:center;color:#cfcfcf}.icobtn:hover{background:var(--chip)}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld>label,.lbl{font-size:11px;font-weight:600;color:#cfcfcf}
+input[type=text],input[type=email],input[type=password],input[type=date],input[type=number],input[type=url],input[type=search],select,textarea{width:100%;background:var(--chip);border:1px solid transparent;border-radius:10px;color:var(--text);font:inherit;font-size:13px;padding:0 12px;height:38px}
+textarea{height:auto;padding:10px 12px;resize:vertical;min-height:80px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238d8d8d' stroke-width='2'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);outline:none}
+input::placeholder,textarea::placeholder{color:#666}
+.chk{display:flex;align-items:flex-start;gap:10px;font-size:13px;cursor:pointer}
+.seg{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px;gap:2px}
+.card{background:var(--panel);border-radius:14px;padding:16px}
+.card.in{background:var(--card)}
+.pill{background:var(--chip);border-radius:20px;padding:0 16px;height:32px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.pill:hover{background:var(--chip2)}
+.badge{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:11px;font-size:11px;font-weight:600;background:var(--chip);color:#ccc;white-space:nowrap}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.b-live{background:#12301f;color:var(--green)}.b-delivered{background:#0f2f2d;color:var(--teal)}.b-pending{background:#33290f;color:var(--amber)}.b-changes{background:#35220f;color:var(--orange)}.b-approved{background:#12263d;color:var(--blue)}.b-rejected{background:#3a1c1c;color:var(--red)}.b-draft{background:#262626;color:#aaa}.b-down{background:#2a2a2a;color:#888}
+.note{display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:#12263d;color:#bcd7f7;font-size:12px}
+.note.warn{background:#33290f;color:#f6dc9a}.note.err{background:#3a1c1c;color:#fbb}.note.ok{background:#12301f;color:#b8f0cc}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;color:var(--mute);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl{overflow-x:auto}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.pg-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 2px 14px;flex-wrap:wrap}
+.stat{background:var(--panel);border-radius:12px;padding:12px 14px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.prog{display:flex;align-items:flex-start;margin:6px 0 4px}
+.dl{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;border:1.5px dashed #3a3a3a;border-radius:12px;padding:22px 14px;cursor:pointer;color:#bbb;font-size:12px}
+.drop:hover,.drop.over{border-color:var(--teal);color:var(--teal)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:14px;height:26px;padding:0 6px 0 10px;font-size:11px;font-weight:600}
+.chk-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.chk-i{display:flex;gap:8px;font-size:12px;align-items:flex-start}
+.chk-i.err{color:#fbb}.chk-i.warn{color:#f6dc9a}.chk-i.ok{color:var(--green)}
+.meter{height:6px;border-radius:3px;background:var(--chip2);overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;background:var(--teal);transition:width .25s}
+.success{text-align:center;padding:40px 16px}
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.65);display:grid;place-items:center;z-index:100;padding:16px}
+.modal{background:#181818;border:1px solid var(--line);border-radius:16px;padding:20px;width:min(480px,100%);max-height:90vh;overflow:auto}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#222;border:1px solid #333;padding:10px 16px;border-radius:20px;font-size:13px;z-index:120;display:flex;gap:8px;align-items:center;max-width:90vw}
+details.acc{background:var(--card);border-radius:12px;padding:0}
+details.acc+details.acc{margin-top:8px}
+.art-card{background:var(--card);border-radius:12px;padding:16px;text-align:left;width:100%}
+.art-card:hover{background:#202020}.art-card h3{font-size:14px;margin:4px 0 6px}.art-card p{font-size:12px;color:var(--mute)}
+.tag{font-size:10px;font-weight:600;color:var(--teal)}
+.tl{display:flex;flex-direction:column}
+.tl>div{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.tl>div:last-child{border:0}.tl b{font-size:13px}.tl .d{font-size:12px;color:var(--teal);font-weight:600}
+.toggle{width:38px;height:22px;border-radius:11px;background:var(--chip2);position:relative;flex:none}
+.toggle::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#aaa;transition:.15s}
+.toggle.on{background:var(--teal)}.toggle.on::after{left:19px;background:#06201e}
+
+/* ===== PORTAL-PARITY COMPAT ===== */
+
+/* Portal-parity compat: preserve admin status colors + layout where portal base classes meet admin semantics */
+.badge.ba{background:rgba(74,222,128,.14);color:var(--green)}
+.badge.br{background:rgba(96,165,250,.14);color:var(--blue)}
+.badge.bp{background:rgba(251,191,36,.14);color:var(--amber)}
+.badge.bx{background:rgba(248,113,113,.14);color:var(--red)}
+.badge.bt{background:rgba(25,211,197,.12);color:var(--teal)}
+.mbox.modal{width:720px;max-width:95vw;padding:0}
+.abox.card{padding:44px 40px}
+.stat .sc-l{font-size:11px;color:#dcdcdc;display:block}
+.stat .sc-v{font-size:17px;font-weight:500;margin-top:5px}
+.stat .sc-v:not(.g):not(.r){color:var(--teal)}
+
+/* Portal component descendant rules */
+.fld .hint{font-size:11px;color:var(--mute)}
+.chk input{width:16px;height:16px;margin-top:2px;accent-color:var(--teal);flex:none}
+.seg button{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;color:#bbb}.seg button.on{background:#3a3a3a;color:#fff}
+.card h3{font-size:15px}
+.card .head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.note .i{margin-top:2px}
+.pg-h h1{font-size:22px}
+.pg-h p{color:var(--mute);font-size:13px;margin-top:3px}
+.stat small{display:block;font-size:11px;color:#dcdcdc}
+.stat b{display:block;font-size:17px;color:var(--teal);font-weight:500;margin-top:5px}
+.filters select{width:auto;height:32px;font-size:12px;border-radius:16px}
+.filters input{height:32px;width:200px;border-radius:16px;font-size:12px}
+.prog .st{flex:1;text-align:center;position:relative;font-size:11px;color:var(--mute)}
+.prog .st::before{content:"";display:block;width:14px;height:14px;border-radius:50%;background:var(--chip2);margin:0 auto 8px;position:relative;z-index:1}
+.prog .st::after{content:"";position:absolute;top:6px;left:-50%;width:100%;height:2px;background:var(--chip2)}
+.prog .st:first-child::after{display:none}
+.prog .st.done{color:#ddd}.prog .st.done::before{background:var(--teal)}.prog .st.done::after{background:var(--teal)}
+.prog .st.now::before{background:var(--teal);box-shadow:0 0 0 4px rgba(25,211,197,.22)}
+.prog .st.bad::before{background:var(--red);box-shadow:0 0 0 4px rgba(248,113,113,.2)}
+.dl div small{display:block;font-size:11px;color:var(--mute)}.dl div b{font-size:13px;font-weight:500;word-break:break-word}
+.drop input{display:none}
+.chip button{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;color:#aaa}.chip button:hover{background:#444;color:#fff}
+.chk-i .i{margin-top:2px}
+.success .ok{width:56px;height:56px;border-radius:50%;background:#12301f;color:var(--green);display:grid;place-items:center;margin:0 auto 14px}
+.modal h3{font-size:17px;margin-bottom:6px}
+details.acc summary{padding:14px 16px;cursor:pointer;font-weight:600;font-size:14px;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:"+";font-size:18px;color:var(--teal);line-height:1}
+details.acc[open] summary::after{content:"−"}
+details.acc .b{padding:0 16px 16px;color:#cfcfcf;font-size:13px}
+.prose p{margin:0 0 10px}.prose ul{margin:0 0 10px;padding-left:18px}.prose li{margin-bottom:4px}.prose h4{margin:14px 0 6px;font-size:13px}
+.bars .b{display:grid;grid-template-columns:110px 1fr 60px;gap:10px;align-items:center;margin:10px 0;font-size:12px}
+.bars .b i{display:block;height:8px;border-radius:4px;background:linear-gradient(90deg,#8a7bd8,#19d3c5)}
+.bars .b .t{background:var(--chip);border-radius:4px;height:8px}
 </style>
 </head>
 <body>
@@ -428,12 +501,12 @@ tr:last-child td{border-bottom:none}
 <div id="ld"><div class="ld-logo">T · I · R</div><div class="ld-bar"><div class="ld-fill"></div></div></div>
 
 <div id="auth">
-  <div class="abox">
+  <div class="abox card">
     <div class="abox-top"><div class="abox-brand">T·I·R</div><div class="abox-sub">Admin Panel</div><div class="abox-tag">Label owner access only</div></div>
     <div class="err-box" id="ae"></div>
-    <div class="iw"><label>Email</label><input type="email" id="em" placeholder="admin@example.com" autocomplete="username"/></div>
-    <div class="iw"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-    <button class="btn-pri" id="blg" onclick="doLogin()">Access Admin Panel</button>
+    <div class="iw fld"><label>Email</label><input type="email" id="em" placeholder="admin@example.com" autocomplete="username"/></div>
+    <div class="iw fld"><label>Password</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn-pri btn primary" id="blg" onclick="doLogin()">Access Admin Panel</button>
     <div style="margin-top:14px;font-size:11.5px;color:var(--txt3);text-align:center">🔒 Protected by your password</div>
   </div>
 </div>
@@ -444,40 +517,33 @@ tr:last-child td{border-bottom:none}
 <div class="sb" id="sb">
   <div class="sb-top">
     <div><div class="sb-brand">T·I·R</div><div class="sb-sub">Admin Console</div></div>
-    <button class="icon-btn ham" onclick="closeDrawer()" aria-label="Close menu"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    <button class="icon-btn icobtn ham" onclick="closeDrawer()" aria-label="Close menu"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
   </div>
   <div class="sb-admin"><div class="admin-dot"></div><div class="admin-lbl">Label Owner</div></div>
-  <nav>
+    <nav>
     <div class="ns">Dashboard</div>
     <div class="ni on" onclick="goPage('overview',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</div>
     <div class="ns">Releases</div>
     <div class="ni" onclick="goPage('releases',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>All Submissions <span class="cnt" id="pend-cnt" style="display:none">0</span></div>
-    <div class="ns">Demos</div>
-    <div class="ni" onclick="goPage('demos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Demo Inbox <span class="cnt" id="demo-new-cnt" style="display:none">0</span></div>
-    <div class="ns">Artists</div>
-    <div class="ni" onclick="goPage('artists',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Artists/Users</div>
-    <div class="ni" onclick="goPage('roster',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M17.5 14.5a6.5 6.5 0 0 1 4 5.5"/></svg>Roster Artists</div>
-    <div class="ni" onclick="goPage('kyc',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9,12 11,14 15,10"/></svg>KYC Approvals <span class="cnt" id="kyc-cnt" style="display:none">0</span></div>
     <div class="ns">Catalogue</div>
     <div class="ni" onclick="goPage('tracks',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Tracks</div>
     <div class="ni" onclick="goPage('splits',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 3 7.5 7.5a4 4 0 0 1-1.172 2.872L12 22"/></svg>Split Sheets</div>
     <div class="ni" onclick="goPage('licenses',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><path d="M9 15l2 2 4-4"/></svg>Licenses <span class="cnt" id="lic-cnt" style="display:none">0</span></div>
     <div class="ni" onclick="goPage('contracts',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Contracts</div>
-    <div class="ns">Support</div>
-    <div class="ni" onclick="goPage('tickets',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Service Requests <span class="cnt" id="tkt-cnt" style="display:none">0</span></div>
     <div class="ns">Finance</div>
     <div class="ni" onclick="goPage('royalties',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Royalties</div>
-    <div class="ni" onclick="goPage('analytics',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
     <div class="ni" onclick="goPage('withdrawals',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Withdrawals <span class="cnt" id="wd-cnt" style="display:none">0</span></div>
+    <div class="ns">Support</div>
+    <div class="ni" onclick="goPage('tickets',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Service Requests <span class="cnt" id="tkt-cnt" style="display:none">0</span></div>
+    <div class="ns">Analytics</div>
+    <div class="ni" onclick="goPage('analytics',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
     <div class="ns">Content</div>
-    <div class="ni" onclick="goPage('blog',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Blog/CMS</div>
     <div class="ni" onclick="goPage('notifications',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</div>
+    <div class="ni" onclick="goPage('blog',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Blog/CMS</div>
     <div class="ns">System</div>
     <div class="ni" onclick="goPage('logs',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Activity Logs</div>
-    <div class="ni" onclick="goPage('settings',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
-    <div class="ns">Account</div>
-    <div class="ni" onclick="goPage('profile',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</div>
     <div class="ni" onclick="goPage('logins',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Login History</div>
+    <div class="ni" onclick="goPage('settings',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
   </nav>
   <div class="sb-bot"><button class="so-btn" onclick="doSignOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button></div>
 </div>
@@ -485,253 +551,137 @@ tr:last-child td{border-bottom:none}
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
-      <button class="icon-btn ham" onclick="openDrawer()" aria-label="Open menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
+      <button class="icon-btn icobtn ham" onclick="openDrawer()" aria-label="Open menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
       <div><h1 id="pgt">Overview</h1><p id="pgs">The Imaginary Records</p></div>
       <span class="section-pill pill-label" id="section-pill">Label</span>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
-      <span class="admin-chip"><span class="admin-dot"></span>Label Owner</span>
-      <button class="btn-ref" onclick="loadAll()">↻ Refresh</button>
+      <button class="icon-btn icobtn" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <span class="admin-chip chip"><span class="admin-dot"></span>Label Owner</span>
+      <button class="btn-ref btn ghost" onclick="loadAll()">↻ Refresh</button>
     </div>
   </div>
 
   <div class="content">
 
-    <div class="pg" id="page-profile">
-      <div class="section">
-        <div class="sh"><div><h3>My Profile</h3><p>Admin account details</p></div></div>
-        <div class="sb2" style="max-width:640px">
-          <div class="dr"><div class="dk">Email</div><div class="dv" style="font-family:'DM Mono',monospace" id="prof-email">—</div></div>
-          <div class="dr"><div class="dk">Role</div><div class="dv">Label Owner</div></div>
-          <div class="dr"><div class="dk">Last sign-in</div><div class="dv" id="prof-last">—</div></div>
-          <div class="fg" style="margin-top:14px"><label>Display Name</label><input id="prof-name" placeholder="Your name"/></div>
-          <div class="update-acts"><button class="btn-save-demo" onclick="saveAdminProfile()">Save Changes</button></div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="sh"><h3>Change Password</h3></div>
-        <div class="sb2" style="max-width:640px">
-          <div class="al al-e" id="prof-pass-err"></div>
-          <div class="release-edit-grid">
-            <div class="fg"><label>New Password</label><input type="password" id="prof-pass1" autocomplete="new-password"/></div>
-            <div class="fg"><label>Confirm Password</label><input type="password" id="prof-pass2" autocomplete="new-password"/></div>
-          </div>
-          <div class="update-acts"><button class="btn-save-demo" onclick="changeAdminPassword()">Update Password</button></div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="sh"><h3>Session</h3></div>
-        <div class="sb2" style="max-width:640px">
-          <button class="db" onclick="doSignOut()">Sign Out of Admin Panel</button>
-        </div>
-      </div>
-    </div>
+    
 
     <div class="pg" id="page-logins">
       <div class="section">
-        <div class="sh"><div><h3>Login History</h3><p>Sign-in records across all accounts</p></div></div>
+        <div class="sh pg-h"><div><h3>Login History</h3><p>Sign-in records across all accounts</p></div></div>
         <div style="padding:14px 18px 0"><div class="frow">
           <input class="si" type="text" id="login-search" placeholder="Search email..." oninput="applyLoginFilter()"/>
         </div></div>
-        <div class="tw" id="login-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
+        <div class="tw tbl" id="login-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
       </div>
     </div>
 
     <div class="pg on" id="page-overview">
       <div class="stats">
-        <div class="sc"><div class="sc-l">Total Releases</div><div class="sc-v g" id="s0">—</div></div>
-        <div class="sc"><div class="sc-l">Pending</div><div class="sc-v" id="s1">—</div></div>
-        <div class="sc"><div class="sc-l">Live</div><div class="sc-v" id="s2">—</div></div>
-        <div class="sc"><div class="sc-l">Artists</div><div class="sc-v" id="s3">—</div></div>
-        <div class="sc"><div class="sc-l">Open Tickets</div><div class="sc-v" id="s4">—</div></div>
+        <div class="sc stat"><div class="sc-l">Total Releases</div><div class="sc-v g" id="s0">—</div></div>
+        <div class="sc stat"><div class="sc-l">Pending</div><div class="sc-v" id="s1">—</div></div>
+        <div class="sc stat"><div class="sc-l">Live</div><div class="sc-v" id="s2">—</div></div>
+        <div class="sc stat"><div class="sc-l">Open Tickets</div><div class="sc-v" id="s4">—</div></div>
       </div>
-      <div class="stats">
-        <div class="sc"><div class="sc-l">Total Demos</div><div class="sc-v r" id="d0">—</div></div>
-        <div class="sc"><div class="sc-l">New Demos</div><div class="sc-v" id="d1">—</div></div>
-        <div class="sc"><div class="sc-l">Reviewing</div><div class="sc-v" id="d2">—</div></div>
-        <div class="sc"><div class="sc-l">Shortlisted</div><div class="sc-v r" id="d3">—</div></div>
-        <div class="sc"><div class="sc-l">Signed</div><div class="sc-v gr" id="d4">—</div></div>
-      </div>
+      
       <div class="stats s2">
-        <div class="sc"><div class="sc-l">KYC Pending Review</div><div class="sc-v" id="k0">—</div></div>
-        <div class="sc"><div class="sc-l">Withdrawals Pending</div><div class="sc-v" id="k1">—</div></div>
+        <div class="sc stat"><div class="sc-l">Withdrawals Pending</div><div class="sc-v" id="k1">—</div></div>
       </div>
       <div class="stats s4">
-        <div class="sc"><div class="sc-l">Split Sheets</div><div class="sc-v g" id="o-splits">—</div></div>
-        <div class="sc"><div class="sc-l">Licenses Pending</div><div class="sc-v" id="o-licenses">—</div></div>
-        <div class="sc"><div class="sc-l">Contracts Out</div><div class="sc-v" id="o-contracts">—</div></div>
-        <div class="sc"><div class="sc-l">Tracks Uploaded</div><div class="sc-v" id="o-tracks">—</div></div>
+        <div class="sc stat"><div class="sc-l">Split Sheets</div><div class="sc-v g" id="o-splits">—</div></div>
+        <div class="sc stat"><div class="sc-l">Licenses Pending</div><div class="sc-v" id="o-licenses">—</div></div>
+        <div class="sc stat"><div class="sc-l">Contracts Out</div><div class="sc-v" id="o-contracts">—</div></div>
+        <div class="sc stat"><div class="sc-l">Tracks Uploaded</div><div class="sc-v" id="o-tracks">—</div></div>
       </div>
-      <div class="section"><div class="sh"><h3>Latest Releases</h3></div><div class="tw" id="ov-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div></div>
-      <div class="section"><div class="sh"><h3>Open Support Tickets</h3><p>Needs your response</p></div><div class="tw" id="ov-tickets"></div></div>
-      <div class="section"><div class="sh"><h3>New Demo Submissions</h3></div><div class="tw" id="ov-demos"></div></div>
+      <div class="section"><div class="sh pg-h"><h3>Latest Releases</h3></div><div class="tw tbl" id="ov-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div></div>
+      <div class="section"><div class="sh pg-h"><h3>Open Support Tickets</h3><p>Needs your response</p></div><div class="tw tbl" id="ov-tickets"></div></div>
     </div>
 
     <div class="pg" id="page-releases">
-      <div class="section"><div class="sh"><h3>All Submissions</h3><p>Status changes refresh every table, widget, stat and badge</p></div>
+      <div class="section"><div class="sh pg-h"><h3>All Submissions</h3><p>Status changes refresh every table, widget, stat and badge</p></div>
         <div style="padding:14px 18px 0"><div class="frow">
           <input class="si" type="text" id="rel-search" placeholder="Search title or artist..." oninput="applyRelFilter()"/>
-          <button class="fb on" onclick="setRelSt('all',this)">All</button>
-          <button class="fb" onclick="setRelSt('pending',this)">Pending</button>
-          <button class="fb" onclick="setRelSt('review',this)">In Review</button>
-          <button class="fb" onclick="setRelSt('approved',this)">Approved</button>
-          <button class="fb" onclick="setRelSt('live',this)">Live</button>
-          <button class="fb" onclick="setRelSt('rejected',this)">Rejected</button>
+          <button class="fb pill on" onclick="setRelSt('all',this)">All</button>
+          <button class="fb pill" onclick="setRelSt('pending',this)">Pending</button>
+          <button class="fb pill" onclick="setRelSt('review',this)">In Review</button>
+          <button class="fb pill" onclick="setRelSt('approved',this)">Approved</button>
+          <button class="fb pill" onclick="setRelSt('live',this)">Live</button>
+          <button class="fb pill" onclick="setRelSt('rejected',this)">Rejected</button>
         </div></div>
-        <div class="tw" id="all-list"></div>
+        <div class="tw tbl" id="all-list"></div>
       </div>
     </div>
 
-    <div class="pg" id="page-demos">
-      <div class="stats">
-        <div class="sc"><div class="sc-l">Total</div><div class="sc-v r" id="ds0">—</div></div>
-        <div class="sc"><div class="sc-l">New</div><div class="sc-v" id="ds1">—</div></div>
-        <div class="sc"><div class="sc-l">Reviewing</div><div class="sc-v" id="ds2">—</div></div>
-        <div class="sc"><div class="sc-l">Shortlisted</div><div class="sc-v r" id="ds3">—</div></div>
-        <div class="sc"><div class="sc-l">Signed</div><div class="sc-v gr" id="ds4">—</div></div>
-      </div>
-      <div class="section">
-        <div class="sh"><h3>Demo Submissions</h3><p id="demo-all-count"></p></div>
-        <div style="padding:14px 18px 0"><div class="frow">
-          <input class="si" type="text" id="demo-search" placeholder="Search name, email, genre..." oninput="applyDemoFilter()"/>
-          <button class="fb on" onclick="setDemoF('all',this)">All</button>
-          <button class="fb" onclick="setDemoF('new',this)">New</button>
-          <button class="fb" onclick="setDemoF('reviewing',this)">Reviewing</button>
-          <button class="fb" onclick="setDemoF('shortlisted',this)">Shortlisted</button>
-          <button class="fb" onclick="setDemoF('signed',this)">Signed</button>
-          <button class="fb" onclick="setDemoF('rejected',this)">Rejected</button>
-          <button class="fb" onclick="setDemoF('archived',this)">Archived</button>
-        </div></div>
-        <div class="tw" id="demo-all-list"></div>
-      </div>
-    </div>
+    
 
-    <div class="pg" id="page-artists">
-      <div class="section" style="margin-bottom:18px">
-        <div class="sh"><h3>Create Account</h3><p>Artist or Label — no Firebase Console needed</p></div>
-        <div class="sb2">
-          <div class="al al-e" id="artist-e"></div><div class="al al-s" id="artist-s"></div>
-          <div id="ca-draft-banner" style="display:none;background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 16px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-            <div style="font-size:12px;color:var(--txt2)">Unsaved account draft from <span id="ca-draft-banner-time" style="font-weight:700;color:var(--txt)"></span> (password not saved for security)</div>
-            <div style="display:flex;gap:8px">
-              <button onclick="restoreCreateAccountDraft()" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Restore</button>
-              <button onclick="discardCreateAccountDraft()" style="padding:6px 14px;background:none;border:1px solid var(--brd);border-radius:8px;font-size:11px;color:var(--txt2);cursor:pointer">Discard</button>
-            </div>
-          </div>
-          <div style="display:flex;gap:0;background:var(--input);border:1px solid var(--brd);border-radius:10px;overflow:hidden;margin-bottom:16px">
-            <button id="att-artist" onclick="switchAcctType('artist')" style="flex:1;padding:11px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:none;background:var(--accent);color:#fff;transition:all .2s">Artist Account</button>
-            <button id="att-label" onclick="switchAcctType('label')" style="flex:1;padding:11px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:none;background:none;color:var(--txt2);transition:all .2s">Label Account</button>
-          </div>
-          <div class="artist-create-grid" id="ca-form">
-            <div class="fg" style="grid-column:1/-1;margin-bottom:4px"><div style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;padding-bottom:6px;border-bottom:1px solid var(--brd)">Account Details</div></div>
-            <div class="fg"><label id="ca-name-label">Artist / Stage Name *</label><input type="text" id="ca-name" placeholder="Artist name"/></div>
-            <div class="fg"><label>Email *</label><input type="email" id="ca-email" placeholder="artist@email.com"/></div>
-            <div class="fg"><label>Password *</label><input type="password" id="ca-password" placeholder="Minimum 6 characters"/></div>
-            <div class="fg"><label>Genre</label><input type="text" id="ca-genre" placeholder="Hip Hop / Trap"/></div>
-            <div class="fg"><label>Country</label><input type="text" id="ca-country" placeholder="India"/></div>
-            <div class="fg"><label>Instagram</label><input type="text" id="ca-instagram" placeholder="@handle"/></div>
-            <div class="fg full"><label>Bio</label><textarea id="ca-bio" placeholder="Short artist bio or label description"></textarea></div>
-            <div class="fg" id="ca-spotify-grp" style="grid-column:1/-1"><div style="font-size:10px;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Streaming Profiles</div></div>
-            <div class="fg" id="ca-spotify-row"><label>Spotify Artist URL</label><input type="url" id="ca-spotify" placeholder="https://open.spotify.com/artist/..."/></div>
-            <div class="fg" id="ca-apple-row"><label>Apple Music URL</label><input type="url" id="ca-apple-music" placeholder="https://music.apple.com/..."/></div>
-            <div class="fg" id="ca-soundcloud-row"><label>SoundCloud URL</label><input type="url" id="ca-soundcloud" placeholder="https://soundcloud.com/..."/></div>
-            <div class="fg" id="ca-youtube-row"><label>YouTube Channel URL</label><input type="url" id="ca-youtube-url" placeholder="https://youtube.com/@..."/></div>
-            <div class="fg"><label>Plan</label><select id="ca-plan"><option value="free">Free</option><option value="starter">Starter (₹999/yr)</option><option value="pro">Pro (₹1599/yr)</option><option value="custom">Custom Label</option></select></div>
-            <div class="fg"><label>Royalty Split (%)</label><input type="number" id="ca-royalty" placeholder="85" value="85" min="0" max="100"/></div>
-            <div class="fg" id="ca-audio-row"><label>Audio Release Access</label><select id="ca-audio-access"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
-            <div class="fg" id="ca-video-row"><label>Music Video Access</label><select id="ca-video-access"><option value="false">Disabled</option><option value="true">Enabled</option></select></div>
-            <div class="fg full"><button class="btn-pri" id="ca-btn" onclick="createAccount()">Create Artist Account</button></div>
-          </div>
-        </div>
-      </div>
-      <div class="section"><div class="sh"><div><h3>Registered Accounts</h3><p id="art-count">0 accounts</p></div></div><div class="tw" id="art-list"></div></div>
-    </div>
+    
 
-    <div class="pg" id="page-roster">
-      <div class="section"><div class="sh"><h3>Roster Artists</h3><p>Every artist added by every account — with Spotify, Apple Music and full details</p></div>
-        <div style="padding:14px 18px 0"><div class="frow">
-          <input class="si" type="text" id="roster-search" placeholder="Search artist or account..." oninput="renderRosterAll()"/>
-        </div></div>
-        <div class="tw" id="roster-list"></div>
-      </div>
-    </div>
+    
 
-    <div class="pg" id="page-kyc">
-      <div class="section">
-        <div class="sh"><div><h3>KYC Approvals</h3><p>Identity &amp; payout verification — approve only real, verified submissions</p></div></div>
-        <div style="padding:14px 18px 0"><div class="frow">
-          <button class="fb on" onclick="setKycF('pending',this)">Pending</button>
-          <button class="fb" onclick="setKycF('approved',this)">Approved</button>
-          <button class="fb" onclick="setKycF('rejected',this)">Rejected</button>
-          <button class="fb" onclick="setKycF('all',this)">All</button>
-        </div></div>
-        <div class="sb2" id="kyc-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
-      </div>
-    </div>
+    
 
     <div class="pg" id="page-tickets">
-      <div class="section"><div class="sh"><div><h3>Service Requests</h3><p>Support tickets &amp; artist service requests</p></div></div>
+      <div class="section"><div class="sh pg-h"><div><h3>Service Requests</h3><p>Support tickets &amp; artist service requests</p></div></div>
         <div style="padding:14px 18px 0">
           <div class="frow" id="tkt-status-row">
             <span class="frow-lbl">Status</span>
-            <button class="fb on" onclick="setTF('all',this)">All</button>
-            <button class="fb" onclick="setTF('open',this)">Open</button>
-            <button class="fb" onclick="setTF('pending',this)">Pending</button>
-            <button class="fb" onclick="setTF('resolved',this)">Resolved</button>
-            <button class="fb" onclick="setTF('closed',this)">Closed</button>
+            <button class="fb pill on" onclick="setTF('all',this)">All</button>
+            <button class="fb pill" onclick="setTF('open',this)">Open</button>
+            <button class="fb pill" onclick="setTF('pending',this)">Pending</button>
+            <button class="fb pill" onclick="setTF('resolved',this)">Resolved</button>
+            <button class="fb pill" onclick="setTF('closed',this)">Closed</button>
           </div>
           <div class="frow" id="tkt-type-row"><span class="frow-lbl">Type</span></div>
         </div>
-        <div class="tw" id="tkt-list"></div>
+        <div class="tw tbl" id="tkt-list"></div>
       </div>
     </div>
 
     <div class="pg" id="page-royalties">
       <div class="section" style="margin-bottom:18px">
-        <div class="sh"><h3>Add / Update Royalty Statement</h3></div>
+        <div class="sh pg-h"><h3>Add / Update Royalty Statement</h3></div>
         <div class="sb2">
           <div class="al al-e" id="roy-e"></div><div class="al al-s" id="roy-s"></div>
           <div class="roy-form">
-            <div class="fg"><label>Select Artist *</label><select id="r-artist"><option value="">Select Artist —</option></select></div>
-            <div class="fg"><label>Period *</label><select id="r-period"><option value="">Select Quarter —</option><option>Q1 2025 (Jan–Mar)</option><option>Q2 2025 (Apr–Jun)</option><option>Q3 2025 (Jul–Sep)</option><option>Q4 2025 (Oct–Dec)</option><option>Q1 2026 (Jan–Mar)</option><option>Q2 2026 (Apr–Jun)</option><option>Q3 2026 (Jul–Sep)</option><option>Q4 2026 (Oct–Dec)</option></select></div>
-            <div class="fg"><label>Total Amount (₹) *</label><input type="number" id="r-total" placeholder="e.g. 1250.00" step="0.01"/></div>
-            <div class="fg"><label>Release Title (optional)</label><input type="text" id="r-release-title" placeholder="Song name"/></div>
-            <div class="fg rf-full"><label>Earnings by Platform (₹ each)</label></div>
-            <div class="fg"><label>Spotify</label><input type="number" id="p-spotify" placeholder="0.00" step="0.01"/></div>
-            <div class="fg"><label>Apple Music</label><input type="number" id="p-apple" placeholder="0.00" step="0.01"/></div>
-            <div class="fg"><label>Amazon Music</label><input type="number" id="p-amazon" placeholder="0.00" step="0.01"/></div>
-            <div class="fg"><label>YouTube Music</label><input type="number" id="p-youtube" placeholder="0.00" step="0.01"/></div>
-            <div class="fg"><label>JioSaavn</label><input type="number" id="p-jio" placeholder="0.00" step="0.01"/></div>
-            <div class="fg"><label>Gaana</label><input type="number" id="p-gaana" placeholder="0.00" step="0.01"/></div>
-            <div class="fg"><label>Tidal</label><input type="number" id="p-tidal" placeholder="0.00" step="0.01"/></div>
-            <div class="fg"><label>Other</label><input type="number" id="p-other" placeholder="0.00" step="0.01"/></div>
-            <div class="fg rf-full"><label>Notes (optional)</label><input type="text" id="r-notes" placeholder="e.g. Q1 2026 royalty payout"/></div>
-            <div class="fg"><label>Mark as Current Quarter?</label><select id="r-current"><option value="true">Yes</option><option value="false">No</option></select></div>
-            <div class="fg"><label>Mark as Payout?</label><select id="r-payout"><option value="false">No — Statement only</option><option value="true">Yes — Payout made</option></select></div>
-            <div class="fg rf-full"><button class="btn-pri" id="r-btn" onclick="saveRoyalty()">Save Royalty Statement</button></div>
+            <div class="fg fld"><label>Select Artist *</label><select id="r-artist"><option value="">Select Artist —</option></select></div>
+            <div class="fg fld"><label>Period *</label><select id="r-period"><option value="">Select Quarter —</option><option>Q1 2025 (Jan–Mar)</option><option>Q2 2025 (Apr–Jun)</option><option>Q3 2025 (Jul–Sep)</option><option>Q4 2025 (Oct–Dec)</option><option>Q1 2026 (Jan–Mar)</option><option>Q2 2026 (Apr–Jun)</option><option>Q3 2026 (Jul–Sep)</option><option>Q4 2026 (Oct–Dec)</option></select></div>
+            <div class="fg fld"><label>Total Amount (₹) *</label><input type="number" id="r-total" placeholder="e.g. 1250.00" step="0.01"/></div>
+            <div class="fg fld"><label>Release Title (optional)</label><input type="text" id="r-release-title" placeholder="Song name"/></div>
+            <div class="fg fld rf-full"><label>Earnings by Platform (₹ each)</label></div>
+            <div class="fg fld"><label>Spotify</label><input type="number" id="p-spotify" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld"><label>Apple Music</label><input type="number" id="p-apple" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld"><label>Amazon Music</label><input type="number" id="p-amazon" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld"><label>YouTube Music</label><input type="number" id="p-youtube" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld"><label>JioSaavn</label><input type="number" id="p-jio" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld"><label>Gaana</label><input type="number" id="p-gaana" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld"><label>Tidal</label><input type="number" id="p-tidal" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld"><label>Other</label><input type="number" id="p-other" placeholder="0.00" step="0.01"/></div>
+            <div class="fg fld rf-full"><label>Notes (optional)</label><input type="text" id="r-notes" placeholder="e.g. Q1 2026 royalty payout"/></div>
+            <div class="fg fld"><label>Mark as Current Quarter?</label><select id="r-current"><option value="true">Yes</option><option value="false">No</option></select></div>
+            <div class="fg fld"><label>Mark as Payout?</label><select id="r-payout"><option value="false">No — Statement only</option><option value="true">Yes — Payout made</option></select></div>
+            <div class="fg fld rf-full"><button class="btn-pri btn primary" id="r-btn" onclick="saveRoyalty()">Save Royalty Statement</button></div>
           </div>
         </div>
       </div>
-      <div class="section"><div class="sh"><h3>Royalty History</h3></div><div class="tw" id="roy-history-list"></div></div>
+      <div class="section"><div class="sh pg-h"><h3>Royalty History</h3></div><div class="tw tbl" id="roy-history-list"></div></div>
     </div>
 
     <div class="pg" id="page-analytics">
       <div class="section" style="margin-bottom:18px">
-        <div class="sh"><div><h3>Update Artist Analytics</h3><p>Pick an artist, edit their streaming stats, save — changes appear in the artist portal immediately</p></div></div>
+        <div class="sh pg-h"><div><h3>Update Artist Analytics</h3><p>Pick an artist, edit their streaming stats, save — changes appear in the artist portal immediately</p></div></div>
         <div class="sb2">
           <div class="roy-form">
-            <div class="fg rf-full"><label>Select Artist *</label><select id="anp-artist" onchange="anPageSelect()"><option value="">Select Artist —</option></select></div>
-            <div class="fg"><label>Analytics Enabled</label><select id="anp-enabled"><option value="true">Yes</option><option value="false">No</option></select></div>
-            <div class="fg"><label>Total Streams</label><input type="number" id="anp-streams-total" placeholder="e.g. 125000"/></div>
-            <div class="fg"><label>Streams This Month</label><input type="number" id="anp-streams-month" placeholder="e.g. 8500"/></div>
-            <div class="fg"><label>Total Revenue (₹)</label><input type="number" id="anp-revenue-total" placeholder="e.g. 4200.50" step="0.01"/></div>
-            <div class="fg"><label>Revenue This Month (₹)</label><input type="number" id="anp-revenue-month" placeholder="e.g. 310.75" step="0.01"/></div>
-            <div class="fg rf-full"><label>Top Tracks <span style="font-weight:400;color:var(--txt3)">(one per line: Title, streams)</span></label><textarea id="anp-top-tracks" style="min-height:70px" placeholder="Midnight Drive, 12500"></textarea></div>
-            <div class="fg rf-full"><label>By Platform <span style="font-weight:400;color:var(--txt3)">(one per line: platform, streams)</span></label><textarea id="anp-platforms" style="min-height:70px" placeholder="spotify, 45000" oninput="renderAnpPreview()"></textarea>
+            <div class="fg fld rf-full"><label>Select Artist *</label><select id="anp-artist" onchange="anPageSelect()"><option value="">Select Artist —</option></select></div>
+            <div class="fg fld"><label>Analytics Enabled</label><select id="anp-enabled"><option value="true">Yes</option><option value="false">No</option></select></div>
+            <div class="fg fld"><label>Total Streams</label><input type="number" id="anp-streams-total" placeholder="e.g. 125000"/></div>
+            <div class="fg fld"><label>Streams This Month</label><input type="number" id="anp-streams-month" placeholder="e.g. 8500"/></div>
+            <div class="fg fld"><label>Total Revenue (₹)</label><input type="number" id="anp-revenue-total" placeholder="e.g. 4200.50" step="0.01"/></div>
+            <div class="fg fld"><label>Revenue This Month (₹)</label><input type="number" id="anp-revenue-month" placeholder="e.g. 310.75" step="0.01"/></div>
+            <div class="fg fld rf-full"><label>Top Tracks <span style="font-weight:400;color:var(--txt3)">(one per line: Title, streams)</span></label><textarea id="anp-top-tracks" style="min-height:70px" placeholder="Midnight Drive, 12500"></textarea></div>
+            <div class="fg fld rf-full"><label>By Platform <span style="font-weight:400;color:var(--txt3)">(one per line: platform, streams)</span></label><textarea id="anp-platforms" style="min-height:70px" placeholder="spotify, 45000" oninput="renderAnpPreview()"></textarea>
               <div id="anp-preview" style="margin-top:10px"></div>
             </div>
-            <div class="fg rf-full"><button class="btn-pri" id="anp-save-btn" onclick="savePageAnalytics()">Save Analytics</button></div>
+            <div class="fg fld rf-full"><button class="btn-pri btn primary" id="anp-save-btn" onclick="savePageAnalytics()">Save Analytics</button></div>
           </div>
         </div>
       </div>
@@ -739,49 +689,49 @@ tr:last-child td{border-bottom:none}
 
     <div class="pg" id="page-withdrawals">
       <div class="section">
-        <div class="sh"><div><h3>Withdrawal Requests</h3><p>Review artist payout requests — decisions are recorded with a timestamp</p></div></div>
+        <div class="sh pg-h"><div><h3>Withdrawal Requests</h3><p>Review artist payout requests — decisions are recorded with a timestamp</p></div></div>
         <div style="padding:14px 18px 0"><div class="frow">
-          <button class="fb on" onclick="setWdF('pending',this)">Pending</button>
-          <button class="fb" onclick="setWdF('approved',this)">Approved</button>
-          <button class="fb" onclick="setWdF('rejected',this)">Rejected</button>
-          <button class="fb" onclick="setWdF('paid',this)">Paid</button>
-          <button class="fb" onclick="setWdF('all',this)">All</button>
+          <button class="fb pill on" onclick="setWdF('pending',this)">Pending</button>
+          <button class="fb pill" onclick="setWdF('approved',this)">Approved</button>
+          <button class="fb pill" onclick="setWdF('rejected',this)">Rejected</button>
+          <button class="fb pill" onclick="setWdF('paid',this)">Paid</button>
+          <button class="fb pill" onclick="setWdF('all',this)">All</button>
         </div></div>
-        <div class="tw" id="wd-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
+        <div class="tw tbl" id="wd-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
       </div>
     </div>
 
     <div class="pg" id="page-tracks">
       <div class="section">
-        <div class="sh"><div><h3>Tracks</h3><p id="tracks-count">All uploaded audio across every artist</p></div></div>
+        <div class="sh pg-h"><div><h3>Tracks</h3><p id="tracks-count">All uploaded audio across every artist</p></div></div>
         <div style="padding:14px 18px 0"><div class="frow">
           <input class="si" type="text" id="track-search" placeholder="Search title, artist, email..." oninput="applyTrackFilter()"/>
         </div></div>
-        <div class="tw" id="track-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
+        <div class="tw tbl" id="track-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
       </div>
     </div>
 
     <div class="pg" id="page-splits">
       <div class="section">
-        <div class="sh"><div><h3>Split Sheets</h3><p id="splits-count">Royalty splits across all artists</p></div></div>
+        <div class="sh pg-h"><div><h3>Split Sheets</h3><p id="splits-count">Royalty splits across all artists</p></div></div>
         <div style="padding:14px 18px 0"><div class="frow">
           <input class="si" type="text" id="split-search" placeholder="Search name or artist..." oninput="applySplitFilter()"/>
-          <button class="fb on" onclick="setSplitF('all',this)">All</button>
-          <button class="fb" onclick="setSplitF('active',this)">Active</button>
-          <button class="fb" onclick="setSplitF('inactive',this)">Inactive</button>
+          <button class="fb pill on" onclick="setSplitF('all',this)">All</button>
+          <button class="fb pill" onclick="setSplitF('active',this)">Active</button>
+          <button class="fb pill" onclick="setSplitF('inactive',this)">Inactive</button>
         </div></div>
-        <div class="tw" id="split-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
+        <div class="tw tbl" id="split-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
       </div>
     </div>
 
     <div class="pg" id="page-licenses">
       <div class="section">
-        <div class="sh"><div><h3>Licenses</h3><p id="licenses-count">Review licensing requests across all artists</p></div></div>
+        <div class="sh pg-h"><div><h3>Licenses</h3><p id="licenses-count">Review licensing requests across all artists</p></div></div>
         <div style="padding:14px 18px 0"><div class="frow">
-          <button class="fb on" onclick="setLicF('pending',this)">Pending</button>
-          <button class="fb" onclick="setLicF('approved',this)">Approved</button>
-          <button class="fb" onclick="setLicF('rejected',this)">Rejected</button>
-          <button class="fb" onclick="setLicF('all',this)">All</button>
+          <button class="fb pill on" onclick="setLicF('pending',this)">Pending</button>
+          <button class="fb pill" onclick="setLicF('approved',this)">Approved</button>
+          <button class="fb pill" onclick="setLicF('rejected',this)">Rejected</button>
+          <button class="fb pill" onclick="setLicF('all',this)">All</button>
         </div></div>
         <div class="sb2" id="lic-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
       </div>
@@ -789,80 +739,80 @@ tr:last-child td{border-bottom:none}
 
     <div class="pg" id="page-contracts">
       <div class="section" style="margin-bottom:18px">
-        <div class="sh"><h3>New Agreement Template</h3><p>Publish a versioned contract artists can be assigned</p></div>
+        <div class="sh pg-h"><h3>New Agreement Template</h3><p>Publish a versioned contract artists can be assigned</p></div>
         <div class="sb2">
           <div class="al al-e" id="ct-e"></div><div class="al al-s" id="ct-s"></div>
           <div class="roy-form">
-            <div class="fg"><label>Contract Title *</label><input type="text" id="ct-title" placeholder="e.g. TIR Distribution Agreement"/></div>
-            <div class="fg"><label>Version *</label><input type="text" id="ct-version" placeholder="e.g. v5.0"/></div>
-            <div class="fg"><label>Type</label><select id="ct-type"><option>Distribution</option><option>Recording</option><option>Publishing</option><option>Partnership</option><option>Sync</option><option>Other</option></select></div>
-            <div class="fg"><label>Term</label><input type="text" id="ct-term" placeholder="e.g. 2 years"/></div>
-            <div class="fg"><label>Territory</label><input type="text" id="ct-territory" placeholder="e.g. Worldwide"/></div>
-            <div class="fg"><label>Royalty Share (%)</label><input type="number" id="ct-share" placeholder="e.g. 85" min="0" max="100"/></div>
-            <div class="fg rf-full"><label>Agreement Body *</label><textarea id="ct-body" style="min-height:160px" placeholder="Full agreement text..."></textarea></div>
-            <div class="fg rf-full"><button class="btn-pri" id="ct-btn" onclick="saveContractTemplate()">Publish Template</button></div>
+            <div class="fg fld"><label>Contract Title *</label><input type="text" id="ct-title" placeholder="e.g. TIR Distribution Agreement"/></div>
+            <div class="fg fld"><label>Version *</label><input type="text" id="ct-version" placeholder="e.g. v5.0"/></div>
+            <div class="fg fld"><label>Type</label><select id="ct-type"><option>Distribution</option><option>Recording</option><option>Publishing</option><option>Partnership</option><option>Sync</option><option>Other</option></select></div>
+            <div class="fg fld"><label>Term</label><input type="text" id="ct-term" placeholder="e.g. 2 years"/></div>
+            <div class="fg fld"><label>Territory</label><input type="text" id="ct-territory" placeholder="e.g. Worldwide"/></div>
+            <div class="fg fld"><label>Royalty Share (%)</label><input type="number" id="ct-share" placeholder="e.g. 85" min="0" max="100"/></div>
+            <div class="fg fld rf-full"><label>Agreement Body *</label><textarea id="ct-body" style="min-height:160px" placeholder="Full agreement text..."></textarea></div>
+            <div class="fg fld rf-full"><button class="btn-pri btn primary" id="ct-btn" onclick="saveContractTemplate()">Publish Template</button></div>
           </div>
         </div>
       </div>
-      <div class="section" style="margin-bottom:18px"><div class="sh"><div><h3>Templates</h3><p>Assign a template to an artist to create their contract</p></div></div><div class="tw" id="ct-templates-list"></div></div>
-      <div class="section"><div class="sh"><div><h3>Artist Contracts</h3><p id="ct-assign-count"></p></div></div><div class="tw" id="ct-assign-list"></div></div>
+      <div class="section" style="margin-bottom:18px"><div class="sh pg-h"><div><h3>Templates</h3><p>Assign a template to an artist to create their contract</p></div></div><div class="tw tbl" id="ct-templates-list"></div></div>
+      <div class="section"><div class="sh pg-h"><div><h3>Artist Contracts</h3><p id="ct-assign-count"></p></div></div><div class="tw tbl" id="ct-assign-list"></div></div>
     </div>
 
     <div class="pg" id="page-blog">
       <div class="section" style="margin-bottom:18px">
-        <div class="sh"><h3>Write New Blog Post</h3></div>
+        <div class="sh pg-h"><h3>Write New Blog Post</h3></div>
         <div class="sb2">
           <div class="al al-e" id="blog-e"></div><div class="al al-s" id="blog-s"></div>
           <div class="blog-form">
             <div><label>Post Title *</label><input type="text" id="b-title" placeholder="e.g. How to Get Playlisted on Spotify"/></div>
             <div><label>Category</label><select id="b-cat"><option>Music Tips</option><option>Distribution</option><option>Industry News</option><option>Royalties & Money</option><option>Marketing</option><option>TIR Updates</option><option>Artist Spotlight</option></select></div>
             <div><label>Content *</label><textarea id="b-content" placeholder="Write your blog post here..."></textarea></div>
-            <div><button class="btn-pri" id="b-btn" onclick="saveBlog()">Publish Post</button></div>
+            <div><button class="btn-pri btn primary" id="b-btn" onclick="saveBlog()">Publish Post</button></div>
           </div>
         </div>
       </div>
-      <div class="section"><div class="sh"><h3>Published Posts</h3><p id="blog-count">0 posts</p></div><div class="sb2" id="blog-list"></div></div>
+      <div class="section"><div class="sh pg-h"><h3>Published Posts</h3><p id="blog-count">0 posts</p></div><div class="sb2" id="blog-list"></div></div>
     </div>
 
     <div class="pg" id="page-notifications">
       <div class="section" style="margin-bottom:18px">
-        <div class="sh"><div><h3>Compose Notification</h3><p>Sent to the artist portal inbox</p></div></div>
+        <div class="sh pg-h"><div><h3>Compose Notification</h3><p>Sent to the artist portal inbox</p></div></div>
         <div class="sb2">
           <div class="al al-e" id="nt-e"></div><div class="al al-s" id="nt-s"></div>
           <div class="blog-form">
             <div><label>Recipient</label><select id="nt-to"><option value="all">All users</option></select></div>
             <div><label>Subject *</label><input type="text" id="nt-subject" placeholder="e.g. Royalty statement for Q3 2026 is ready"/></div>
             <div><label>Message *</label><textarea id="nt-body" placeholder="Write your message..." style="min-height:120px"></textarea></div>
-            <div><button class="btn-pri" id="nt-btn" onclick="sendNotification()" style="width:auto;padding:12px 28px">Send Notification</button></div>
+            <div><button class="btn-pri btn primary" id="nt-btn" onclick="sendNotification()" style="width:auto;padding:12px 28px">Send Notification</button></div>
           </div>
         </div>
       </div>
-      <div class="section"><div class="sh"><h3>Sent Notifications</h3><p id="nt-count">0 sent</p></div><div class="tw" id="nt-list"></div></div>
+      <div class="section"><div class="sh pg-h"><h3>Sent Notifications</h3><p id="nt-count">0 sent</p></div><div class="tw tbl" id="nt-list"></div></div>
     </div>
 
     <div class="pg" id="page-logs">
       <div class="section">
-        <div class="sh"><div><h3>Activity Logs</h3><p>Read-only audit trail of admin actions</p></div></div>
+        <div class="sh pg-h"><div><h3>Activity Logs</h3><p>Read-only audit trail of admin actions</p></div></div>
         <div style="padding:14px 18px 0"><div class="frow">
           <input class="si" type="text" id="log-search" placeholder="Search email, action, detail..." oninput="applyLogFilter()"/>
         </div></div>
-        <div class="tw" id="log-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
+        <div class="tw tbl" id="log-list"><div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">Loading...</div></div></div>
       </div>
     </div>
 
     <div class="pg" id="page-settings">
       <div class="section">
-        <div class="sh"><h3>Appearance</h3></div>
+        <div class="sh pg-h"><h3>Appearance</h3></div>
         <div class="sb2">
           <div class="theme-row">
-            <button class="fb" id="theme-dark-btn" onclick="setTheme('dark')">Dark</button>
-            <button class="fb" id="theme-light-btn" onclick="setTheme('light')">Light</button>
+            <button class="fb pill" id="theme-dark-btn" onclick="setTheme('dark')">Dark</button>
+            <button class="fb pill" id="theme-light-btn" onclick="setTheme('light')">Light</button>
           </div>
           <p class="set-note">Your theme is saved on this device and shared with the artist portal.</p>
         </div>
       </div>
       <div class="section">
-        <div class="sh"><h3>Account</h3></div>
+        <div class="sh pg-h"><h3>Account</h3></div>
         <div class="sb2">
           <div class="dr"><div class="dk">Admin email</div><div class="dv" style="font-family:'DM Mono',monospace">theimaginaryrecords@gmail.com</div></div>
           <div class="dr"><div class="dk">Panel</div><div class="dv">TIR Admin Panel</div></div>
@@ -870,9 +820,30 @@ tr:last-child td{border-bottom:none}
         </div>
       </div>
       <div class="section">
-        <div class="sh"><h3>Security</h3></div>
+        <div class="sh pg-h"><div><h3>My Profile</h3><p>Admin account details</p></div></div>
+        <div class="sb2" style="max-width:640px">
+          <div class="dr"><div class="dk">Email</div><div class="dv" style="font-family:'DM Mono',monospace" id="prof-email">—</div></div>
+          <div class="dr"><div class="dk">Role</div><div class="dv">Label Owner</div></div>
+          <div class="dr"><div class="dk">Last sign-in</div><div class="dv" id="prof-last">—</div></div>
+          <div class="fg fld" style="margin-top:14px"><label>Display Name</label><input id="prof-name" placeholder="Your name"/></div>
+          <div class="update-acts"><button class="btn-save-demo btn primary" onclick="saveAdminProfile()">Save Changes</button></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sh pg-h"><h3>Change Password</h3></div>
+        <div class="sb2" style="max-width:640px">
+          <div class="al al-e" id="prof-pass-err"></div>
+          <div class="release-edit-grid">
+            <div class="fg fld"><label>New Password</label><input type="password" id="prof-pass1" autocomplete="new-password"/></div>
+            <div class="fg fld"><label>Confirm Password</label><input type="password" id="prof-pass2" autocomplete="new-password"/></div>
+          </div>
+          <div class="update-acts"><button class="btn-save-demo btn primary" onclick="changeAdminPassword()">Update Password</button></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sh pg-h"><h3>Security</h3></div>
         <div class="sb2">
-          <p class="set-note">The admin-email check in this panel is <b>UI-only</b>. Real access control must be enforced by Firestore Security Rules: deny all reads/writes on <span style="font-family:'DM Mono',monospace">users, releases, tracks, splits, licenses, contracts, tickets, royalties, blog, demos, walletTx, withdrawals, notifications, activityLogs, loginHistory</span> except for the admin UID. Approve KYC and license submissions only after verifying real documents — never fabricate approvals.</p>
+          <p class="set-note">The admin-email check in this panel is <b>UI-only</b>. Real access control must be enforced by Firestore Security Rules: deny all reads/writes on <span style="font-family:'DM Mono',monospace">users, releases, tracks, splits, licenses, contracts, tickets, royalties, blog, walletTx, withdrawals, notifications, activityLogs, loginHistory</span> except for the admin UID. Approve license submissions only after verifying real documents — never fabricate approvals.</p>
         </div>
       </div>
     </div>
@@ -885,348 +856,43 @@ tr:last-child td{border-bottom:none}
 
 <!-- RELEASE MODAL -->
 <div class="mo" id="rmo" onclick="if(event.target===this)closeMo('rmo')">
-  <div class="mbox">
+  <div class="mbox modal">
     <div class="mh"><div class="mt2" id="rmo-title">Release</div><button class="mc" onclick="closeMo('rmo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
     <div class="mb" id="rmo-body"></div>
   </div>
 </div>
 <!-- TICKET MODAL -->
 <div class="mo" id="tmo" onclick="if(event.target===this)closeMo('tmo')">
-  <div class="mbox"><div class="mh"><div class="mt2" id="tmo-title">Ticket</div><button class="mc" onclick="closeMo('tmo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="tmo-body"></div></div>
+  <div class="mbox modal"><div class="mh"><div class="mt2" id="tmo-title">Ticket</div><button class="mc" onclick="closeMo('tmo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="tmo-body"></div></div>
 </div>
 <!-- DEMO MODAL -->
-<div class="mo" id="dmo" onclick="if(event.target===this)closeMo('dmo')">
-  <div class="mbox"><div class="mh"><div><div class="mt2" id="dmo-title">Demo</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center" id="dmo-ref"></div></div><button class="mc" onclick="closeMo('dmo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="dmo-body"></div></div>
-</div>
+
 <!-- SPLIT SHEET MODAL -->
 <div class="mo" id="smod" onclick="if(event.target===this)closeMo('smod')">
-  <div class="mbox"><div class="mh"><div class="mt2" id="smod-title">Split Sheet</div><button class="mc" onclick="closeMo('smod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="smod-body"></div></div>
+  <div class="mbox modal"><div class="mh"><div class="mt2" id="smod-title">Split Sheet</div><button class="mc" onclick="closeMo('smod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="smod-body"></div></div>
 </div>
 
 <!-- ACCOUNT (BANK + ANALYTICS) MODAL -->
-<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)" id="acct-modal" onclick="if(event.target===this)closeAcctModal()">
-  <div style="background:var(--card);border:1px solid var(--brd);border-radius:16px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--brd)">
-      <div style="font-size:15px;font-weight:800;color:var(--accent-tx)" id="acct-modal-title">Manage Account</div>
-      <button onclick="closeAcctModal()" style="background:none;border:none;color:var(--txt3);font-size:20px;cursor:pointer;padding:0 4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-    </div>
-    <div style="overflow-y:auto;padding:20px;flex:1">
-      <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--txt)">Bank / Payout Details <span style="font-weight:400;color:var(--txt3);font-size:11px">(read-only, artist-managed)</span></div>
-      <div id="acct-bank-view" style="font-size:12px;color:var(--txt2);line-height:2;margin-bottom:24px;padding:14px;background:var(--input);border:1px solid var(--brd);border-radius:10px"></div>
 
-      <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--txt);display:flex;align-items:center;gap:10px;flex-wrap:wrap">Analytics
-        <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:400;color:var(--txt3);cursor:pointer"><input type="checkbox" id="acct-an-enabled" onchange="toggleAnalyticsEnabledInstant(this.checked)"/>Enabled for this account</label>
-        <span id="acct-an-toggle-status" style="font-size:11px;color:var(--txt3)"></span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="fg"><label>Total Streams</label><input type="number" id="acct-an-streams-total"/></div>
-        <div class="fg"><label>Streams This Month</label><input type="number" id="acct-an-streams-month"/></div>
-        <div class="fg"><label>Total Revenue (₹)</label><input type="number" id="acct-an-revenue-total"/></div>
-        <div class="fg"><label>Revenue This Month (₹)</label><input type="number" id="acct-an-revenue-month"/></div>
-        <div class="fg" style="grid-column:1/-1"><label>Top Tracks <span style="font-weight:400;color:var(--txt3)">(one per line: Title, streams)</span></label><textarea id="acct-an-top-tracks" style="min-height:70px" placeholder="Midnight Drive, 12500&#10;Heartbreak Road, 8900"></textarea></div>
-        <div class="fg" style="grid-column:1/-1"><label>By Platform <span style="font-weight:400;color:var(--txt3)">(one per line: platform, streams)</span></label><textarea id="acct-an-platforms" style="min-height:70px" placeholder="spotify, 45000&#10;apple music, 12000&#10;youtube music, 8000"></textarea></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:16px">
-        <button id="acct-an-save-btn" onclick="saveAccountAnalytics()" style="padding:9px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Save Analytics</button>
-        <button onclick="closeAcctModal()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:8px;font-size:12px;color:var(--txt2);cursor:pointer">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- LABEL ARTISTS MODAL -->
-<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)" id="la-modal" onclick="if(event.target===this)closeLaModal()">
-  <div style="background:var(--card);border:1px solid var(--brd);border-radius:16px;width:100%;max-width:620px;max-height:88vh;display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--brd)">
-      <div style="font-size:15px;font-weight:800;color:var(--accent-tx)" id="la-modal-title">Label Artists</div>
-      <button onclick="closeLaModal()" style="background:none;border:none;color:var(--txt3);font-size:20px;cursor:pointer;padding:0 4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-    </div>
-    <div style="overflow-y:auto;padding:18px;flex:1">
-      <div id="la-modal-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
-      <button onclick="toggleAddLaForm()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--info-bg);border:1px solid var(--info);border-radius:8px;color:var(--info);font-size:12px;font-weight:700;cursor:pointer">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Artist
-      </button>
-      <div id="la-add-form" style="display:none;margin-top:12px;padding:14px;background:var(--input);border:1px solid var(--brd);border-radius:10px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="fg"><label>Artist Name *</label><input id="la-art-name" placeholder="Stage name"/></div>
-          <div class="fg"><label>Genre</label><input id="la-art-genre" placeholder="Hip Hop, R&B..."/></div>
-          <div class="fg"><label>Spotify Artist URL</label><input type="url" id="la-art-spotify" placeholder="https://open.spotify.com/artist/..."/></div>
-          <div class="fg"><label>Apple Music URL</label><input type="url" id="la-art-apple" placeholder="https://music.apple.com/..."/></div>
-          <div class="fg" style="grid-column:1/-1"><label>SoundCloud URL</label><input type="url" id="la-art-soundcloud" placeholder="https://soundcloud.com/..."/></div>
-          <div class="fg" style="grid-column:1/-1"><label>Bio</label><textarea id="la-art-bio" style="min-height:55px" placeholder="Short bio"></textarea></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button id="la-add-btn" onclick="addLabelArtist()" style="padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Add Artist</button>
-          <button onclick="toggleAddLaForm()" style="padding:8px 14px;background:none;border:1px solid var(--brd);border-radius:8px;font-size:12px;color:var(--txt2);cursor:pointer">Cancel</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <div class="toast" id="toast"></div>
 
 <script>
 
-/* ═══ ACCOUNT TYPE SWITCHER ═══ */
-var _acctType = 'artist';
-var CA_DRAFT_KEY = 'tir_admin_create_account_draft_v1';
-var CA_DRAFT_FIELDS = ['ca-name','ca-email','ca-genre','ca-country','ca-instagram','ca-bio','ca-spotify','ca-apple-music','ca-soundcloud','ca-youtube-url','ca-plan','ca-royalty','ca-audio-access','ca-video-access'];
-var _caAutosaveTimer = null;
-function autosaveCreateAccountDraft() {
-  try {
-    var data = { savedAt: new Date().toISOString(), acctType: _acctType, fields: {} };
-    var hasContent = false;
-    CA_DRAFT_FIELDS.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) { data.fields[id] = el.value; if (el.value && id !== 'ca-plan' && id !== 'ca-royalty' && id !== 'ca-audio-access' && id !== 'ca-video-access') hasContent = true; }
-    });
-    if (!hasContent) return;
-    localStorage.setItem(CA_DRAFT_KEY, JSON.stringify(data));
-  } catch(e) {}
-}
-function checkForCreateAccountDraft() {
-  var raw;
-  try { raw = localStorage.getItem(CA_DRAFT_KEY); } catch(e) { return; }
-  if (!raw) return;
-  try {
-    var data = JSON.parse(raw);
-    var banner = document.getElementById('ca-draft-banner');
-    var timeEl = document.getElementById('ca-draft-banner-time');
-    if (banner && timeEl) { timeEl.textContent = new Date(data.savedAt).toLocaleString(); banner.style.display = 'flex'; }
-  } catch(e) {}
-}
-window.restoreCreateAccountDraft = function() {
-  var raw;
-  try { raw = localStorage.getItem(CA_DRAFT_KEY); } catch(e) { return; }
-  if (!raw) return;
-  try {
-    var data = JSON.parse(raw);
-    if (data.acctType) switchAcctType(data.acctType);
-    Object.keys(data.fields||{}).forEach(function(id) { var el = document.getElementById(id); if (el && data.fields[id]) el.value = data.fields[id]; });
-    document.getElementById('ca-draft-banner').style.display = 'none';
-    toast('Draft restored — remember to re-enter the password ✓');
-  } catch(e) {}
-};
-window.discardCreateAccountDraft = function() {
-  try { localStorage.removeItem(CA_DRAFT_KEY); } catch(e) {}
-  document.getElementById('ca-draft-banner').style.display = 'none';
-};
-function switchAcctType(type) {
-  _acctType = type;
-  var isLabel = type === 'label';
-  var artistBtn = document.getElementById('att-artist');
-  var labelBtn  = document.getElementById('att-label');
-  artistBtn.style.background = isLabel ? 'none' : 'var(--accent)';
-  artistBtn.style.color      = isLabel ? 'var(--txt2)' : '#fff';
-  labelBtn.style.background  = isLabel ? 'var(--accent)' : 'none';
-  labelBtn.style.color       = isLabel ? '#fff' : 'var(--txt2)';
-  document.getElementById('ca-name-label').textContent = isLabel ? 'Label Name *' : 'Artist / Stage Name *';
-  document.getElementById('ca-name').placeholder = isLabel ? 'e.g. Sheen Valley Records' : 'Artist name';
-  document.getElementById('ca-genre').placeholder = isLabel ? 'Various' : 'Hip Hop / Trap';
-  document.getElementById('ca-btn').textContent = isLabel ? 'Create Label Account' : 'Create Artist Account';
-  document.getElementById('ca-plan').value = isLabel ? 'custom' : 'free';
-  var hide = ['ca-spotify-grp','ca-spotify-row','ca-apple-row','ca-soundcloud-row','ca-youtube-row','ca-audio-row','ca-video-row'];
-  hide.forEach(function(id){
-    var el = document.getElementById(id);
-    if (el) el.style.display = isLabel ? 'none' : '';
-  });
-}
 
-/* ═══ CREATE ACCOUNT ═══ */
-window.createAccount = async function() {
-  if(!requireAdmin())return;
-  var name     = (document.getElementById('ca-name').value||'').trim();
-  var email    = (document.getElementById('ca-email').value||'').trim();
-  var password = (document.getElementById('ca-password').value||'');
-  var eEl = document.getElementById('artist-e');
-  var sEl = document.getElementById('artist-s');
-  eEl.classList.remove('on'); sEl.classList.remove('on');
-  if (!name)              { eEl.textContent = 'Please enter a name.'; eEl.classList.add('on'); return; }
-  if (!email)             { eEl.textContent = 'Please enter an email.'; eEl.classList.add('on'); return; }
-  if (password.length<6)  { eEl.textContent = 'Password must be at least 6 characters.'; eEl.classList.add('on'); return; }
-  var btn = document.getElementById('ca-btn');
-  btn.disabled = true; btn.textContent = 'Creating...';
-  var isLabel = _acctType === 'label';
-  try {
-    var secAuth = secondaryAuth();
-    var cred = await secAuth.createUserWithEmailAndPassword(email, password);
-    var uid = cred.user.uid;
-    try { await cred.user.sendEmailVerification(); } catch(e) {}
-    var userData = {
-      name: name, email: email,
-      accountType: _acctType,
-      genre:    (document.getElementById('ca-genre').value||'').trim(),
-      country:  (document.getElementById('ca-country').value||'').trim(),
-      instagram:(document.getElementById('ca-instagram').value||'').trim(),
-      bio:      (document.getElementById('ca-bio').value||'').trim(),
-      plan:     document.getElementById('ca-plan').value,
-      royaltySplit: Number(document.getElementById('ca-royalty').value)||85,
-      createdAt: new Date().toISOString(),
-      createdBy: 'admin-panel'
-    };
-    if (!isLabel) {
-      userData.spotify       = (document.getElementById('ca-spotify').value||'').trim();
-      userData.appleMusicUrl = (document.getElementById('ca-apple-music').value||'').trim();
-      userData.soundcloudUrl = (document.getElementById('ca-soundcloud').value||'').trim();
-      userData.youtube       = (document.getElementById('ca-youtube-url').value||'').trim();
-      userData.releaseServices = {
-        audio: document.getElementById('ca-audio-access').value === 'true',
-        video: document.getElementById('ca-video-access').value === 'true'
-      };
-    } else {
-      userData.labelArtists   = [];
-      userData.releaseServices = { audio: true, video: true };
-    }
-    try {
-      await db.collection('users').doc(uid).set(userData, { merge: true });
-    } catch (firestoreErr) {
-      // The Auth user was already created but the Firestore profile write failed.
-      // Roll back the Auth user so it doesn't become an orphaned login.
-      var rollbackNote = ' The login was rolled back automatically.';
-      try { await cred.user.delete(); }
-      catch (delErr) { rollbackNote = ' IMPORTANT: the login could NOT be rolled back automatically — remove it manually in Firebase Console → Authentication → Users (' + email + ').'; }
-      try { await secAuth.signOut(); } catch (soErr) {}
-      throw new Error('Profile save failed.' + rollbackNote + ' Details: ' + firestoreErr.message);
-    }
-    await secAuth.signOut();
-    ['ca-name','ca-email','ca-password','ca-genre','ca-country','ca-instagram','ca-bio','ca-spotify','ca-apple-music','ca-soundcloud','ca-youtube-url'].forEach(function(id){
-      var el = document.getElementById(id); if (el) el.value = '';
-    });
-    document.getElementById('ca-royalty').value = '85';
-    try { localStorage.removeItem(CA_DRAFT_KEY); } catch(e) {}
-    var _cadb = document.getElementById('ca-draft-banner'); if (_cadb) _cadb.style.display = 'none';
-    sEl.textContent = '✓ ' + (isLabel?'Label':'Artist') + ' account created: ' + name + ' (' + email + ')';
-    sEl.classList.add('on');
-    await loadArtists();
-    logActivity('',ADMIN_EMAIL,'account_create',(isLabel?'Label':'Artist')+' account created: '+name+' ('+email+')');
-    toast((isLabel?'Label':'Artist') + ' account created ✓');
-  } catch(ex) {
-    eEl.textContent = 'Error: ' + ex.message; eEl.classList.add('on');
-  }
-  btn.disabled = false;
-  btn.textContent = isLabel ? 'Create Label Account' : 'Create Artist Account';
-};
 
-/* ═══ MANAGE LABEL ARTISTS MODAL ═══ */
-// Roster helper: merges labelArtists (admin-added) + savedArtists (portal-added),
-// normalising the two field conventions so every artist shows with full details.
-function getLabelRoster(label){
-  var out = [];
-  (label.labelArtists||[]).forEach(function(a,i){
-    out.push({name:a.name||'', artistType:a.artistType||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
-      spotifyUrl:a.spotifyUrl||a.spotify||'', appleMusicUrl:a.appleMusicUrl||a.appleMusic||'',
-      soundcloudUrl:a.soundcloudUrl||a.soundcloud||'', socials:a.socials||'',
-      _src:'labelArtists', _idx:i});
-  });
-  (label.savedArtists||[]).forEach(function(a,i){
-    out.push({name:a.name||'', artistType:a.artistType||'', genre:a.genre||'', email:a.email||'', bio:a.bio||'', website:a.website||'',
-      spotifyUrl:a.spotifyUrl||a.spotify||'', appleMusicUrl:a.appleMusicUrl||a.appleMusic||'',
-      soundcloudUrl:a.soundcloudUrl||a.soundcloud||'', socials:a.socials||'',
-      _src:'savedArtists', _idx:i});
-  });
-  return out;
-}
+
 var _labelId = null;
-window.manageLabelArtists = function(id) {
-  _labelId = id;
-  var label = artists.find(function(a){ return a.id===id; });
-  if (!label) return;
-  var roster = getLabelRoster(label);
-  document.getElementById('la-modal-title').textContent = label.name + ' — Artists (' + roster.length + ')';
-  renderLaList(roster);
-  document.getElementById('la-modal').style.display = 'flex';
-};
-function closeLaModal() {
-  document.getElementById('la-modal').style.display = 'none';
-  document.getElementById('la-add-form').style.display = 'none';
-}
+
+
 var _acctId = null;
-window.manageAccountExtra = function(id) {
-  _acctId = id;
-  var a = artists.find(function(x){ return x.id===id; });
-  if (!a) return;
-  document.getElementById('acct-modal-title').textContent = (a.name||'Account') + ' — Manage';
-  var b = a.bankDetails || {};
-  var bankView = document.getElementById('acct-bank-view');
-  if (b.accountNumber || b.accountHolder || b.upiId) {
-    bankView.innerHTML =
-      '<div><strong>Account Holder:</strong> ' + escA(b.accountHolder||'—') + '</div>' +
-      '<div><strong>Bank Name:</strong> ' + escA(b.bankName||'—') + '</div>' +
-      '<div><strong>Account Number:</strong> <span class="masked-pii" data-full="'+escA(b.accountNumber||'—')+'" onclick="this.textContent=this.getAttribute(\'data-full\');this.classList.remove(\'masked-pii\')" title="Click to reveal">'+escA(maskId(b.accountNumber,4))+'</span></div>' +
-      '<div><strong>IFSC / SWIFT:</strong> ' + escA(b.ifscSwift||'—') + '</div>' +
-      '<div><strong>Bank Country:</strong> ' + escA(b.bankCountry||'—') + '</div>' +
-      '<div><strong>UPI ID:</strong> ' + escA(b.upiId||'—') + '</div>' +
-      '<div style="color:var(--txt3);font-size:11px;margin-top:6px">Last updated: ' + (b.updatedAt?b.updatedAt.substring(0,10):'—') + '</div>';
-  } else {
-    bankView.innerHTML = '<span style="color:var(--txt3)">This account has not added bank/payout details yet.</span>';
-  }
-  var an = a.analytics || {};
-  document.getElementById('acct-an-enabled').checked = !!an.enabled;
-  document.getElementById('acct-an-streams-total').value = an.streams ? (an.streams.total!=null?an.streams.total:'') : '';
-  document.getElementById('acct-an-streams-month').value = an.streams ? (an.streams.thisMonth!=null?an.streams.thisMonth:'') : '';
-  document.getElementById('acct-an-revenue-total').value = an.revenue ? (an.revenue.total!=null?an.revenue.total:'') : '';
-  document.getElementById('acct-an-revenue-month').value = an.revenue ? (an.revenue.thisMonth!=null?an.revenue.thisMonth:'') : '';
-  document.getElementById('acct-an-top-tracks').value = (an.topTracks||[]).map(function(t){ return (t.title||'')+', '+(t.streams!=null?t.streams:''); }).join('\n');
-  document.getElementById('acct-an-platforms').value = an.platforms ? Object.keys(an.platforms).map(function(k){ return k+', '+an.platforms[k]; }).join('\n') : '';
-  document.getElementById('acct-modal').style.display = 'flex';
-};
-function closeAcctModal() { document.getElementById('acct-modal').style.display = 'none'; }
-window.toggleAnalyticsEnabledInstant = async function(val) {
-  if (!_acctId) return;
-  var status = document.getElementById('acct-an-toggle-status');
-  status.textContent = 'Saving...';
-  try {
-    await db.collection('users').doc(_acctId).update({ 'analytics.enabled': val });
-    var a = artists.find(function(x){ return x.id===_acctId; });
-    if (a) { a.analytics = a.analytics || {}; a.analytics.enabled = val; }
-    status.textContent = val ? '✓ Enabled — saved instantly' : '✓ Disabled — saved instantly';
-    setTimeout(function(){ status.textContent=''; }, 2500);
-  } catch(e) {
-    status.textContent = 'Error saving';
-    toast('Error: ' + e.message);
-  }
-};
-window.saveAccountAnalytics = async function() {
-  if (!_acctId) return;
-  var parseLines = function(id) {
-    var lines = document.getElementById(id).value.split('\n').map(function(l){return l.trim();}).filter(Boolean);
-    var out = [];
-    lines.forEach(function(line) {
-      var parts = line.split(',');
-      if (parts.length >= 2) { var v = Number(parts[1].trim()); out.push([parts[0].trim(), isNaN(v)?0:v]); }
-    });
-    return out;
-  };
-  var topTracksArr = parseLines('acct-an-top-tracks').map(function(p){ return { title: p[0], streams: p[1] }; });
-  var platformsObj = {};
-  parseLines('acct-an-platforms').forEach(function(p){ platformsObj[p[0]] = p[1]; });
-  var patch = {
-    analytics: {
-      enabled: document.getElementById('acct-an-enabled').checked,
-      streams: {
-        total: document.getElementById('acct-an-streams-total').value ? Number(document.getElementById('acct-an-streams-total').value) : null,
-        thisMonth: document.getElementById('acct-an-streams-month').value ? Number(document.getElementById('acct-an-streams-month').value) : null
-      },
-      revenue: {
-        total: document.getElementById('acct-an-revenue-total').value ? Number(document.getElementById('acct-an-revenue-total').value) : null,
-        thisMonth: document.getElementById('acct-an-revenue-month').value ? Number(document.getElementById('acct-an-revenue-month').value) : null
-      },
-      topTracks: topTracksArr,
-      platforms: platformsObj,
-      lastUpdated: new Date().toISOString()
-    }
-  };
-  var btn = document.getElementById('acct-an-save-btn'); btn.disabled = true; btn.textContent = 'Saving...';
-  try {
-    await db.collection('users').doc(_acctId).set(patch, { merge: true });
-    var a = artists.find(function(x){ return x.id===_acctId; });
-    if (a) a.analytics = patch.analytics;
-    toast('Analytics updated ✓');
-    closeAcctModal();
-  } catch(e) { toast('Error: ' + e.message); }
-  btn.disabled = false; btn.textContent = 'Save Analytics';
-};
+
+
+
+
 // ── dedicated Analytics page: obvious per-artist analytics editor ──
 function loadAnalyticsPage(){
   var sel = document.getElementById('anp-artist');
@@ -1346,184 +1012,14 @@ window.savePageAnalytics = async function(){
   btn.disabled = false; btn.textContent = 'Save Analytics';
 };
 function escA(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function renderLaList(arr) {
-  var el = document.getElementById('la-modal-list');
-  if (!arr.length) {
-    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--txt3);font-size:13px">No artists yet. Add your first artist below.</div>';
-    return;
-  }
-  el.innerHTML = arr.map(function(a,i){
-    var links='';
-    if(a.spotifyUrl) links+='<a href="'+safeUrl(a.spotifyUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(30,215,96,.12);color:#1ed760;border-radius:5px;text-decoration:none">Spotify</a> ';
-    if(a.appleMusicUrl) links+='<a href="'+safeUrl(a.appleMusicUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,65,108,.12);color:#ff416c;border-radius:5px;text-decoration:none">Apple</a> ';
-    if(a.soundcloudUrl) links+='<a href="'+safeUrl(a.soundcloudUrl)+'" target="_blank" style="font-size:11px;padding:2px 7px;background:rgba(255,85,0,.12);color:#ff5500;border-radius:5px;text-decoration:none">SoundCloud</a>';
-    var extra='';
-    if(a.email) extra+='<div style="font-size:11px;color:var(--txt3);margin-top:2px">'+escA(a.email)+'</div>';
-    if(a.website) extra+='<div style="font-size:11px;margin-top:2px"><a href="'+safeUrl(a.website)+'" target="_blank" style="color:var(--info)">'+escA(a.website)+'</a></div>';
-    return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--input);border:1px solid var(--brd);border-radius:10px">'
-      +'<div style="width:38px;height:38px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--accent-tx);flex-shrink:0">'+(a.name||'A')[0].toUpperCase()+'</div>'
-      +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:13px;font-weight:700">'+escA(a.name)+'</div>'
-        +'<div style="font-size:11px;color:var(--txt3);margin-top:3px">'+(a.genre?'<span style="margin-right:6px">'+escA(a.genre)+'</span>':'')+links+'</div>'
-        +extra
-        +(a.bio?'<div style="font-size:11px;color:var(--txt3);margin-top:4px">'+escA(a.bio)+'</div>':'')
-      +'</div>'
-      +'<button onclick="removeLaArtist(\''+a._src+'\','+a._idx+')" style="padding:5px 12px;background:var(--bad-bg);border:1px solid var(--bad);border-radius:6px;color:var(--bad);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">Remove</button>'
-      +'</div>';
-  }).join('');
-}
-function toggleAddLaForm(){
-  var f=document.getElementById('la-add-form');
-  f.style.display=f.style.display==='none'?'block':'none';
-}
-window.removeLaArtist = async function(src, idx){
-  if(!confirm('Remove this artist from the label?')) return;
-  var label = artists.find(function(a){ return a.id===_labelId; });
-  if(!label) return;
-  var key = (src==='savedArtists') ? 'savedArtists' : 'labelArtists';
-  var arr = (label[key]||[]).slice();
-  arr.splice(idx,1);
-  try{
-    var patch={}; patch[key]=arr;
-    await db.collection('users').doc(_labelId).update(patch);
-    label[key]=arr;
-    manageLabelArtists(_labelId);
-    renderArtists();
-    toast('Artist removed ✓');
-  }catch(e){toast('Error: '+e.message);}
-};
-window.addLabelArtist = async function(){
-  var name=(document.getElementById('la-art-name').value||'').trim();
-  if(!name){toast('Artist name is required.');return;}
-  var label=artists.find(function(a){return a.id===_labelId;});
-  if(!label)return;
-  var arr=(label.labelArtists||[]).slice();
-  arr.push({
-    name:name,
-    genre:(document.getElementById('la-art-genre').value||'').trim(),
-    spotifyUrl:(document.getElementById('la-art-spotify').value||'').trim(),
-    appleMusicUrl:(document.getElementById('la-art-apple').value||'').trim(),
-    soundcloudUrl:(document.getElementById('la-art-soundcloud').value||'').trim(),
-    bio:(document.getElementById('la-art-bio').value||'').trim(),
-    addedAt:new Date().toISOString()
-  });
-  var btn=document.getElementById('la-add-btn');
-  btn.disabled=true;btn.textContent='Adding...';
-  try{
-    await db.collection('users').doc(_labelId).update({labelArtists:arr});
-    label.labelArtists=arr;
-    renderLaList(arr);
-    renderArtists();
-    ['la-art-name','la-art-genre','la-art-spotify','la-art-apple','la-art-soundcloud','la-art-bio'].forEach(function(id){
-      var el=document.getElementById(id);if(el)el.value='';
-    });
-    document.getElementById('la-add-form').style.display='none';
-    toast('Artist added ✓');
-  }catch(e){toast('Error: '+e.message);}
-  btn.disabled=false;btn.textContent='Add Artist';
-};
 
-window.renderRosterAll=function(){
-  const el=document.getElementById('roster-list');if(!el)return;
-  const q=(document.getElementById('roster-search')?document.getElementById('roster-search').value:'').toLowerCase();
-  var rows=[];
-  artists.forEach(function(a){
-    getLabelRoster(a).forEach(function(r){
-      rows.push({acct:a.name||a.email||a.id, acctId:a.id, r:r});
-    });
-  });
-  if(q) rows=rows.filter(function(x){return ((x.r.name||'')+' '+(x.acct||'')).toLowerCase().indexOf(q)>=0;});
-  if(!rows.length){el.innerHTML='<div class="empty"><div class="empty-text">No roster artists yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Type</th><th>Account</th><th>Genre</th><th>Email</th><th>Spotify</th><th>Apple Music</th><th>SoundCloud</th><th>Website</th><th>Bio</th></tr></thead><tbody>
-    ${rows.map(function(x){
-      const r=x.r;
-      const link=function(u,label,color){return u?`<a href="${safeUrl(u)}" target="_blank" style="font-size:11px;font-weight:700;color:${color};text-decoration:none">${label} ↗</a>`:'<span style="color:var(--txt3)">—</span>';};
-      return `<tr>
-        <td style="font-weight:700">${escA(r.name||'—')}</td>
-        <td style="font-size:12px;color:var(--txt2)">${escA(r.artistType||'—')}</td>
-        <td style="font-size:12px;color:var(--txt2)">${escA(x.acct)}</td>
-        <td style="font-size:12px;color:var(--txt3)">${escA(r.genre||'—')}</td>
-        <td style="font-size:11px;font-family:'DM Mono',monospace">${escA(r.email||'—')}</td>
-        <td>${link(r.spotifyUrl,'Spotify','#1ed760')}</td>
-        <td>${link(r.appleMusicUrl,'Apple','#ff416c')}</td>
-        <td>${link(r.soundcloudUrl,'SoundCloud','#ff5500')}</td>
-        <td>${link(r.website,'Site','var(--info)')}</td>
-        <td style="font-size:11px;color:var(--txt3);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escA(r.bio||'')}">${escA(r.bio||'—')}</td>
-      </tr>`;
-    }).join('')}
-  </tbody></table>`;
-};
 
-/* ═══ RENDER ACCOUNTS TABLE (type, access controls, royalties, agreement, ID verification) ═══ */
-window.renderArtists=function(){
-  const el=document.getElementById('art-list');if(!el)return;
-  const countEl=document.getElementById('art-count'); if(countEl) countEl.textContent=artists.length+' account'+(artists.length!==1?'s':'');
-  if(!artists.length){el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No accounts yet</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Type</th><th>Name</th><th>Email</th><th>Genre</th><th>Country</th><th>Royalty %</th><th>Audio</th><th>Video</th><th>Releases</th><th>Royalties</th><th>Agreement</th><th>ID Verification</th><th>Action</th></tr></thead><tbody>
-    ${artists.map(a=>{
-      const rc=releases.filter(r=>r.userId===a.id).length;
-      const tr=royalties.filter(r=>r.userId===a.id).reduce((s,r2)=>s+Number(r2.totalAmount||0),0);
-      const access=a.releaseServices||{};
-      const isLabel=a.accountType==='label';
-      const laCount=getLabelRoster(a).length;
-      const typeSelect=`<select class="ss" id="art-type-${a.id}" style="font-size:11px;font-weight:700;padding:3px 6px"><option value="artist" ${!isLabel?'selected':''}>Artist</option><option value="label" ${isLabel?'selected':''}>Label</option></select>`;
-      const agr=a.agreement;
-      const agreementHTML=agr&&agr.signed?`<a href="${safeUrl(agr.signatureUrl)}" target="_blank" style="color:var(--ok);font-size:11px;font-weight:700">✓ Signed ${esc(agr.signedAt||'').substring(0,10)}</a>`:'<span style="color:var(--txt3);font-size:11px">Not signed</span>';
-      const idv=a.idVerification;
-      let idHTML='<span style="color:var(--txt3);font-size:11px">Not submitted</span>';
-      if(idv&&idv.url){
-        const statusColor=idv.status==='verified'?'var(--ok)':(idv.status==='rejected'?'var(--bad)':'var(--warn)');
-        idHTML=`<div style="display:flex;flex-direction:column;gap:4px"><a href="${safeUrl(idv.url)}" target="_blank" style="font-size:11px;font-weight:700;color:${statusColor}">${esc(idv.type)||'ID'} — ${esc(idv.status)||'pending'}</a><div style="display:flex;gap:4px"><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','verified')">Verify</button><button class="db" style="padding:2px 8px;font-size:10px" onclick="setIdVerificationStatus('${a.id}','rejected')">Reject</button></div></div>`;
-      }
-      return `<tr>
-        <td>${typeSelect}${isLabel?`<div style="font-size:10px;color:var(--info);margin-top:2px">${laCount} artist${laCount!==1?'s':''}</div>`:''}</td>
-        <td style="font-weight:700">${escA(a.name||'—')}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${escA(a.email||'—')}</td>
-        <td style="font-size:12px;color:var(--txt3)">${escA(isLabel?'Label':(a.genre||'—'))}</td>
-        <td style="font-size:12px">${escA(a.country||'—')}</td>
-        <td><input class="ss" style="width:60px" type="number" min="0" max="100" id="art-royalty-${a.id}" value="${a.royaltySplit!=null?a.royaltySplit:85}"/></td>
-        <td><select class="ss" id="art-audio-${a.id}"><option value="true" ${(access.audio!==false)?'selected':''}>On</option><option value="false" ${(access.audio===false)?'selected':''}>Off</option></select></td>
-        <td><select class="ss" id="art-video-${a.id}"><option value="true" ${(access.video===true)?'selected':''}>On</option><option value="false" ${(access.video!==true)?'selected':''}>Off</option></select></td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent-tx);font-weight:700">${rc}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent-tx)">₹${tr.toFixed(2)}</td>
-        <td>${agreementHTML}</td>
-        <td>${idHTML}</td>
-        <td><div style="display:flex;gap:5px;flex-wrap:wrap">
-          <button class="vb" onclick="saveArtistServices('${a.id}')">Save</button>
-          <button class="vb" style="background:var(--warn-bg);color:var(--warn)" onclick="sendArtistPasswordReset('${escJs(a.email||'')}')">Reset Password</button>
-          <button class="vb" style="background:var(--accent-soft);color:var(--accent-tx)" onclick="manageAccountExtra('${a.id}')">Bank &amp; Analytics</button>
-          ${isLabel?`<button class="vb" style="background:var(--info-bg);color:var(--info)" onclick="manageLabelArtists('${a.id}')">Artists</button>`:''}
-          <button class="db" onclick="deleteArtistProfile('${a.id}')">Delete</button>
-        </div></td>
-      </tr>`;
-    }).join('')}
-  </tbody></table>`;
-};
-window.saveArtistServices=async function(id){
-  try{
-    const royaltyEl=document.getElementById('art-royalty-'+id);
-    const typeEl=document.getElementById('art-type-'+id);
-    const patch={releaseServices:{audio:document.getElementById('art-audio-'+id).value==='true', video:document.getElementById('art-video-'+id).value==='true'}};
-    if(royaltyEl){ const v=Number(royaltyEl.value); if(!isNaN(v)&&v>=0&&v<=100) patch.royaltySplit=v; }
-    if(typeEl){ patch.accountType=typeEl.value; }
-    await db.collection('users').doc(id).set(patch,{merge:true});
-    toast('Artist account updated ✓');
-    await loadArtists();
-  }catch(e){toast('Error: '+e.message);}
-};
-window.sendArtistPasswordReset=async function(email){
-  if(!requireAdmin())return;
-  if(!email){ toast('No email on file for this artist.'); return; }
-  if(!confirm('Send a password reset email to '+email+'? The artist will get a link to set a new password themselves.')) return;
-  try{ await auth.sendPasswordResetEmail(email); toast('Password reset email sent to '+email+' ✓'); }
-  catch(e){ toast('Error: '+e.message); }
-};
-window.setIdVerificationStatus=async function(uid,status){
-  await db.collection('users').doc(uid).set({ idVerification: { status: status } }, { merge: true });
-  const a=artists.find(x=>x.id===uid); if(a && a.idVerification) a.idVerification.status=status;
-  renderArtists();
-  toast('ID marked as '+status);
-};
+
+
+
+
+
+
 
 /* ═══ XSS HARDENING HELPERS ═══
    esc(): escape user-controlled text inserted into HTML.
@@ -1597,14 +1093,14 @@ function doSignOut(){auth.signOut();}
 /* ── loadAll: settled results, reports which loaders failed, never claims false success ── */
 async function loadAll(){
   toast('Loading...');
-  const jobs=[['Releases',loadReleases()],['Artists',loadArtists()],['Tickets',loadTickets()],['Blog',loadBlogPosts()],['Royalties',loadRoyaltyHistory()],['Demos',loadDemos()],['Withdrawals',loadWithdrawals()],['Notifications',loadNotifications()],['Activity Logs',loadActivityLogs()],['Tracks',loadTracks()],['Split Sheets',loadSplits()],['Licenses',loadLicenses()],['Contracts',loadContracts()],['Login History',loadLoginHistory()]];
+  const jobs=[['Releases',loadReleases()],['Users',loadUsers()],['Tickets',loadTickets()],['Blog',loadBlogPosts()],['Royalties',loadRoyaltyHistory()],['Withdrawals',loadWithdrawals()],['Notifications',loadNotifications()],['Activity Logs',loadActivityLogs()],['Tracks',loadTracks()],['Split Sheets',loadSplits()],['Licenses',loadLicenses()],['Contracts',loadContracts()],['Login History',loadLoginHistory()]];
   const results=await Promise.allSettled(jobs.map(j=>j[1]));
   const failed=results.map((r,i)=>r.status==='rejected'?jobs[i][0]:null).filter(Boolean);
   toast(failed.length?('Loaded with errors: '+failed.join(', ')+' — tap ↻ Refresh to retry'):'All data loaded ✓');
 }
 
-let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[],demos=[];
-let relFilter='all',tktFilter='all',tktTypeFilter='all',demoFilter='all';
+let releases=[],artists=[],tickets=[],blogPosts=[],royalties=[];
+let relFilter='all',tktFilter='all',tktTypeFilter='all';
 
 /* ── Loaders ── */
 async function loadReleases(){
@@ -1618,11 +1114,11 @@ async function loadReleases(){
     if(el){el.textContent=pc;el.style.display=pc>0?'inline':'none';}
   }catch(e){console.error(e);}
 }
-async function loadArtists(){
+async function loadUsers(){
   try{
     const snap=await db.collection('users').get();
     artists=[];snap.forEach(d=>artists.push({id:d.id,...d.data()}));
-    renderArtists();renderLabelStats();renderKycQueue();
+    renderLabelStats();
     const sel=document.getElementById('r-artist');
     if(sel){
       sel.innerHTML='<option value="">Select Artist —</option>';
@@ -1643,26 +1139,10 @@ async function loadTickets(){
 }
 async function loadBlogPosts(){try{const snap=await db.collection('blog').orderBy('createdAt','desc').get();blogPosts=[];snap.forEach(d=>blogPosts.push({id:d.id,...d.data()}));renderBlogList();}catch(e){console.log(e);}}
 async function loadRoyaltyHistory(){try{const snap=await db.collection('royalties').orderBy('createdAt','desc').get();royalties=[];snap.forEach(d=>royalties.push({id:d.id,...d.data()}));renderRoyaltyHistory();}catch(e){console.log(e);}}
-async function loadDemos(){
-  try{
-    const snap=await db.collection('demos').orderBy('submittedAt','desc').get();
-    demos=[];snap.forEach(d=>demos.push({id:d.id,...d.data()}));
-    renderDemoStats();renderDemoTable('ov-demos',demos.filter(d=>d.status==='new').slice(0,6));renderDemoTable('demo-all-list',demos);
-    const nw=demos.filter(d=>d.status==='new').length;
-    const el=document.getElementById('demo-new-cnt');
-    if(el){el.textContent=nw;el.style.display=nw>0?'inline':'none';}
-    const c=document.getElementById('demo-all-count'); if(c)c.textContent=demos.length+' submission'+(demos.length!==1?'s':'');
-  }catch(e){console.log(e);}
-}
+async 
 
-function renderLabelStats(){document.getElementById('s0').textContent=releases.length;document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;document.getElementById('s2').textContent=releases.filter(r=>r.status==='live').length;document.getElementById('s3').textContent=artists.length;document.getElementById('s4').textContent=tickets.filter(t=>t.status==='open').length;var ac=document.getElementById('art-count');if(ac)ac.textContent=artists.length+' account'+(artists.length!==1?'s':'');}
-function renderDemoStats(){
-  const total=demos.length,nw=demos.filter(d=>d.status==='new').length,rv=demos.filter(d=>d.status==='reviewing').length,sh=demos.filter(d=>d.status==='shortlisted').length,sg=demos.filter(d=>d.status==='signed').length;
-  [['d0','ds0',total],['d1','ds1',nw],['d2','ds2',rv],['d3','ds3',sh],['d4','ds4',sg]].forEach(function(p){
-    const a=document.getElementById(p[0]);if(a)a.textContent=p[2];
-    const b=document.getElementById(p[1]);if(b)b.textContent=p[2];
-  });
-}
+function renderLabelStats(){document.getElementById('s0').textContent=releases.length;document.getElementById('s1').textContent=releases.filter(r=>r.status==='pending').length;document.getElementById('s2').textContent=releases.filter(r=>r.status==='live').length;document.getElementById('s4').textContent=tickets.filter(t=>t.status==='open').length;}
+
 
 /* ── Release table + modal ── */
 function trackPillsHTML(r){
@@ -1742,10 +1222,10 @@ function renderAdminTrack(t,i){
     + '</div>';
   var audio = t.audioUrl
     ? '<audio class="admin-audio" controls src="'+safeUrl(t.audioUrl)+'"></audio>'
-      +'<div class="audio-actions"><a class="audio-dl-btn" href="'+safeUrl(t.audioUrl)+'" target="_blank" download>Download Track '+n+'</a></div>'
+      +'<div class="audio-actions"><a class="audio-dl-btn btn sm primary" href="'+safeUrl(t.audioUrl)+'" target="_blank" download>Download Track '+n+'</a></div>'
     : '<div class="no-file-msg">No audio uploaded for this track yet</div>';
   var lyr = t.lyrics ? '<details style="margin-top:8px"><summary style="font-size:11px;font-weight:700;color:var(--txt3);cursor:pointer">Lyrics</summary><div style="font-size:11px;color:var(--txt2);white-space:pre-wrap;max-height:140px;overflow:auto;margin-top:6px;line-height:1.7">'+escapeAttr(t.lyrics)+'</div></details>' : '';
-  return '<div class="track-admin-row">'+head+meta+audio+lyr+'</div>';
+  return '<div class="track-admin-row card">'+head+meta+audio+lyr+'</div>';
 }
 function renderAdminSplits(sp){
   if(!sp || !Array.isArray(sp.collaborators) || !sp.collaborators.length) return '';
@@ -1801,10 +1281,10 @@ function openRelease(id){
   const audioHTML = hasTracks
     ? `<div class="tracklist-admin">${trackList.map((t,i)=>renderAdminTrack(t,i)).join('')}</div>`
     : (r.audioUrl
-      ? `<div class="audio-player-admin"><div class="audio-filename">${esc(r.audioFilename)||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${esc(r.audioFormat||'AUDIO')}</span>${r.audioSize?`<span style="color:var(--txt3)">${esc(r.audioSize)}</span>`:''}</div><audio class="admin-audio" controls src="${safeUrl(r.audioUrl)}"></audio><div class="audio-actions"><a class="audio-dl-btn" href="${safeUrl(r.audioUrl)}" target="_blank" download>Download Audio</a></div></div>`
+      ? `<div class="audio-player-admin"><div class="audio-filename">${esc(r.audioFilename)||'Audio File'}</div><div class="audio-filemeta"><span class="audio-format-pill">${esc(r.audioFormat||'AUDIO')}</span>${r.audioSize?`<span style="color:var(--txt3)">${esc(r.audioSize)}</span>`:''}</div><audio class="admin-audio" controls src="${safeUrl(r.audioUrl)}"></audio><div class="audio-actions"><a class="audio-dl-btn btn sm primary" href="${safeUrl(r.audioUrl)}" target="_blank" download>Download Audio</a></div></div>`
       : `<div class="no-file-msg">No audio file uploaded</div>`);
   const videoHTML = r.videoUrl
-    ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${esc(r.videoDirector)}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${esc(r.videoUrl)}</div><div class="audio-actions"><a class="audio-dl-btn" href="${safeUrl(r.videoUrl)}" target="_blank">Open Video URL</a></div></div>`
+    ? `<div class="audio-player-admin"><div class="audio-filename">Hosted Video URL</div><div class="audio-filemeta"><span class="audio-format-pill">VIDEO</span>${r.videoDirector?`<span style="color:var(--txt3)">Director: ${esc(r.videoDirector)}</span>`:''}</div><div style="font-size:12px;line-height:1.7;color:var(--txt2);word-break:break-all">${esc(r.videoUrl)}</div><div class="audio-actions"><a class="audio-dl-btn btn sm primary" href="${safeUrl(r.videoUrl)}" target="_blank">Open Video URL</a></div></div>`
     : `<div class="no-file-msg">No video URL added</div>`;
   document.getElementById('rmo-body').innerHTML=`
     <div style="margin-bottom:18px">
@@ -1819,74 +1299,74 @@ function openRelease(id){
     </div>
 
     <div class="file-preview-panel">
-      <div class="fp-card"><div class="fp-label">Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${safeUrl(r.artworkUrl)}" target="_blank">Open Artwork</a></div>`:''}</div></div>
+      <div class="fp-card"><div class="fp-label">Artwork</div><div class="fp-content">${artworkHTML}${r.artworkUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn btn sm ghost" href="${safeUrl(r.artworkUrl)}" target="_blank">Open Artwork</a></div>`:''}</div></div>
       <div class="fp-card"><div class="fp-label">${hasTracks?`Tracklist (${trackList.filter(t=>t.audioUrl).length}/${trackList.length} uploaded)`:'Audio File'}</div><div class="fp-content">${audioHTML}</div></div>
       ${isVideo?`<div class="fp-card"><div class="fp-label">Video URL</div><div class="fp-content">${videoHTML}</div></div>`:''}
-      ${isVideo?`<div class="fp-card"><div class="fp-label">Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn" href="${safeUrl(r.thumbnailUrl)}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
+      ${isVideo?`<div class="fp-card"><div class="fp-label">Thumbnail</div><div class="fp-content">${thumbHTML}${r.thumbnailUrl?`<div style="margin-top:10px"><a class="artwork-dl-btn btn sm ghost" href="${safeUrl(r.thumbnailUrl)}" target="_blank">Open Thumbnail</a></div>`:''}</div></div>`:''}
       ${renderAdminSplits(r.splits)}${renderAdminLicenses(r.licenses)}
     </div>
 
-    <div class="edit-card">
+    <div class="edit-card card">
       <h4>Full Submitted Metadata (read-only)</h4>
       <div class="release-edit-grid" style="font-size:12px">
-        ${r.primaryArtistType?`<div class="fg"><label>Primary Artist Type</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.primaryArtistType)}</div></div>`:''}
-        ${r.spotifyArtistUrl?`<div class="fg"><label>Spotify Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.spotifyArtistUrl)}" target="_blank" style="color:#1db954">${escapeAttr(r.spotifyArtistUrl)}</a></div></div>`:''}
-        ${r.appleMusicArtistUrl?`<div class="fg"><label>Apple Music Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.appleMusicArtistUrl)}" target="_blank" style="color:#fa9e9b">${escapeAttr(r.appleMusicArtistUrl)}</a></div></div>`:''}
-        ${r.subGenre?`<div class="fg"><label>Sub-Genre</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.subGenre)}</div></div>`:''}
-        ${r.language?`<div class="fg"><label>Language</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.language)}</div></div>`:''}
-        ${r.contentRating?`<div class="fg"><label>Content Rating</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.contentRating)}</div></div>`:''}
-        ${r.upc?`<div class="fg"><label>UPC</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.upc)}</div></div>`:''}
-        ${r.recordedYear?`<div class="fg"><label>Recorded Year</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.recordedYear)}</div></div>`:''}
-        ${r.originalReleaseDate?`<div class="fg"><label>Original Release Date</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.originalReleaseDate)}</div></div>`:''}
-        ${r.copyrightYear||r.copyrightText?`<div class="fg full"><label>Copyright (C Line)</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.copyrightYear||'')} ${escapeAttr(r.copyrightText||'')}</div></div>`:''}
-        ${r.phonogramYear||r.phonogramText?`<div class="fg full"><label>Phonogram (P Line)</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.phonogramYear||'')} ${escapeAttr(r.phonogramText||'')}</div></div>`:''}
-        ${r.version?`<div class="fg"><label>Version</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.version)}</div></div>`:''}
-        ${r.territories?`<div class="fg"><label>Territories</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.territories)}</div></div>`:''}
-        ${(r.selectedPlatforms&&r.selectedPlatforms.length)?`<div class="fg full"><label>Selected Platforms</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.selectedPlatforms.join(', '))}</div></div>`:''}
-        ${r.previewStartTime!=null?`<div class="fg"><label>Preview Start Time</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(String(r.previewStartTime))}s</div></div>`:''}
+        ${r.primaryArtistType?`<div class="fg fld"><label>Primary Artist Type</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.primaryArtistType)}</div></div>`:''}
+        ${r.spotifyArtistUrl?`<div class="fg fld"><label>Spotify Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.spotifyArtistUrl)}" target="_blank" style="color:#1db954">${escapeAttr(r.spotifyArtistUrl)}</a></div></div>`:''}
+        ${r.appleMusicArtistUrl?`<div class="fg fld"><label>Apple Music Artist URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.appleMusicArtistUrl)}" target="_blank" style="color:#fa9e9b">${escapeAttr(r.appleMusicArtistUrl)}</a></div></div>`:''}
+        ${r.subGenre?`<div class="fg fld"><label>Sub-Genre</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.subGenre)}</div></div>`:''}
+        ${r.language?`<div class="fg fld"><label>Language</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.language)}</div></div>`:''}
+        ${r.contentRating?`<div class="fg fld"><label>Content Rating</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.contentRating)}</div></div>`:''}
+        ${r.upc?`<div class="fg fld"><label>UPC</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.upc)}</div></div>`:''}
+        ${r.recordedYear?`<div class="fg fld"><label>Recorded Year</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.recordedYear)}</div></div>`:''}
+        ${r.originalReleaseDate?`<div class="fg fld"><label>Original Release Date</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.originalReleaseDate)}</div></div>`:''}
+        ${r.copyrightYear||r.copyrightText?`<div class="fg fld full"><label>Copyright (C Line)</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.copyrightYear||'')} ${escapeAttr(r.copyrightText||'')}</div></div>`:''}
+        ${r.phonogramYear||r.phonogramText?`<div class="fg fld full"><label>Phonogram (P Line)</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.phonogramYear||'')} ${escapeAttr(r.phonogramText||'')}</div></div>`:''}
+        ${r.version?`<div class="fg fld"><label>Version</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.version)}</div></div>`:''}
+        ${r.territories?`<div class="fg fld"><label>Territories</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.territories)}</div></div>`:''}
+        ${(r.selectedPlatforms&&r.selectedPlatforms.length)?`<div class="fg fld full"><label>Selected Platforms</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.selectedPlatforms.join(', '))}</div></div>`:''}
+        ${r.previewStartTime!=null?`<div class="fg fld"><label>Preview Start Time</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(String(r.previewStartTime))}s</div></div>`:''}
         ${r.deliveryOptions?`
-          ${r.deliveryOptions.priceBand?`<div class="fg"><label>Price Band</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.priceBand)}</div></div>`:''}
-          ${r.deliveryOptions.prevDist?`<div class="fg"><label>Previously Distributed</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.prevDist)}</div></div>`:''}
-          ${(r.deliveryOptions.endDateType&&r.deliveryOptions.endDateType!=='none')?`<div class="fg"><label>End Date (${escapeAttr(r.deliveryOptions.endDateType)})</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.endDate||'—')}</div></div>`:''}
+          ${r.deliveryOptions.priceBand?`<div class="fg fld"><label>Price Band</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.priceBand)}</div></div>`:''}
+          ${r.deliveryOptions.prevDist?`<div class="fg fld"><label>Previously Distributed</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.prevDist)}</div></div>`:''}
+          ${(r.deliveryOptions.endDateType&&r.deliveryOptions.endDateType!=='none')?`<div class="fg fld"><label>End Date (${escapeAttr(r.deliveryOptions.endDateType)})</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.deliveryOptions.endDate||'—')}</div></div>`:''}
         `:''}
-        ${r.motionArtUrl?`<div class="fg full"><label>Motion Art URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.motionArtUrl)}" target="_blank" style="color:var(--accent-tx)">Open motion art</a></div></div>`:''}
-        ${r.artistNotes?`<div class="fg full"><label>Artist Notes</label><div style="padding:8px 10px;color:var(--txt2);white-space:pre-wrap">${escapeAttr(r.artistNotes)}</div></div>`:''}
-        ${r.lyrics?`<div class="fg full"><label>Lyrics</label><div style="padding:8px 10px;color:var(--txt2);white-space:pre-wrap;max-height:120px;overflow:auto">${escapeAttr(r.lyrics)}</div></div>`:''}
-        ${r.videoCredits?`<div class="fg full"><label>Video Credits</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoCredits)}</div></div>`:''}
-        ${r.videoNotes?`<div class="fg full"><label>Video Notes</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoNotes)}</div></div>`:''}
+        ${r.motionArtUrl?`<div class="fg fld full"><label>Motion Art URL</label><div style="padding:8px 10px"><a href="${safeUrl(r.motionArtUrl)}" target="_blank" style="color:var(--accent-tx)">Open motion art</a></div></div>`:''}
+        ${r.artistNotes?`<div class="fg fld full"><label>Artist Notes</label><div style="padding:8px 10px;color:var(--txt2);white-space:pre-wrap">${escapeAttr(r.artistNotes)}</div></div>`:''}
+        ${r.lyrics?`<div class="fg fld full"><label>Lyrics</label><div style="padding:8px 10px;color:var(--txt2);white-space:pre-wrap;max-height:120px;overflow:auto">${escapeAttr(r.lyrics)}</div></div>`:''}
+        ${r.videoCredits?`<div class="fg fld full"><label>Video Credits</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoCredits)}</div></div>`:''}
+        ${r.videoNotes?`<div class="fg fld full"><label>Video Notes</label><div style="padding:8px 10px;color:var(--txt2)">${escapeAttr(r.videoNotes)}</div></div>`:''}
       </div>
     </div>
 
-    <div class="edit-card">
+    <div class="edit-card card">
       <h4>Edit Submission</h4>
       <div class="release-edit-grid" id="release-edit-grid">
-        <div class="fg"><label>Title</label><input id="er-title" value="${escapeAttr(r.title||'')}"/></div>
-        <div class="fg"><label>Artist</label><input id="er-artist" value="${escapeAttr(r.primaryArtist||r.artistName||'')}"/></div>
-        <div class="fg"><label>Type</label><input id="er-type" value="${escapeAttr(r.type||'')}"/></div>
-        <div class="fg"><label>Genre</label><input id="er-genre" value="${escapeAttr(r.genre||'')}"/></div>
-        <div class="fg"><label>Release Date</label><input id="er-date" type="date" value="${escapeAttr(r.releaseDate||'')}"/></div>
-        <div class="fg"><label>UPC <span style="font-weight:400;color:var(--txt3)">(label assigns)</span></label><input id="er-upc" placeholder="Leave blank until assigned" value="${escapeAttr(r.upc||'')}"/></div>
-        <div class="fg"><label>Label</label><input id="er-label" value="${escapeAttr(r.label||'')}"/></div>
-        <div class="fg full"><label>Featured Artists</label><input id="er-featured" value="${escapeAttr(r.featuredArtists||'')}"/></div>
-        <div class="fg"><label>Spotify Artist URL</label><input id="er-spotify-url" value="${escapeAttr(r.spotifyArtistUrl||'')}"/></div>
-        <div class="fg"><label>Apple Music Artist URL</label><input id="er-applemusic-url" value="${escapeAttr(r.appleMusicArtistUrl||'')}"/></div>
-        <div class="fg full"><label>Writers</label><input id="er-writers" value="${escapeAttr(r.writers||'')}"/></div>
-        <div class="fg full"><label>Producers</label><input id="er-producers" value="${escapeAttr(r.producers||'')}"/></div>
-        ${isVideo?`<div class="fg full"><label>Video URL</label><input id="er-video-url" value="${escapeAttr(r.videoUrl||'')}"/></div>
-          <div class="fg"><label>Director</label><input id="er-video-director" value="${escapeAttr(r.videoDirector||'')}"/></div>
-          <div class="fg"><label>Channel</label><input id="er-video-channel" value="${escapeAttr(r.videoChannel||'')}"/></div>
-          <div class="fg full"><label>Thumbnail URL</label><input id="er-thumb-url" value="${escapeAttr(r.thumbnailUrl||'')}"/></div>` : ``}
-        <div class="fg full"><label>Audio URL</label><input id="er-audio-url" value="${escapeAttr(r.audioUrl||'')}"/></div>
-        <div class="fg full"><label>Artwork URL</label><input id="er-art-url" value="${escapeAttr(r.artworkUrl||'')}"/></div>
-        <div class="fg full"><label>Notes</label><textarea id="er-notes">${escapeAttr(r.notes||'')}</textarea></div>
-        <div class="fg full"><label>Selected Platforms <span style="font-weight:400;color:var(--txt3)">(comma separated)</span></label><input id="er-platforms" value="${escapeAttr((r.selectedPlatforms||[]).join(', '))}"/></div>
-        <div class="fg"><label>Preview Start Time (s)</label><input id="er-preview" type="number" value="${r.previewStartTime!=null?escapeAttr(String(r.previewStartTime)):''}"/></div>
-        <div class="fg full"><label>Track ISRCs <span style="font-weight:400;color:var(--txt3)">(label assigns after submission)</span></label><div id="er-isrc-list" style="border:1px solid var(--brd);border-radius:8px;padding:12px;background:var(--input)">${isrcListHTML}</div></div>
-        ${hasTracks?`<div class="fg full"><label>Tracklist (read-only — edit tracks from the artist portal)</label><div style="padding:10px 13px;border:1px solid var(--brd);border-radius:8px;background:var(--input);font-size:12px;color:var(--txt2);line-height:1.8;max-height:160px;overflow:auto">${trackList.map((t,i)=>escapeAttr(((t.albumOrder!=null&&t.albumOrder!=='')?t.albumOrder:(i+1))+'. '+(t.title||'Untitled')+' — '+(t.artist||'')+(t.audioUrl?' (audio uploaded)':' (no audio yet)'))).join('<br/>')}</div></div>`:''}
+        <div class="fg fld"><label>Title</label><input id="er-title" value="${escapeAttr(r.title||'')}"/></div>
+        <div class="fg fld"><label>Artist</label><input id="er-artist" value="${escapeAttr(r.primaryArtist||r.artistName||'')}"/></div>
+        <div class="fg fld"><label>Type</label><input id="er-type" value="${escapeAttr(r.type||'')}"/></div>
+        <div class="fg fld"><label>Genre</label><input id="er-genre" value="${escapeAttr(r.genre||'')}"/></div>
+        <div class="fg fld"><label>Release Date</label><input id="er-date" type="date" value="${escapeAttr(r.releaseDate||'')}"/></div>
+        <div class="fg fld"><label>UPC <span style="font-weight:400;color:var(--txt3)">(label assigns)</span></label><input id="er-upc" placeholder="Leave blank until assigned" value="${escapeAttr(r.upc||'')}"/></div>
+        <div class="fg fld"><label>Label</label><input id="er-label" value="${escapeAttr(r.label||'')}"/></div>
+        <div class="fg fld full"><label>Featured Artists</label><input id="er-featured" value="${escapeAttr(r.featuredArtists||'')}"/></div>
+        <div class="fg fld"><label>Spotify Artist URL</label><input id="er-spotify-url" value="${escapeAttr(r.spotifyArtistUrl||'')}"/></div>
+        <div class="fg fld"><label>Apple Music Artist URL</label><input id="er-applemusic-url" value="${escapeAttr(r.appleMusicArtistUrl||'')}"/></div>
+        <div class="fg fld full"><label>Writers</label><input id="er-writers" value="${escapeAttr(r.writers||'')}"/></div>
+        <div class="fg fld full"><label>Producers</label><input id="er-producers" value="${escapeAttr(r.producers||'')}"/></div>
+        ${isVideo?`<div class="fg fld full"><label>Video URL</label><input id="er-video-url" value="${escapeAttr(r.videoUrl||'')}"/></div>
+          <div class="fg fld"><label>Director</label><input id="er-video-director" value="${escapeAttr(r.videoDirector||'')}"/></div>
+          <div class="fg fld"><label>Channel</label><input id="er-video-channel" value="${escapeAttr(r.videoChannel||'')}"/></div>
+          <div class="fg fld full"><label>Thumbnail URL</label><input id="er-thumb-url" value="${escapeAttr(r.thumbnailUrl||'')}"/></div>` : ``}
+        <div class="fg fld full"><label>Audio URL</label><input id="er-audio-url" value="${escapeAttr(r.audioUrl||'')}"/></div>
+        <div class="fg fld full"><label>Artwork URL</label><input id="er-art-url" value="${escapeAttr(r.artworkUrl||'')}"/></div>
+        <div class="fg fld full"><label>Notes</label><textarea id="er-notes">${escapeAttr(r.notes||'')}</textarea></div>
+        <div class="fg fld full"><label>Selected Platforms <span style="font-weight:400;color:var(--txt3)">(comma separated)</span></label><input id="er-platforms" value="${escapeAttr((r.selectedPlatforms||[]).join(', '))}"/></div>
+        <div class="fg fld"><label>Preview Start Time (s)</label><input id="er-preview" type="number" value="${r.previewStartTime!=null?escapeAttr(String(r.previewStartTime)):''}"/></div>
+        <div class="fg fld full"><label>Track ISRCs <span style="font-weight:400;color:var(--txt3)">(label assigns after submission)</span></label><div id="er-isrc-list" style="border:1px solid var(--brd);border-radius:8px;padding:12px;background:var(--input)">${isrcListHTML}</div></div>
+        ${hasTracks?`<div class="fg fld full"><label>Tracklist (read-only — edit tracks from the artist portal)</label><div style="padding:10px 13px;border:1px solid var(--brd);border-radius:8px;background:var(--input);font-size:12px;color:var(--txt2);line-height:1.8;max-height:160px;overflow:auto">${trackList.map((t,i)=>escapeAttr(((t.albumOrder!=null&&t.albumOrder!=='')?t.albumOrder:(i+1))+'. '+(t.title||'Untitled')+' — '+(t.artist||'')+(t.audioUrl?' (audio uploaded)':' (no audio yet)'))).join('<br/>')}</div></div>`:''}
       </div>
       <div class="update-acts">
-        <button class="btn-save-demo" onclick="saveReleaseEdits('${r.id}')">Save Changes</button>
-        <button class="btn-del-demo" onclick="deleteRelease('${r.id}')">Delete Submission</button>
+        <button class="btn-save-demo btn primary" onclick="saveReleaseEdits('${r.id}')">Save Changes</button>
+        <button class="btn-del-demo btn danger" onclick="deleteRelease('${r.id}')">Delete Submission</button>
       </div>
     </div>
   `;
@@ -1969,65 +1449,23 @@ async function deleteRelease(id){
   }catch(e){toast('Error: '+e.message);}
 }
 
-/* ── Demo table + modal ── */
-function renderDemoTable(id,list){
-  const el=document.getElementById(id);if(!el)return;
-  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No demos found</div></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>Artist</th><th>Genre</th><th>Email</th><th>Instagram</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody>
-    ${list.map(d=>`<tr>
-      <td><div style="font-weight:700">${esc(d.name)||'—'}</div><span class="ref-badge">${esc(d.refId)||'—'}</span></td>
-      <td style="color:var(--txt2);font-size:12px">${esc(d.genre)||'—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2)">${esc(d.email)||'—'}</td>
-      <td style="font-size:12px;color:var(--txt2)">${esc(d.instagram)||'—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3)">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</td>
-      <td><select class="ss" onchange="updateDemoStatus('${d.id}',this.value)">
-        <option value="new" ${d.status==='new'?'selected':''}>New</option>
-        <option value="reviewing" ${d.status==='reviewing'?'selected':''}>Reviewing</option>
-        <option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>Shortlisted</option>
-        <option value="signed" ${d.status==='signed'?'selected':''}>Signed</option>
-        <option value="rejected" ${d.status==='rejected'?'selected':''}>Rejected</option>
-        <option value="archived" ${d.status==='archived'?'selected':''}>Archived</option>
-      </select></td>
-      <td><button class="vb" onclick="openDemo('${d.id}')">View</button></td>
-    </tr>`).join('')}
-  </tbody></table>`;
-}
 
-function openDemo(id){
-  const d=demos.find(x=>x.id===id);if(!d)return;
-  const bc={new:'b-new',reviewing:'b-reviewing',shortlisted:'b-shortlisted',signed:'b-signed',rejected:'b-rejected',archived:'b-archived'};
-  document.getElementById('dmo-title').textContent=d.name||'Demo';
-  document.getElementById('dmo-ref').innerHTML=`<span class="ref-badge">${esc(d.refId)||'—'}</span><span class="badge ${bc[d.status]||'b-new'}" style="margin-left:6px">${esc(d.status||'new').toUpperCase()}</span>`;
-  const links=[];if(d.demoLink)links.push(`<a href="${safeUrl(d.demoLink)}" target="_blank">Demo Link</a>`);if(d.youtubeLink)links.push(`<a href="${safeUrl(d.youtubeLink)}" target="_blank">YouTube / SoundCloud</a>`);
-  document.getElementById('dmo-body').innerHTML=`<div class="demo-grid"><div class="demo-field"><div class="df-label">Artist</div><div class="df-val" style="font-weight:700;font-size:15px">${esc(d.name)||'—'}</div></div><div class="demo-field"><div class="df-label">Genre</div><div class="df-val">${esc(d.genre)||'—'}</div></div><div class="demo-field"><div class="df-label">Email</div><div class="df-val"><a href="mailto:${esc(d.email)}">${esc(d.email)||'—'}</a></div></div><div class="demo-field"><div class="df-label">Phone</div><div class="df-val">${esc(d.phone)||'—'}</div></div><div class="demo-field"><div class="df-label">Instagram</div><div class="df-val"><a href="https://instagram.com/${igHandle(d.instagram)}" target="_blank">${esc(d.instagram)||'—'}</a></div></div><div class="demo-field"><div class="df-label">Submitted</div><div class="df-val">${d.submittedAt?d.submittedAt.substring(0,10):'—'}</div></div><div class="demo-field full"><div class="df-label">Music Links</div><div class="df-val" style="display:flex;gap:16px;flex-wrap:wrap">${links.length?links.join(''):'No links provided'}</div></div><div class="demo-field full"><div class="df-label">Bio</div><div class="df-val bio">${esc(d.bio)||'—'}</div></div></div><div class="update-box"><label>Update Status</label><select onchange="updateDemoStatus('${d.id}',this.value)"><option value="new" ${d.status==='new'?'selected':''}>New</option><option value="reviewing" ${d.status==='reviewing'?'selected':''}>Reviewing</option><option value="shortlisted" ${d.status==='shortlisted'?'selected':''}>Shortlisted</option><option value="signed" ${d.status==='signed'?'selected':''}>Signed</option><option value="rejected" ${d.status==='rejected'?'selected':''}>Rejected</option><option value="archived" ${d.status==='archived'?'selected':''}>Archived</option></select><label>Internal Notes</label><textarea id="modal-notes">${esc(d.notes)||''}</textarea><div class="update-acts"><button class="btn-save-demo" id="save-notes-btn" onclick="saveDemoNotes('${d.id}')">Save Notes</button><button class="btn-del-demo" onclick="deleteDemo('${d.id}')">Delete</button></div></div>`;
-  document.getElementById('dmo').classList.add('on');
-}
 
-async function updateDemoStatus(id,status){if(!requireAdmin())return;try{await db.collection('demos').doc(id).update({status});await loadDemos();logActivity('',ADMIN_EMAIL,'demo_status','Demo '+id+' → '+status);toast('Demo → '+status+' ✓');}catch(e){toast('Error: '+e.message);}}
-async function saveDemoNotes(id){if(!requireAdmin())return;const notes=document.getElementById('modal-notes')?.value.trim()||'';const btn=document.getElementById('save-notes-btn');btn.disabled=true;btn.textContent='Saving...';try{await db.collection('demos').doc(id).update({notes});const d=demos.find(x=>x.id===id);if(d)d.notes=notes;toast('Notes saved ✓');}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Save Notes';}
-async function deleteDemo(id){
-  if(!requireAdmin())return;
-  // NOTE: demo links point to external hosts; any Cloudinary assets (public_id, if any) are NOT deleted here — remove manually in the Cloudinary dashboard; client has no API secret.
-  if(!confirm('Delete this demo?'))return;
-  try{await db.collection('demos').doc(id).delete();demos=demos.filter(d=>d.id!==id);renderDemoStats();applyDemoFilter();renderDemoTable('ov-demos',demos.filter(d=>d.status==='new').slice(0,6));closeMo('dmo');logActivity('',ADMIN_EMAIL,'demo_delete','Demo '+id+' deleted');toast('Deleted ✓');}catch(e){toast('Error: '+e.message);}
-}
 
-function setDemoF(s,btn){demoFilter=s;document.querySelectorAll('#page-demos .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyDemoFilter();}
-function applyDemoFilter(){
-  const q=(document.getElementById('demo-search')?.value||'').toLowerCase();
-  let list=demos;
-  if(demoFilter!=='all')list=list.filter(d=>d.status===demoFilter);
-  if(q)list=list.filter(d=>(d.name||'').toLowerCase().includes(q)||(d.email||'').toLowerCase().includes(q)||(d.genre||'').toLowerCase().includes(q));
-  renderDemoTable('demo-all-list',list);
-  document.getElementById('demo-all-count').textContent=list.length+' result'+(list.length!==1?'s':'');
-}
+
+async 
+async 
+async 
+
+
+
 
 /* ── Tickets ── */
 function renderTicketTypePills(){
   const row=document.getElementById('tkt-type-row');if(!row)return;
   const types=[...new Set(tickets.map(t=>t.ticketType||'Support'))];
-  row.innerHTML='<span class="frow-lbl">Type</span><button class="fb'+(tktTypeFilter==='all'?' on':'')+'" onclick="setTTy(\'all\',this)">All Types</button>'
-    +types.map(t=>'<button class="fb'+(tktTypeFilter===t?' on':'')+'" onclick="setTTy(\''+escJs(t)+'\',this)">'+esc(t)+'</button>').join('');
+  row.innerHTML='<span class="frow-lbl">Type</span><button class="fb pill'+(tktTypeFilter==='all'?' on':'')+'" onclick="setTTy(\'all\',this)">All Types</button>'
+    +types.map(t=>'<button class="fb pill'+(tktTypeFilter===t?' on':'')+'" onclick="setTTy(\''+escJs(t)+'\',this)">'+esc(t)+'</button>').join('');
 }
 function setTF(s,btn){tktFilter=s;document.querySelectorAll('#tkt-status-row .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyTicketFilter();}
 function setTTy(s,btn){tktTypeFilter=s;document.querySelectorAll('#tkt-type-row .fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyTicketFilter();}
@@ -2055,7 +1493,7 @@ function renderTickets(list){
 function openTicket(id){
   const t=tickets.find(x=>x.id===id);if(!t)return;
   document.getElementById('tmo-title').textContent=t.subject||'Ticket';
-  document.getElementById('tmo-body').innerHTML=`<div class="dr"><div class="dk">Artist</div><div class="dv">${esc(t.artistName)||'—'}</div></div><div class="dr"><div class="dk">Email</div><div class="dv">${esc(t.artistEmail)||'—'}</div></div><div class="dr"><div class="dk">Category</div><div class="dv">${esc(t.category)||'—'}</div></div><div class="dr"><div class="dk">Type</div><div class="dv"><span class="badge bt">${esc(t.ticketType||'Support')}</span></div></div><div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${esc(t.priority)||'Normal'}</span></div></div><div class="dr"><div class="dk">Status</div><div class="dv"><select class="ss" onchange="updateTicketStatus('${t.id}',this.value)"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option></select></div></div><div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--input);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${esc(t.message)||'—'}</div></div>${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${esc(t.reply)}</div></div>`:''}<div class="reply-box"><label>Reply to Artist</label><textarea id="reply-txt">${esc(t.reply)||''}</textarea><div class="reply-acts"><button class="btn-reply" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button><button class="btn-close-t" onclick="updateTicketStatus('${t.id}','closed');closeMo('tmo')">Close Ticket</button></div></div>`;
+  document.getElementById('tmo-body').innerHTML=`<div class="dr"><div class="dk">Artist</div><div class="dv">${esc(t.artistName)||'—'}</div></div><div class="dr"><div class="dk">Email</div><div class="dv">${esc(t.artistEmail)||'—'}</div></div><div class="dr"><div class="dk">Category</div><div class="dv">${esc(t.category)||'—'}</div></div><div class="dr"><div class="dk">Type</div><div class="dv"><span class="badge bt">${esc(t.ticketType||'Support')}</span></div></div><div class="dr"><div class="dk">Priority</div><div class="dv"><span class="badge ${t.priority==='urgent'?'bx':'bp'}">${esc(t.priority)||'Normal'}</span></div></div><div class="dr"><div class="dk">Status</div><div class="dv"><select class="ss" onchange="updateTicketStatus('${t.id}',this.value)"><option value="open" ${t.status==='open'?'selected':''}>Open</option><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="resolved" ${t.status==='resolved'?'selected':''}>Resolved</option><option value="closed" ${t.status==='closed'?'selected':''}>Closed</option></select></div></div><div class="dr"><div class="dk">Message</div><div class="dv" style="white-space:pre-wrap;background:var(--input);padding:12px;border-radius:8px;margin-top:4px;line-height:1.6">${esc(t.message)||'—'}</div></div>${t.reply?`<div class="existing-reply"><div class="er-label">Your Previous Reply</div><div class="er-text">${esc(t.reply)}</div></div>`:''}<div class="reply-box card"><label>Reply to Artist</label><textarea id="reply-txt">${esc(t.reply)||''}</textarea><div class="reply-acts"><button class="btn-reply btn primary" id="btn-reply" onclick="sendReply('${t.id}')">Send Reply</button><button class="btn-close-t btn ghost" onclick="updateTicketStatus('${t.id}','closed');closeMo('tmo')">Close Ticket</button></div></div>`;
   document.getElementById('tmo').classList.add('on');
 }
 async function sendReply(id){if(!requireAdmin())return;const reply=document.getElementById('reply-txt')?.value.trim();if(!reply){toast('Please type a reply first.');return;}const btn=document.getElementById('btn-reply');btn.disabled=true;btn.textContent='Sending...';try{await db.collection('tickets').doc(id).update({reply,status:'resolved',repliedAt:new Date().toISOString()});const t=tickets.find(x=>x.id===id);if(t){t.reply=reply;t.status='resolved';}logActivity('',ADMIN_EMAIL,'ticket_reply','Ticket '+id+' replied & resolved');toast('Reply sent ✓');closeMo('tmo');await loadTickets();}catch(e){toast('Error: '+e.message);}btn.disabled=false;btn.textContent='Send Reply';}
@@ -2067,15 +1505,11 @@ function applyRelFilter(){const q=(document.getElementById('rel-search')?.value|
 function goPage(name,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   const pg=document.getElementById('page-'+name);if(pg){pg.classList.add('on');try{localStorage.setItem('tir-admin-page',name);}catch(e){}}if(el)el.classList.add('on');
-  const isDemo=name==='demos';const pill=document.getElementById('section-pill');
-  if(pill){pill.textContent=isDemo?'Demos':'Label';pill.className='section-pill '+(isDemo?'pill-demo':'pill-label');}
+  const pill=document.getElementById('section-pill');
+  if(pill){pill.textContent='Label';pill.className='section-pill pill-label';}
   const m={
-    overview:['Overview','Label + Demo summary'],
+    overview:['Overview','Label summary'],
     releases:['All Submissions','Every release'],
-    demos:['Demo Inbox','Every demo'],
-    artists:['Artists/Users','Registered accounts'],
-    roster:['Roster Artists','Every artist on every account'],
-    kyc:['KYC Approvals','Identity & payout verification'],
     tickets:['Service Requests','Artist support'],
     royalties:['Manage Royalties','Update artist earnings'],
     analytics:['Analytics','Update artist streaming stats'],
@@ -2088,21 +1522,17 @@ function goPage(name,el){
     notifications:['Notifications','Message your artists'],
     logs:['Activity Logs','Admin audit trail'],
     settings:['Settings','Panel preferences'],
-    profile:['My Profile','Admin account'],
     logins:['Login History','Sign-in records']
   };
   const[t,s]=m[name]||['Admin',''];document.getElementById('pgt').textContent=t;document.getElementById('pgs').textContent=s;
   if(name==='releases')loadReleases();
-  if(name==='demos')loadDemos();
   if(name==='blog')loadBlogPosts();
-  if(name==='royalties'){loadRoyaltyHistory();loadArtists();}
-  if(name==='analytics'){loadArtists();loadAnalyticsPage();}
-  if(name==='kyc')renderKycQueue();
+  if(name==='royalties'){loadRoyaltyHistory();loadUsers();}
+  if(name==='analytics'){loadUsers();loadAnalyticsPage();}
   if(name==='withdrawals')loadWithdrawals();
   if(name==='notifications')loadNotifications();
-  if(name==='roster')renderRosterAll();
   if(name==='logs')loadActivityLogs();
-  if(name==='profile')loadAdminProfile();
+  if(name==='settings')loadAdminProfile();
   if(name==='logins')loadLoginHistory();
   if(name==='tracks')loadTracks();
   if(name==='splits')loadSplits();
@@ -2116,14 +1546,7 @@ function closeMo(id){var m=document.getElementById(id);if(m)m.classList.remove('
 function showAl(id,m){const e=document.getElementById(id);if(e){e.textContent=m;e.classList.add('on');}}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3000);}
 
-/* ═══ DELETE ARTIST PROFILE ═══
-   Deletes the Firestore profile document only. The Firebase Auth login remains
-   and must be deleted manually in Firebase Console → Authentication → Users. */
-async function deleteArtistProfile(id){
-  if(!requireAdmin())return;
-  if(!confirm('Delete this artist profile document from Firestore? IMPORTANT: the Firebase Auth login stays ACTIVE — also disable/delete the login in Firebase Console → Authentication → Users, otherwise the person can still sign in.'))return;
-  try{await db.collection('users').doc(id).delete(); await loadArtists(); logActivity(id,'','artist_delete','Artist profile '+id+' deleted from Firestore (Auth login must be removed separately)'); toast('Artist profile deleted ✓');}catch(e){toast('Error: '+e.message);}
-}
+
 </script>
 
 <script>
@@ -2153,9 +1576,7 @@ document.addEventListener('DOMContentLoaded',function(){
   var t='light';
   try{ t=localStorage.getItem('tir-theme')||'light'; }catch(e){}
   setTheme(t);
-  setTimeout(checkForCreateAccountDraft,100);
-  setInterval(autosaveCreateAccountDraft,15000);
-});
+  });
 
 /* ── Activity log helper (audit trail for admin actions) ── */
 function logActivity(uid,email,action,detail){
@@ -2167,93 +1588,23 @@ function logActivity(uid,email,action,detail){
   }catch(e){ console.warn('logActivity failed:',e.message); return Promise.resolve(); }
 }
 
-/* ═══ KYC APPROVALS ═══
-   Lists users with kycStatus pending/approved/rejected.
-   Decisions only ever act on real submissions — never fabricated. */
-var kycFilter='pending';
-function setKycF(s,btn){ kycFilter=s; document.querySelectorAll('#page-kyc .fb').forEach(function(b){b.classList.remove('on');}); btn.classList.add('on'); renderKycQueue(); }
+/* ═══ KYC HELPERS (kept) ═══
+   kycKV / kycDoc / maskId are used by Licenses + Withdrawals. The KYC Approvals page was removed. */
+
 function kycKV(label,val){ return '<div class="kyc-kv"><span>'+esc(label)+'</span><b>'+esc(val||'—')+'</b></div>'; }
 /* SECURITY: mask high-sensitivity identifiers by default; full value revealed only on explicit click.
    Reduces shoulder-surfing / screenshot exposure of identity-theft-grade PII. */
 function maskId(v, keep){ v=String(v||''); if(!v) return '—'; keep=keep||4;
   return v.length<=keep ? '••••' : '•••• '+v.slice(-keep); }
-function kycKVm(label,val,keep){ var full=String(val||'—');
-  return '<div class="kyc-kv"><span>'+esc(label)+'</span><b class="masked-pii" data-full="'+esc(full)+'" onclick="this.textContent=this.getAttribute(\'data-full\');this.classList.remove(\'masked-pii\')" title="Click to reveal">'+esc(maskId(val,keep))+'</b></div>'; }
+
 function kycDoc(label,url){
   return url
     ? '<a class="doc-link" href="'+safeUrl(url)+'" target="_blank" rel="noopener">'+esc(label)+' ↗</a>'
     : '<span class="doc-link off">'+esc(label)+' — not uploaded</span>';
 }
-function kycBadge(s){
-  var map={pending:'bp',approved:'ba',rejected:'bx'};
-  return '<span class="badge '+(map[s]||'br')+'">'+esc(s||'—').toUpperCase()+'</span>';
-}
-function renderKycQueue(){
-  var el=document.getElementById('kyc-list'); if(!el) return;
-  var pendN=artists.filter(function(a){return a.kycStatus==='pending';}).length;
-  var badge=document.getElementById('kyc-cnt');
-  if(badge){ badge.textContent=pendN; badge.style.display=pendN>0?'inline':'none'; }
-  var k0=document.getElementById('k0'); if(k0) k0.textContent=pendN;
-  var list=artists.filter(function(a){
-    var s=a.kycStatus||'none';
-    if(kycFilter==='all') return s!=='none'||!!a.kyc;
-    return s===kycFilter;
-  });
-  list.sort(function(a,b){ return new Date((b.kyc&&b.kyc.submittedAt)||0)-new Date((a.kyc&&a.kyc.submittedAt)||0); });
-  if(!list.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No '+(kycFilter==='all'?'KYC submissions':kycFilter+' KYC submissions')+' found</div></div>';
-    return;
-  }
-  el.innerHTML=list.map(function(a){
-    var k=a.kyc||{};
-    var docs=k.docs||{};
-    var isPending=(a.kycStatus||'none')==='pending';
-    var reviewHtml=isPending
-      ? '<div class="kyc-review"><input id="kyc-note-'+a.id+'" placeholder="Reviewer note (optional) — e.g. verified PAN against name"/>'
-        +'<button class="rb" onclick="decideKyc(\''+a.id+'\',\'approved\')">Approve</button>'
-        +'<button class="db" onclick="decideKyc(\''+a.id+'\',\'rejected\')">Reject</button></div>'
-      : '<div class="kyc-reviewed"><b>Reviewed:</b> '+esc((k.reviewedAt||'').substring(0,16).replace('T',' '))+(k.reviewNote?' · <b>Note:</b> '+esc(k.reviewNote):' · <i style="color:var(--txt3)">no note</i>')+'</div>';
-    return '<div class="kyc-card">'
-      +'<div class="kyc-head"><div><div class="kyc-name">'+esc(k.legalName||a.name||'—')+'</div><div class="kyc-mail">'+esc(a.email||'—')+' · submitted '+(k.submittedAt?esc(k.submittedAt.substring(0,10)):'—')+'</div></div>'+kycBadge(a.kycStatus||'none')+'</div>'
-      +'<div class="kyc-grid">'
-        +'<div class="kyc-sec"><h5>Identity</h5>'
-          +kycKV('Legal name',k.legalName)+kycKV('Mobile',k.mobile)+kycKVm('PAN',k.pan,5)+kycKVm('Aadhaar',k.aadhaar,4)
-        +'</div>'
-        +'<div class="kyc-sec"><h5>Address</h5>'
-          +kycKV('Address 1',k.address1)+kycKV('Address 2',k.address2)+kycKV('City',k.city)+kycKV('State',k.state)+kycKV('Pincode',k.pincode)
-        +'</div>'
-        +'<div class="kyc-sec"><h5>Bank / Payout</h5>'
-          +kycKV('Account holder',k.bankHolder)+kycKV('Bank name',k.bankName)+kycKVm('Account no.',k.accountNumber,4)+kycKV('IFSC',k.ifsc)+kycKV('UPI ID',k.upiId)
-        +'</div>'
-        +'<div class="kyc-sec"><h5>Documents</h5><div style="margin-top:2px">'
-          +kycDoc('Aadhaar Front',docs.aadhaarFront)+kycDoc('Aadhaar Back',docs.aadhaarBack)+kycDoc('PAN',docs.panDoc)+kycDoc('Signature',docs.signature)
-        +'</div></div>'
-      +'</div>'
-      +reviewHtml
-    +'</div>';
-  }).join('');
-}
-async function decideKyc(uid,decision){
-  if(!requireAdmin())return;
-  var user=artists.find(function(a){return a.id===uid;});
-  var noteEl=document.getElementById('kyc-note-'+uid);
-  var note=noteEl?noteEl.value.trim():'';
-  var verb=decision==='approved'?'Approve':'Reject';
-  if(!confirm(verb+' KYC for '+((user&&user.email)||uid)+'? This records a real review decision.')) return;
-  try{
-    var now=new Date().toISOString();
-    await db.collection('users').doc(uid).update({
-      kycStatus:decision,
-      'kyc.status':decision,
-      'kyc.reviewedAt':now,
-      'kyc.reviewNote':note
-    });
-    if(user){ user.kycStatus=decision; user.kyc=user.kyc||{}; user.kyc.status=decision; user.kyc.reviewedAt=now; user.kyc.reviewNote=note; }
-    logActivity(uid,(user&&user.email)||'','KYC '+decision,'KYC '+decision+' by '+ADMIN_EMAIL+(note?'. Note: '+note:''));
-    renderKycQueue();
-    toast('KYC '+decision+' ✓');
-  }catch(e){ toast('Error: '+e.message); }
-}
+
+
+async 
 
 /* ═══ WITHDRAWALS ═══
    Artist payout requests: approve / reject / mark paid.
