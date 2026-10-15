@@ -123,7 +123,6 @@ body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-he
 .admin-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:var(--accent-soft);border:1px solid var(--accent-brd);border-radius:20px;font-size:11px;font-weight:700;color:var(--accent-tx);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
 .section-pill{font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
 .pill-label{background:var(--accent-soft);color:var(--accent-tx)}
-.pill-demo{background:var(--info-bg);color:var(--info)}
 .btn-ref{padding:9px 16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
 .btn-ref:hover{border-color:var(--accent);color:var(--accent-tx)}
 .content{padding:22px 26px;flex:1}
@@ -235,13 +234,6 @@ tr:last-child td{border-bottom:none}
 .no-file-msg{font-size:12px;color:var(--txt3);display:flex;align-items:center;gap:6px;padding:8px 0}
 
 /* ── Forms ── */
-.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
-.demo-field{background:var(--input);border:1px solid var(--brd);border-radius:12px;padding:12px 14px}
-.demo-field.full{grid-column:1/-1}
-.df-label{font-size:10px;font-weight:800;color:var(--accent-tx);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
-.df-val{font-size:13px;color:var(--txt);line-height:1.5;word-break:break-all}
-.df-val a{color:var(--accent-tx);text-decoration:none;font-weight:600}
-.df-val.bio{white-space:pre-wrap;color:var(--txt2);max-height:140px;overflow-y:auto;font-size:13px;line-height:1.7}
 .roy-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
 .rf-full{grid-column:1/-1}
 .fg label{display:block;font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
@@ -281,8 +273,6 @@ tr:last-child td{border-bottom:none}
 .blog-form input:focus,.blog-form select:focus,.blog-form textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .blog-form select option{background:var(--card);color:var(--txt)}
 .blog-form textarea{resize:vertical;min-height:200px}
-.artist-create-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.artist-create-grid .full{grid-column:1/-1}
 .release-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
 .release-edit-grid .full{grid-column:1/-1}
 .edit-card{background:var(--input);border:1px solid var(--brd);border-radius:12px;padding:16px;margin-top:18px}
@@ -303,7 +293,7 @@ tr:last-child td{border-bottom:none}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;color:var(--txt);font-size:13px;font-weight:600;padding:12px 18px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:var(--shadow);transform:translateY(8px)}
 .toast.on{opacity:1;transform:translateY(0)}
 
-/* ── KYC queue ── */
+/* ── License cards (kyc-* classes reused) ── */
 .kyc-card{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
 .kyc-card:last-child{margin-bottom:0}
 .kyc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--brd);background:var(--input)}
@@ -359,8 +349,8 @@ tr:last-child td{border-bottom:none}
   .stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
   .stats.s2,.stats.s4{grid-template-columns:1fr 1fr}
   .sc{padding:12px}.sc-v{font-size:22px}
-  .roy-form,.artist-create-grid,.release-edit-grid{grid-template-columns:1fr}
-  .rf-full,.artist-create-grid .full,.release-edit-grid .full{grid-column:1}
+  .roy-form,.release-edit-grid{grid-template-columns:1fr}
+  .rf-full,.release-edit-grid .full{grid-column:1}
   .blog-form textarea{min-height:140px}
   .frow{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
   .si{width:100%;min-width:160px}
@@ -368,7 +358,6 @@ tr:last-child td{border-bottom:none}
   .toast{bottom:16px;right:12px;left:12px;text-align:center}
   .mo{padding:16px 10px}.mb{padding:16px}.mh{padding:14px 16px}
   .dr{gap:8px}.dk{min-width:80px;font-size:10px}
-  .demo-grid{grid-template-columns:1fr}.demo-field.full{grid-column:1}
   .file-preview-panel{grid-template-columns:1fr}
   .kyc-sec{border-right:none;border-bottom:1px solid var(--brd)}
   .kyc-sec:last-child{border-bottom:none}
@@ -865,17 +854,12 @@ details.acc .b{padding:0 16px 16px;color:#cfcfcf;font-size:13px}
 <div class="mo" id="tmo" onclick="if(event.target===this)closeMo('tmo')">
   <div class="mbox modal"><div class="mh"><div class="mt2" id="tmo-title">Ticket</div><button class="mc" onclick="closeMo('tmo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="tmo-body"></div></div>
 </div>
-<!-- DEMO MODAL -->
-
 <!-- SPLIT SHEET MODAL -->
 <div class="mo" id="smod" onclick="if(event.target===this)closeMo('smod')">
   <div class="mbox modal"><div class="mh"><div class="mt2" id="smod-title">Split Sheet</div><button class="mc" onclick="closeMo('smod')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="mb" id="smod-body"></div></div>
 </div>
 
 <!-- ACCOUNT (BANK + ANALYTICS) MODAL -->
-
-
-<!-- LABEL ARTISTS MODAL -->
 
 
 <div class="toast" id="toast"></div>
@@ -1630,7 +1614,7 @@ function renderWithdrawals(){
   if(badge){ badge.textContent=pendN; badge.style.display=pendN>0?'inline':'none'; }
   var k1=document.getElementById('k1'); if(k1) k1.textContent=pendN;
   var list=wdFilter==='all'?withdrawals:withdrawals.filter(function(w){return w.status===wdFilter;});
-  if(!list.length){ el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No '+wdFilter+' withdrawal requests</div></div>'; return; }
+  if(!list.length){ el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No withdrawal requests yet</div></div>'; return; }
   el.innerHTML='<table><thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Details</th><th>Status</th><th>Requested</th><th>Decision Note</th><th>Action</th></tr></thead><tbody>'
     +list.map(function(w){
       var user=artists.find(function(a){return a.id===w.uid;});
@@ -1958,8 +1942,6 @@ async function loadSplits(){
     splits=[];
     snap.forEach(function(d){ splits.push(Object.assign({id:d.id},d.data())); });
     renderSplits();
-    var c=document.getElementById('splits-count');
-    if(c) c.textContent=splits.length+' split sheet'+(splits.length!==1?'s':'')+' across all artists';
     var o=document.getElementById('o-splits'); if(o) o.textContent=splits.length;
   }catch(e){ console.error(e); }
 }
@@ -1982,6 +1964,7 @@ function renderSplits(){
     var u=artists.find(function(a){return a.id===s.uid;});
     return ((s.name||'')+' '+((u&&u.name)||''+' '+(u&&u.email)||'')).toLowerCase().indexOf(q)>=0;
   });
+  var c=document.getElementById('splits-count'); if(c) c.textContent=list.length+' split sheet'+(list.length!==1?'s':'')+((splitFilter!=='all'||q)?' matching filters':' across all artists');
   if(!list.length){ el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">'+(q?'No split sheets match your search':'No split sheets yet')+'</div></div>'; return; }
   el.innerHTML='<table><thead><tr><th>Name</th><th>Artist</th><th>Type</th><th>Collaborators</th><th>Signed</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>'
     +list.map(function(s){
@@ -2071,7 +2054,7 @@ function renderLicenses(){
   var badge=document.getElementById('lic-cnt');
   if(badge){ badge.textContent=pendN; badge.style.display=pendN>0?'inline':'none'; }
   var list=licenses.filter(function(l){ return licFilter==='all' ? true : (l.status||'pending')===licFilter; });
-  if(!list.length){ el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No '+licFilter+' licenses</div></div>'; return; }
+  if(!list.length){ el.innerHTML='<div class="empty"><div class="empty-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.6"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="6.5" x2="8" y2="6.51"/></svg></div><div class="empty-text">No licenses yet</div></div>'; return; }
   el.innerHTML=list.map(function(l){
     var u=artists.find(function(a){return a.id===l.uid;});
     var who=esc((u&&u.name)||l.uid||'—');
