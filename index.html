@@ -14,7 +14,6 @@ firebase.initializeApp({
   apiKey:"AIzaSyDq7PGSfxGfwAJhzpEVq0Bj2TBhCg09NTU",
   authDomain:"tir-portal.firebaseapp.com",
   projectId:"tir-portal",
-  storageBucket:"tir-portal.firebasestorage.app",
   messagingSenderId:"941411383328",
   appId:"1:941411383328:web:4b7b0aa63e2c7e44d82a445"
 });
@@ -1140,6 +1139,7 @@ function trackPillsHTML(r){
 }
 function artThumb(r){
   if(r.artworkUrl)return `<img src="${safeUrl(r.artworkUrl)}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--brd);vertical-align:middle" alt="Art"/>`;
+  if(r.coverArt)return `<img src="${safeUrl(r.coverArt)}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid var(--brd);vertical-align:middle" alt="Art"/>`;
   return `<div style="width:36px;height:36px;border-radius:8px;background:var(--input);border:1px solid var(--brd);display:inline-flex;align-items:center;justify-content:center;font-size:14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>`;
 }
 function renderRelTable(id,list){
@@ -1919,7 +1919,7 @@ function renderTracks(){
       var sub=u?('<div style="font-size:10px;color:var(--txt3);font-family:\'DM Mono\',monospace">'+esc(u.email||'')+'</div>'):'';
       var arts=[t.artist||t.artists].flat().filter(Boolean).map(String);
       var fileUrl=t.audioUrl||t.fileUrl||'';
-      var play=fileUrl?('<div class="track-play"><audio controls preload="none" src="'+safeUrl(fileUrl)+'"></audio></div>'):'<span style="color:var(--txt3);font-size:11px">No file</span>';
+      var play=fileUrl?('<div class="track-play"><audio controls preload="none" src="'+safeUrl(fileUrl)+'"></audio><div style="margin-top:4px"><a href="'+safeUrl(fileUrl)+'" target="_blank" rel="noopener" style="font-size:11px">Open audio</a></div></div>'):'<span style="color:var(--txt3);font-size:11px">No file</span>';
       var rel=t.releaseName||t.releaseTitle||'';
       return '<tr><td style="font-weight:700">'+esc(t.title||'—')+(t.genres?('<div style="font-size:10px;color:var(--txt3)">'+esc([t.genres].flat().filter(Boolean).join(', '))+'</div>'):'')+'</td>'
         +'<td style="font-size:12px;color:var(--txt2)">'+(arts.length?arts.map(esc).join(', '):'—')+'</td>'
