@@ -1129,7 +1129,11 @@ auth.onAuthStateChanged(u=>{
   document.getElementById('ld').style.display='none';
   if(u&&u.email===ADMIN_EMAIL){
     document.getElementById('auth').style.display='none';document.getElementById('panel').style.display='block';loadAll();
-    try{var sp=localStorage.getItem('tir-admin-page');if(sp&&document.getElementById('page-'+sp))goPage(sp);}catch(e){}
+    /* Restore the last page on sign-in (this is the post-login redirect):
+       sessionStorage first (this tab's refresh), localStorage as fallback
+       (previously saved page). The persisted page survives sign-out, so a
+       refresh on any page returns to that same page after login. */
+    try{var sp=null;try{sp=sessionStorage.getItem('tir-admin-page');}catch(e2){}if(!sp){try{sp=localStorage.getItem('tir-admin-page');}catch(e3){}}if(sp&&document.getElementById('page-'+sp))goPage(sp);}catch(e){}
   }
   else if(u&&u.email!==ADMIN_EMAIL){auth.signOut();document.getElementById('auth').style.display='flex';}
   else{document.getElementById('auth').style.display='flex';document.getElementById('panel').style.display='none';resetLoginForm();}
@@ -1868,7 +1872,13 @@ function applyRelFilter(){const q=(document.getElementById('rel-search')?.value|
 /* ── Page navigation ── */
 function goPage(name,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  const pg=document.getElementById('page-'+name);if(pg){pg.classList.add('on');try{localStorage.setItem('tir-admin-page',name);}catch(e){}}if(el)el.classList.add('on');
+  /* Route persistence (refresh-safe): persist the current page on every
+     navigation — sessionStorage (per-tab, survives refresh) plus localStorage
+     (kept for backwards compat with previously saved pages). When called
+     without an element (page restore), resolve the matching nav item so the
+     nav highlight is correct too. */
+  if(!el){ try{ el=Array.prototype.find.call(document.querySelectorAll('.ni'),function(n){ var oc=n.getAttribute('onclick')||''; return oc.indexOf("goPage('"+name+"'")===0; })||null; }catch(e){ el=null; } }
+  const pg=document.getElementById('page-'+name);if(pg){pg.classList.add('on');try{localStorage.setItem('tir-admin-page',name);}catch(e){}try{sessionStorage.setItem('tir-admin-page',name);}catch(e){}}if(el)el.classList.add('on');
   const pill=document.getElementById('section-pill');
   if(pill){pill.textContent='Label';pill.className='section-pill pill-label';}
   const m={
